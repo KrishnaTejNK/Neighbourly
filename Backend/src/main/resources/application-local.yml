@@ -1,15 +1,11 @@
-# Configuration for default development using MySQL database
-
-#spring:
-#  profiles:
-#    active: local
+# Configuration for local development using MySQL database
 
 spring:
   datasource:
-    url: jdbc:mysql://db-5308.cs.dal.ca/CSCI5308_4_PRODUCTION
+    url: jdbc:mysql://localhost:3306/neighbourly
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ${PROD_DB_USER}
-    password: ${PROD_DB_PASSWORD}
+    username: root
+    password: root
 
   jpa:
     hibernate:
@@ -20,7 +16,7 @@ spring:
   sql:
     init:
       platform: mysql
-      mode: always
+      mode:
 
 logging:
   level:
