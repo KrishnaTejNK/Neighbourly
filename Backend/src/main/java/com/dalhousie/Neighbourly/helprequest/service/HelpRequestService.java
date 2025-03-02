@@ -93,7 +93,7 @@ public class HelpRequestService {
 
     public List<HelpRequestDTO> getAllOpenCommunityRequests() {
 
-        List<HelpRequest> helpRequests = helpRequestRepository.findByStatus(HelpRequest.RequestStatus.OPEN);
+        List<HelpRequest> helpRequests = helpRequestRepository.findByStatusAndRequestType( HelpRequest.RequestStatus.OPEN, HelpRequest.RequestType.CREATE);
         return helpRequests.stream()
                 .map(helpRequest -> new HelpRequestDTO().buiHelpRequestDTO(helpRequest))
                 .collect(Collectors.toList());}
