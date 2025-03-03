@@ -12,7 +12,7 @@ const CommunityManager = () => {
     const [actionMessage, setActionMessage] = useState("");
     const [unreadCount, setUnreadCount] = useState(0);
     const currentemail = localStorage.getItem("email")
-    // const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true);
     const neighbourhoodId = localStorage.getItem("neighbourhoodId");
 
     useEffect(() => {
