@@ -12,6 +12,8 @@ compile-backend:
   image: gradle:latest
   script:
     - cd Backend
+    - gradle wrapper
+    - chmod +x gradlew
     - ./gradlew clean build
   artifacts:
     paths:
