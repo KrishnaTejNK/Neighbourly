@@ -9,14 +9,16 @@ compile-backend:
   stage: compile
   tags:
     - Neighbourly-runner
-  image: maven:latest
+  image: gradle:latest
   script:
     - cd Backend
-    - mvn clean package
-    
+    - gradle wrapper
+    - chmod +x gradlew
+    - ./gradlew clean build
   artifacts:
     paths:
-      - Backend/target/*.jar
+      - Backend/build/libs/*.jar
+
 
 compile-frontend:
   stage: compile
