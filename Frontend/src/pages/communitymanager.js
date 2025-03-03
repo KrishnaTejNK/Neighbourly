@@ -11,7 +11,8 @@ const CommunityManager = () => {
     const [notifications, setNotifications] = useState([]);
     const [actionMessage, setActionMessage] = useState("");
     const [unreadCount, setUnreadCount] = useState(0);
-
+    const currentemail = localStorage.getItem("email")
+    const [loading, setLoading] = useState(true);
     const neighbourhoodId = localStorage.getItem("neighbourhoodId");
 
     useEffect(() => {
@@ -24,6 +25,7 @@ const CommunityManager = () => {
         try {
             const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_NOTIFICATIONS_ENDPOINT}/${neighbourhoodId}`); 
             setNotifications(response.data);
+            console.log("notification is : ", response);
             setUnreadCount(response.data.length);
         } catch (error) {
             console.error("Error fetching notifications:", error);
@@ -48,7 +50,30 @@ const CommunityManager = () => {
 
     const handleLogout = () => {
         localStorage.clear();
-        navigate("/login");
+        navigate("/");
+    };
+
+    const handelProfile = () => {
+        navigate(`/profile/${currentemail}`);
+    }
+
+    const handleViewProfile = async (userId) => {
+        try {
+            const response = await axios.get(`http://localhost:8081/api/user/details/${userId}`);
+            console.log("The response is:", response);
+
+            const user = response.data; // Access the user data from the response
+            console.log("User is:", user);
+
+            const email = user.email; // Extract the email from the user data
+            console.log("Email is:", email);
+
+            navigate(`/profile/${email}`);
+        } catch (error) {
+            console.error("Error fetching User Details:", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -117,6 +142,9 @@ const CommunityManager = () => {
 
                                 {isProfileMenuOpen && (
                                     <div className="absolute right-0 mt-2 w-40 bg-white shadow-md rounded-lg py-2 z-50">
+                                        <button onClick={handelProfile} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            Profile Info
+                                        </button>
                                         <button
                                             onClick={handleLogout}
                                             className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
@@ -160,10 +188,15 @@ const CommunityManager = () => {
                                 >
                                     <div className="space-y-3">
                                         <div>
+                                            <button
+
+                                                onClick={() => handleViewProfile(notification.user.id)}
+                                            >
                                             <p className="font-semibold text-gray-800">{notification.requestType}</p>
                                             <p className="text-sm text-gray-600 mt-1">
                                                 {notification.user.name} wants to join the community
                                             </p>
+                                            </button>
                                         </div>
                                         <div className="flex space-x-2 pt-2">
                                             <button

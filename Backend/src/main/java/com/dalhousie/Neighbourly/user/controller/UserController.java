@@ -3,7 +3,6 @@ package com.dalhousie.Neighbourly.user.controller;
 import com.dalhousie.Neighbourly.user.dto.UserResponse;
 import com.dalhousie.Neighbourly.user.entity.User;
 import com.dalhousie.Neighbourly.user.service.UserService;
-import com.dalhousie.Neighbourly.util.CustomResponseBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
