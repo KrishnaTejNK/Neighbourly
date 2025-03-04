@@ -25,10 +25,10 @@ const AdminPage = () => {
 
     const fetchNotifications = async (neighbourhoodId) => {
         try {
-            const response = await axios.get(`http://localhost:8081/api/help-requests/openCommunityRequests`);
+            const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_NOTIFICATIONS_OPEN_COMMUNITY_ENDPOINT}`);
             console.log(response.data.data);
             setNotifications(response.data.data);
-            setUnreadCount(response.data.length);
+            setUnreadCount(response.data.data.length);
             console.log("notification is :", response);
         } catch (error) {
             console.error("Error fetching notifications:", error);
@@ -40,8 +40,8 @@ const AdminPage = () => {
     const handleNotificationAction = async (id, action) => {
         try {
             const endpoint = action === 'approve'
-                ? `http://localhost:8081/api/create-community/approve-create/${id}`
-                : `http://localhost:8081/api/create-community/deny-create/${id}`;
+                ? `${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_CREATE_COMMUNITY_APPROVE_ENDPOINT}/${id}`
+                : `${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_CREATE_COMMUNITY_DENY_ENDPOINT}/${id}`;
 
             await axios.post(endpoint);
             // Show action message
@@ -107,9 +107,9 @@ const AdminPage = () => {
 
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Navigation Bar */}
-            <header className="bg-white shadow-md py-4 w-full">
+        <div className=" min-h-screen bg-gray-50">
+            {/* Navigation Bar - Keeping exactly as original */}
+            <header className="flex items-center bg-white shadow-md py-4 w-full">
                 <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
                     <div className="flex items-center space-x-4 w-full">
                         <button onClick={() => navigate('/')} className="hover:bg-gray-100 p-1 rounded-lg">
@@ -162,7 +162,7 @@ const AdminPage = () => {
                 </div>
             </header>
 
-            {/* Notifications Sidebar */}
+            {/* Notifications Sidebar - Keeping exactly as original */}
             {isNotificationsOpen && (
                 <div className="fixed inset-0 bg-black opacity-50 z-40" onClick={() => setIsNotificationsOpen(false)} />
             )}
@@ -212,11 +212,20 @@ const AdminPage = () => {
                 </div>
             </div>
 
-            {/* Active Neighbourhoods Section */}
+            {/* Welcome Banner - This is the new section */}
+            <div className="text-center py-8 bg-white shadow-sm mb-6 mt-6 mx-auto max-w-4xl rounded-lg">
+                <h2 className="text-3xl font-bold text-[#4873AB] mb-2">Welcome, Admin</h2>
+                <p className="text-gray-600">You have access to manage all neighborhoods and community requests</p>
+            </div>
+
+            {/* Active Neighbourhoods Section - Keeping mostly as original with slight styling improvements */}
             <main className="max-w-7xl mx-auto p-6">
                 <h2 className="text-3xl font-bold text-gray-800 mb-6">Active Neighborhoods</h2>
                 <div className="bg-white shadow-md rounded-lg p-4">
-                    <h3 className="text-xl font-semibold text-gray-700 mb-2">Total Neighborhoods: {neighbourhoods.length}</h3>
+                    <h3 className="text-xl font-semibold text-gray-700 mb-4 flex items-center">
+                        <Users className="h-6 w-6 text-[#4873AB] mr-2" />
+                        Total Neighborhoods: {neighbourhoods.length}
+                    </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {loading ? (
                             <p>Loading neighborhoods...</p>
@@ -224,16 +233,16 @@ const AdminPage = () => {
                             <p>No active neighborhoods found.</p>
                         ) : (
                             neighbourhoods.map((neighbourhood) => (
-                                <div key={neighbourhood.neighbourhood_id} className="bg-gray-100 p-4 rounded-lg shadow-sm">
+                                <div key={neighbourhood.neighbourhood_id} className="bg-gray-100 p-4 rounded-lg shadow-sm border border-gray-200">
                                     <button
                                         onClick={() => handleViewProfile(neighbourhood.managerId)}
+                                        className="w-full text-left"
                                     >
-                                    <h4 className="text-lg font-bold text-gray-800">{neighbourhood.name}</h4>
-                                    <p className="text-gray-600">Location: {neighbourhood.location}</p>
+                                    <h4 className="text-lg font-bold text-[#4873AB]">{neighbourhood.name}</h4>
+                                    <p className="text-gray-600 mt-2">Location: {neighbourhood.location}</p>
                                     <p className="text-gray-600">Members: {neighbourhood.memberCount}</p>
                                     <p className="text-gray-600">Community Manager: {neighbourhood.managerName || "Not Assigned"}</p>
                                     </button>
-
                                 </div>
                             ))
                         )}
