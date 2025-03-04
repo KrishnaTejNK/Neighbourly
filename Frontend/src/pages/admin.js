@@ -65,7 +65,7 @@ const AdminPage = () => {
 
     const fetchNeighbourhoods = async () => {
         try {
-            const response = await axios.get("http://localhost:8081/api/neighbourhoods/getallneighbourhoods");
+            const response = await axios.get("http://172.17.2.103:8080/api/neighbourhoods/getallneighbourhoods");
             console.log("Neighbourhood data:", response.data);
             setNeighbourhoods(response.data);
         } catch (error) {
@@ -87,7 +87,7 @@ const AdminPage = () => {
 
     const handleViewProfile = async (userId) => {
         try {
-            const response = await axios.get(`http://localhost:8081/api/user/details/${userId}`);
+            const response = await axios.get(`http://172.17.2.103:8080/api/user/details/${userId}`);
             console.log("The response is:", response);
 
             const user = response.data; // Access the user data from the response
