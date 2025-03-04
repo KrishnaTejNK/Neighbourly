@@ -24,6 +24,7 @@ const Login = () => {
       localStorage.setItem("token", token);
       localStorage.setItem("userType", userType);
       localStorage.setItem("neighbourhoodId", neighbourhoodId);
+      localStorage.setItem("email",email )
       setMessage("Login successful");
 
       // Redirect based on role

@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -85,15 +84,9 @@ public class HelpRequestService {
         );
     }
 
-    public List<HelpRequest> getRequestsForAdmin(int neighbourhoodId) {
-        Neighbourhood neighbourhood = neighbourhoodRepository.findByNeighbourhoodId(neighbourhoodId)
-                .orElseThrow(() -> new RuntimeException("Neighbourhood not found"));
-        return helpRequestRepository.findByNeighbourhood(neighbourhood);
-    }
-
     public List<HelpRequestDTO> getAllOpenCommunityRequests() {
 
-        List<HelpRequest> helpRequests = helpRequestRepository.findByStatus(HelpRequest.RequestStatus.OPEN);
+        List<HelpRequest> helpRequests = helpRequestRepository.findByStatusAndRequestType( HelpRequest.RequestStatus.OPEN, HelpRequest.RequestType.CREATE);
         return helpRequests.stream()
                 .map(helpRequest -> new HelpRequestDTO().buiHelpRequestDTO(helpRequest))
                 .collect(Collectors.toList());}

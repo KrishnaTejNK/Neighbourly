@@ -2,6 +2,7 @@ package com.dalhousie.Neighbourly.user.service;
 
 
 import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 import com.dalhousie.Neighbourly.user.entity.User;
 import com.dalhousie.Neighbourly.user.repository.UserRepository;
@@ -36,6 +37,11 @@ public class UserServiceImpl implements UserService{
         userRepository.updatePassword(email, password);
     }
 
+
+
+    public Optional<User> getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
     
 }
 
