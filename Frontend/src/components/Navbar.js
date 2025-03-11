@@ -9,7 +9,7 @@ const Navbar = () => {
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
-    const [postsCount, setPostsCount] = useState(0); // New state for posts count
+    const [postsCount, setPostsCount] = useState(0);
     const currentEmail = localStorage.getItem("email");
     const userType = localStorage.getItem("userType");
     const neighbourhoodId = localStorage.getItem("neighbourhoodId");
@@ -19,7 +19,7 @@ const Navbar = () => {
     useEffect(() => {
         if ((userType === "COMMUNITY_MANAGER" || userType === "ADMIN") && neighbourhoodId) {
             fetchNotifications(neighbourhoodId);
-            fetchPostsCount(neighbourhoodId); // Fetch posts count on mount
+            fetchPostsCount(neighbourhoodId);
         }
     }, [userType, neighbourhoodId]);
 
@@ -33,13 +33,12 @@ const Navbar = () => {
         }
     };
 
-    // New method to fetch posts count
     const fetchPostsCount = async (neighbourhoodId) => {
         try {
             const response = await axios.get(
                 `http://172.17.2.103:8080/api/posts/${neighbourhoodId}`
             );
-            setPostsCount(response.data.length); // Assuming response.data is an array of posts
+            setPostsCount(response.data.length);
         } catch (error) {
             console.error("Error fetching posts count:", error);
         }
@@ -85,9 +84,8 @@ const Navbar = () => {
         }
     };
 
-    // Modified Posts button handler to reset count
     const handlePostsClick = () => {
-        setPostsCount(0); // Reset posts count to 0
+        setPostsCount(0);
         navigate("/PostsFeed");
     };
 
@@ -155,11 +153,79 @@ const Navbar = () => {
                                     <span className="text-sm font-medium text-gray-700">Notifications</span>
                                 </button>
 
-                                {/* Rest of the notifications dropdown remains the same */}
                                 {isNotificationsOpen && (
                                     <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40" onClick={() => setIsNotificationsOpen(false)} />
                                 )}
-                                {/* ... rest of notifications dropdown ... */}
+
+                                <div
+                                    className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg transform transition-transform duration-300 ease-in-out z-50 ${
+                                        isNotificationsOpen ? "translate-x-0" : "translate-x-full"
+                                    }`}
+                                >
+                                    <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                                        <h3 className="text-lg font-semibold text-gray-800">Notifications</h3>
+                                        <button
+                                            onClick={() => setIsNotificationsOpen(false)}
+                                            className="p-1 hover:bg-gray-100 rounded-full"
+                                        >
+                                            <X className="w-5 h-5 text-gray-500" />
+                                        </button>
+                                    </div>
+
+                                    <div className="p-4 max-h-[calc(100vh-5rem)] overflow-y-auto">
+                                        {Array.isArray(notifications) && notifications.length > 0 ? (
+                                            <div className="space-y-3">
+                                                {notifications.map((notification) => (
+                                                    <div
+                                                        key={notification.requestId}
+                                                        className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow"
+                                                    >
+                                                        <div className="space-y-3">
+                                                            <div>
+                                                                <button
+                                                                    onClick={() => handleViewProfile(notification.user.id)}
+                                                                >
+                                                                    <p className="font-semibold text-gray-800">{notification.requestType}</p>
+                                                                    <p className="text-sm text-gray-600 mt-1">
+                                                                        {notification.user.name} wants to join the community
+                                                                    </p>
+                                                                </button>
+                                                            </div>
+                                                            <div className="flex space-x-2 pt-2">
+                                                                <button
+                                                                    onClick={() => handleNotificationAction(notification.requestId, "approve")}
+                                                                    className="flex-1 bg-[#4873AB] text-white px-4 py-2 rounded-lg hover:bg-[#3b5d89] transition-colors"
+                                                                >
+                                                                    Approve
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleNotificationAction(notification.requestId, "deny")}
+                                                                    className="flex-1 border border-red-500 text-red-500 px-4 py-2 rounded-lg hover:bg-red-50 transition-colors"
+                                                                >
+                                                                    Deny
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center py-8">
+                                                <Bell className="w-12 h-12 text-gray-300 mb-2" />
+                                                <p className="text-gray-500 text-lg font-medium">No Notifications</p>
+                                                <p className="text-gray-400 text-sm text-center mt-1">
+                                                    You'll see notifications here when you receive new requests
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {actionMessage && (
+                                            <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg transform transition-transform duration-300">
+                                                {actionMessage}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                         )}
 
