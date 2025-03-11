@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, Users, Search, HandHelping, ParkingSquare, Building2, UserCircle } from "lucide-react";
+import { Bell, Users, Search, HandHelping, ParkingSquare, Building2, UserCircle, X } from "lucide-react";
 import axios from "axios";
 
 const Navbar = () => {
@@ -12,6 +12,10 @@ const Navbar = () => {
     const currentEmail = localStorage.getItem("email");
     const userType = localStorage.getItem("userType");
     const neighbourhoodId = localStorage.getItem("neighbourhoodId");
+    const currentemail = localStorage.getItem("email")
+    const [loading, setLoading] = useState(true);
+
+    const [actionMessage, setActionMessage] = useState("");
 
     useEffect(() => {
         if ((userType === "COMMUNITY_MANAGER" || userType === "ADMIN") && neighbourhoodId) {
@@ -21,7 +25,7 @@ const Navbar = () => {
 
     const fetchNotifications = async (neighbourhoodId) => {
         try {
-            const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/notifications/${neighbourhoodId}`);
+            const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_NOTIFICATIONS_ENDPOINT}/${neighbourhoodId}`);
             setNotifications(response.data);
             setUnreadCount(response.data.length);
         } catch (error) {
@@ -41,6 +45,47 @@ const Navbar = () => {
     const handleNotificationClick = () => {
         setIsNotificationsOpen(!isNotificationsOpen);
     };
+    const handelProfile = () => {
+        navigate(`/profile/${currentemail}`);
+    }
+
+    const handleViewProfile = async (userId) => {
+        try {
+            const response = await axios.get(`http://172.17.2.103:8080/api/user/details/${userId}`);
+            console.log("The response is:", response);
+
+            const user = response.data; // Access the user data from the response
+            console.log("User is:", user);
+
+            const email = user.email; // Extract the email from the user data
+            console.log("Email is:", email);
+
+            navigate(`/profile/${email}`);
+        } catch (error) {
+            console.error("Error fetching User Details:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleNotificationAction = async (id, action) => {
+        try {
+            const endpoint = action === 'approve'
+                ? `${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_JOIN_COMMUNITY_APPROVE_ENDPOINT}/${id}`
+                : `${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_JOIN_COMMUNITY_DENY_ENDPOINT}/${id}`;
+
+            await axios.post(endpoint);
+            await axios.post(endpoint);
+            setActionMessage(`${action.charAt(0).toUpperCase() + action.slice(1)} successfully`);
+            setNotifications(notifications.filter(notification => notification.requestId !== id));
+            setUnreadCount(prev => Math.max(0, prev - 1));
+            setTimeout(() => setActionMessage(""), 3000);
+        } catch (error) {
+            console.error(`Error ${action} request:`, error);
+        }
+    };
+
+
 
     return (
         <header className="bg-white shadow-md py-4 w-full">
@@ -101,19 +146,81 @@ const Navbar = () => {
 
                                 {/* Notifications Dropdown */}
                                 {isNotificationsOpen && (
-                                    <div className="absolute right-0 mt-2 w-80 bg-white shadow-lg rounded-lg py-2 z-50 max-h-96 overflow-y-auto">
-                                        {notifications.length > 0 ? (
-                                            notifications.map((notification) => (
-                                                <div key={notification.requestId} className="px-4 py-3 border-b hover:bg-gray-100">
-                                                    <p className="font-semibold text-gray-800">{notification.requestType}</p>
-                                                    <p className="text-sm text-gray-600">{notification.user.name} wants to join the community</p>
-                                                </div>
-                                            ))
+                                    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40" onClick={() => setIsNotificationsOpen(false)} />
+                                )}
+
+                                <div
+                                    className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg transform transition-transform duration-300 ease-in-out z-50 ${
+                                        isNotificationsOpen ? "translate-x-0" : "translate-x-full"
+                                    }`}
+                                >
+                                    <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                                        <h3 className="text-lg font-semibold text-gray-800">Notifications</h3>
+                                        <button
+                                            onClick={() => setIsNotificationsOpen(false)}
+                                            className="p-1 hover:bg-gray-100 rounded-full"
+                                        >
+                                            <X className="w-5 h-5 text-gray-500" />
+                                        </button>
+                                    </div>
+
+                                    <div className="p-4 max-h-[calc(100vh-5rem)] overflow-y-auto">
+                                        {Array.isArray(notifications) && notifications.length > 0 ? (
+                                            <div className="space-y-3">
+                                                {notifications.map((notification) => (
+                                                    <div
+                                                        key={notification.requestId}
+                                                        className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow"
+                                                    >
+                                                        <div className="space-y-3">
+                                                            <div>
+                                                                <button
+
+                                                                    onClick={() => handleViewProfile(notification.user.id)}
+                                                                >
+                                                                    <p className="font-semibold text-gray-800">{notification.requestType}</p>
+                                                                    <p className="text-sm text-gray-600 mt-1">
+                                                                        {notification.user.name} wants to join the community
+                                                                    </p>
+                                                                </button>
+                                                            </div>
+                                                            <div className="flex space-x-2 pt-2">
+                                                                <button
+                                                                    onClick={() => handleNotificationAction(notification.requestId, "approve")}
+                                                                    className="flex-1 bg-[#4873AB] text-white px-4 py-2 rounded-lg hover:bg-[#3b5d89] transition-colors"
+                                                                >
+                                                                    Approve
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleNotificationAction(notification.requestId, "deny")}
+                                                                    className="flex-1 border border-red-500 text-red-500 px-4 py-2 rounded-lg hover:bg-red-50 transition-colors"
+                                                                >
+                                                                    Deny
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         ) : (
-                                            <div className="p-4 text-center text-gray-500">No notifications</div>
+                                            <div className="flex flex-col items-center justify-center py-8">
+                                                <Bell className="w-12 h-12 text-gray-300 mb-2" />
+                                                <p className="text-gray-500 text-lg font-medium">No Notifications</p>
+                                                <p className="text-gray-400 text-sm text-center mt-1">
+                                                    You'll see notifications here when you receive new requests
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {actionMessage && (
+                                            <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg transform transition-transform duration-300">
+                                                {actionMessage}
+                                            </div>
                                         )}
                                     </div>
-                                )}
+
+                                </div>
+
                             </div>
                         )}
 

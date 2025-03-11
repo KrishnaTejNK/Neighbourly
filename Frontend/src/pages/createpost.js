@@ -32,7 +32,7 @@ const CreatePost = () => {
 
         try {
             const response = await axios.post(
-                "http://localhost:8081/api/posts/create",
+                "http://172.17.2.103:8080/api/posts/create",
                 postData
             );
             setMessage(response.data);
