@@ -1,5 +1,6 @@
 package com.dalhousie.Neighbourly.authentication.responseEntity;
 
+import com.dalhousie.Neighbourly.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +13,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AuthenticationResponse {
     private String token;
-    private String userType;
-    private Integer neighbourhoodId;
+    private User user;
 }
