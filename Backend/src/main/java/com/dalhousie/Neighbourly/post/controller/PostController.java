@@ -28,5 +28,15 @@ public class PostController {
         return postService.getPostsByNeighbourhood(neighbourhoodId);
     }
 
+    // Delete a post by postId
+    @DeleteMapping("/delete/{postId}")
+    public ResponseEntity<String> deletePost(@PathVariable int postId) {
+        boolean deleted = postService.deletePost(postId);
+        if (deleted) {
+            return ResponseEntity.ok("Post deleted successfully.");
+        } else {
+            return ResponseEntity.badRequest().body("Error deleting post.");
+        }
+    }
 
 }

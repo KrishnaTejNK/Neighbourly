@@ -16,9 +16,8 @@ public class Post {
     @Column(name = "post_id")
     private int postId;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(nullable = true)
+    private int user_id;
 
     @Column(nullable = true)
     private Integer neighbourhood_id;  // Nullable if user hasn't joined a community

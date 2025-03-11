@@ -39,7 +39,7 @@ public class PostService {
         }
 
         Post post = new Post();
-        post.setUser(userOpt.get());
+        post.setUser_id(userOpt.get().getId());
         post.setNeighbourhood_id(neighbourhoodOpt.get().getNeighbourhoodId());
         post.setPostType(postRequest.getPostType());
         post.setPostContent(postRequest.getPostContent());
@@ -53,17 +53,32 @@ public class PostService {
         List<Post> posts = postRepository.findAllByNeighbourhoodId(neighbourhoodId);
 
         return posts.stream().map(post -> {
-            User user = userRepository.findById(post.getUser().getId()).orElse(null);
+            User user = userRepository.findById(post.getUser_id()).orElse(null);
 
 
             return new PostResponseDTO(
                     post.getPostId(),
-                    post.getUser().getId(),
+                    post.getUser_id(),
                     user != null ? user.getName() : "Unknown User",
                     post.getPostContent(),
                     post.getDateTime()
             );
         }).collect(Collectors.toList());
+    }
+
+//    // Get all posts for a specific neighborhood
+//    public List<Post> getPostsByNeighbourhood(int neighbourhoodId) {
+//        return postRepository.findByNeighbourhoodId(neighbourhoodId);
+//    }
+
+    // Delete a post
+    public boolean deletePost(int postId) {
+        Optional<Post> post = postRepository.findById(postId);
+        if (post.isPresent()) {
+            postRepository.deleteById(postId);
+            return true;
+        }
+        return false;
     }
 
 }
