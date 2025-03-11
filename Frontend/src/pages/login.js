@@ -26,6 +26,7 @@ const Login = () => {
       localStorage.setItem("userType", user.userType);
       localStorage.setItem("neighbourhoodId", user.neighbourhood_id);
       localStorage.setItem("email",user.email )
+      localStorage.setItem("userid",user.id)
       localStorage.setItem("user",user)
       setMessage("Login successful");
 

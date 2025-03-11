@@ -3,6 +3,7 @@ package com.dalhousie.Neighbourly.user.service;
 import java.util.Optional;
 
 import com.dalhousie.Neighbourly.user.entity.User;
+import com.dalhousie.Neighbourly.user.entity.UserType;
 
 
 public interface UserService {
@@ -17,7 +18,7 @@ public interface UserService {
 
     void updatePassword(String email, String password);
 
-
+     UserType getUserRole(String email);
 
     Optional<User> getUserByEmail(String email);
 }

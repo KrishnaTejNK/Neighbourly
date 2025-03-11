@@ -3,6 +3,7 @@ package com.dalhousie.Neighbourly.user.service;
 
 import java.util.Optional;
 
+import com.dalhousie.Neighbourly.user.entity.UserType;
 import org.springframework.stereotype.Service;
 import com.dalhousie.Neighbourly.user.entity.User;
 import com.dalhousie.Neighbourly.user.repository.UserRepository;
@@ -37,7 +38,10 @@ public class UserServiceImpl implements UserService{
         userRepository.updatePassword(email, password);
     }
 
-
+    public UserType getUserRole(String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        return user.map(User::getUserType).orElse(UserType.USER); // Default to Resident if not found
+    }
 
     public Optional<User> getUserByEmail(String email) {
         return userRepository.findByEmail(email);
