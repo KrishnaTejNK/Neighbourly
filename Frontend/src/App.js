@@ -15,7 +15,8 @@ import CreateCommunity from "./pages/CreateCommunity";
 import JoinCommunity from "./pages/JoinCommunity";
 import Resident from "./pages/resident";
 import Profile from "./pages/Profile";
-
+import Createpost   from "./pages/createpost";
+import Posts    from "./pages/PostsFeed";
 
 function App() {
     return(
@@ -37,6 +38,8 @@ function App() {
                     <Route path="/resident" element={<Resident />} />
                     {/*<Route path="/Profile" element={<Profile />} />*/}
                     <Route path="/profile/:email" element={<Profile />} /> {/* Route for viewing other profiles */}
+                    <Route path="/createpost" element={<Createpost />} />
+                    <Route path="/PostsFeed" element={<Posts />} />
                 </Routes>
             </Router>
         </div>
