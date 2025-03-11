@@ -5,12 +5,16 @@
 #    active: local
 
 spring:
+#  datasource:
+#    url: jdbc:mysql://db-5308.cs.dal.ca/CSCI5308_4_PRODUCTION
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    username: ${PROD_DB_USER}
+#    password: ${PROD_DB_PASSWORD}
   datasource:
-    url: jdbc:mysql://db-5308.cs.dal.ca/CSCI5308_4_PRODUCTION
+    url: jdbc:mysql://db-5308.cs.dal.ca/CSCI5308_4_DEVINT
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ${PROD_DB_USER}
-    password: ${PROD_DB_PASSWORD}
-
+    username: ${DEVINT_DB_USER}
+    password: ${DEVINT_DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update

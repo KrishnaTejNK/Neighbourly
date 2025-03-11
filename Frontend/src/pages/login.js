@@ -18,16 +18,20 @@ const Login = () => {
 
     try {
     const res = await axios.post(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_LOGIN_ENDPOINT}`, { email, password });
-      const { token, userType, neighbourhoodId } = res.data.data;
+      const { token, user } = res.data.data;
+
 
       // Store token and role in localStorage
       localStorage.setItem("token", token);
-      localStorage.setItem("userType", userType);
-      localStorage.setItem("neighbourhoodId", neighbourhoodId);
-      localStorage.setItem("email",email )
+      localStorage.setItem("userType", user.userType);
+      localStorage.setItem("neighbourhoodId", user.neighbourhood_id);
+      localStorage.setItem("email",user.email )
+      localStorage.setItem("userid",user.id)
+      localStorage.setItem("user",user)
       setMessage("Login successful");
 
       // Redirect based on role
+      let userType = localStorage.getItem("userType");
       if (userType === "COMMUNITY_MANAGER") {
         navigate("/communitymanager");
       } else if (userType === "RESIDENT") {

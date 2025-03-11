@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { Mail, Phone, MapPin, Home, User, Check, X } from 'lucide-react';
+import { Mail, Phone, MapPin, Home, User } from 'lucide-react';
 
 const Profile = () => {
     const { email } = useParams(); // Get the email from the URL
@@ -105,7 +105,7 @@ const Profile = () => {
                                     </div>
                                 ) : (
                                     <div className="flex items-center text-green-500">
-                                        <check size={16} className="mr-1" />
+                                        {/*<check size={16} className="mr-1" />*/}
                                         <span className="text-xs">Verified</span>
                                     </div>
                                 )}
