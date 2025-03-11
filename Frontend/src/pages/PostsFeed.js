@@ -6,8 +6,8 @@ import Navbar from "../components/Navbar";
 const PostsFeed = () => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [userEmail, setUserEmail] = useState(localStorage.getItem("email"));
-    const [userid, setUserId] = useState(localStorage.getItem("userid"));
+    const [userEmail] = useState(localStorage.getItem("email"));
+    const [userid] = useState(localStorage.getItem("userid"));
     const [userRole, setUserRole] = useState("USER"); // Default role is Resident
 
     const navigate = useNavigate();
@@ -153,7 +153,7 @@ const PostsFeed = () => {
                                 {userRole === "COMMUNITY_MANAGER" ? "All Posts" : "My Posts"}
                             </h2>
 
-                            {(userRole === "RESIDENT" ? posts.filter((post) => post.userId == userid) : posts).map((post) => (
+                            {(userRole === "RESIDENT" ? posts.filter((post) => post.userId === userid) : posts).map((post) => (
 
                                         <div
                                             key={post.postId}
