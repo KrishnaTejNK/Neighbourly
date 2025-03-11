@@ -12,7 +12,7 @@ const Navbar = () => {
     const currentEmail = localStorage.getItem("email");
     const userType = localStorage.getItem("userType");
     const neighbourhoodId = localStorage.getItem("neighbourhoodId");
-    const currentemail = localStorage.getItem("email")
+    // const currentemail = localStorage.getItem("email")
 
 
     const [actionMessage, setActionMessage] = useState("");
