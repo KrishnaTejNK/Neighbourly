@@ -94,8 +94,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         var jwtToken = jwtService.generateToken(user, user.isEmailVerified());
         return AuthenticationResponse.builder()
                 .token(jwtToken)
-                .userType(user.getUserType().name())  // Convert ENUM to String
-                .neighbourhoodId(user.getNeighbourhood_id())  // Get neighbourhood ID
+                .user(user)  // Convert ENUM to String
                 .build();
     }
 

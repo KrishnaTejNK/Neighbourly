@@ -21,7 +21,7 @@ public class HelpRequest {
     private User user;  // User who is making the help request
 
     @ManyToOne
-    @JoinColumn(name = "neighbourhood_id", nullable = false)
+    @JoinColumn(name = "neighbourhood_id", nullable = true)
     private Neighbourhood neighbourhood;  // Neighbourhood the request is made for
 
     @Enumerated(EnumType.STRING)
