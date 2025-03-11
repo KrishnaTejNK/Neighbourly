@@ -8,7 +8,7 @@ const CreatePost = () => {
     const [category, setCategory] = useState("");
     const [description, setDescription] = useState("");
     const [message, setMessage] = useState("");
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();

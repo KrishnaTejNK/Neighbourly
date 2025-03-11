@@ -13,7 +13,7 @@ const Navbar = () => {
     const userType = localStorage.getItem("userType");
     const neighbourhoodId = localStorage.getItem("neighbourhoodId");
     const currentemail = localStorage.getItem("email")
-    const [loading, setLoading] = useState(true);
+
 
     const [actionMessage, setActionMessage] = useState("");
 
@@ -45,9 +45,9 @@ const Navbar = () => {
     const handleNotificationClick = () => {
         setIsNotificationsOpen(!isNotificationsOpen);
     };
-    const handelProfile = () => {
-        navigate(`/profile/${currentemail}`);
-    }
+    // const handelProfile = () => {
+    //     navigate(`/profile/${currentemail}`);
+    // }
 
     const handleViewProfile = async (userId) => {
         try {
@@ -63,8 +63,6 @@ const Navbar = () => {
             navigate(`/profile/${email}`);
         } catch (error) {
             console.error("Error fetching User Details:", error);
-        } finally {
-            setLoading(false);
         }
     };
 
