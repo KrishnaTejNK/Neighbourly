@@ -25,7 +25,7 @@ const ResidentAmenities = () => {
 
   useEffect(() => {
     fetchAmenities();
-  }, []);
+  }, [fetchAmenities]);
 
   const fetchAmenities = async () => {
     try {

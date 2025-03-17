@@ -21,7 +21,7 @@ const CommunityManagerAmenities = () => {
   useEffect(() => {
     fetchAmenities();
     fetchBookingRequests();
-  }, []);
+  },  [fetchAmenities, fetchBookingRequests]);
 
   const handleViewProfile = async (userId) => {
     try {
