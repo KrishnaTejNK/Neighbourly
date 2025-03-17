@@ -18,10 +18,7 @@ const CommunityManagerAmenities = () => {
 
   const neighbourhoodId = localStorage.getItem("neighbourhoodId");
 
-  useEffect(() => {
-    fetchAmenities();
-    fetchBookingRequests();
-  },  [fetchAmenities, fetchBookingRequests]);
+ 
 
   const handleViewProfile = async (userId) => {
     try {
@@ -57,6 +54,10 @@ const CommunityManagerAmenities = () => {
       console.error("Error fetching booking requests:", error);
     }
   };
+  useEffect(() => {
+    fetchAmenities();
+    fetchBookingRequests();
+  },  [fetchAmenities, fetchBookingRequests]);
 
   const handleApprove = async (bookingId, amenityId) => {
     try {

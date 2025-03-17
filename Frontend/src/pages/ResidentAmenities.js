@@ -23,9 +23,7 @@ const ResidentAmenities = () => {
   const userId = localStorage.getItem("userid");
   const neighbourhoodId = localStorage.getItem("neighbourhoodId");
 
-  useEffect(() => {
-    fetchAmenities();
-  }, [fetchAmenities]);
+
 
   const fetchAmenities = async () => {
     try {
@@ -38,6 +36,9 @@ const ResidentAmenities = () => {
       console.error("Error fetching amenities:", error);
     }
   };
+  useEffect(() => {
+    fetchAmenities();
+  }, [fetchAmenities]);
 
   const groupAmenitiesByName = (amenities) => {
     const grouped = {};
