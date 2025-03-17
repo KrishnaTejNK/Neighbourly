@@ -131,10 +131,14 @@ const Navbar = () => {
                             <span className="text-sm font-medium text-gray-700">Parking</span>
                         </button>
 
-                        <button onClick={() => navigate("/public-bookings")} className="hover:bg-gray-100 p-2 rounded-lg flex items-center space-x-2">
+                        <button
+                            onClick={() => navigate(userType === "COMMUNITY_MANAGER" ? "/CommunityManagerAmenities" : "/ResidentAmenities")}
+                            className="hover:bg-gray-100 p-2 rounded-lg flex items-center space-x-2"
+                        >
                             <Building2 className="w-6 h-6 text-[#4873AB]" />
-                            <span className="text-sm font-medium text-gray-700">Public Places</span>
+                            <span className="text-sm font-medium text-gray-700">Amenities</span>
                         </button>
+
 
                         {(userType === "COMMUNITY_MANAGER" || userType === "ADMIN") && (
                             <div className="relative">

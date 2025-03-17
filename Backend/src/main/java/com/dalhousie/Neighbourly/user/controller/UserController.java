@@ -6,6 +6,7 @@ import com.dalhousie.Neighbourly.user.entity.UserType;
 import com.dalhousie.Neighbourly.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,7 +28,8 @@ public class UserController {
             return ResponseEntity.notFound().build();      }
 
         User user = userOptional.get();
-
+        User user1 = userService.findUserByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
         UserResponse userResponse = UserResponse.builder()
                 .id(user.getId())
                 .name(user.getName())
@@ -38,6 +40,7 @@ public class UserController {
                 .address(user.getAddress())
                 .userType(user.getUserType())
                 .build();
+
 
         return ResponseEntity.ok(userResponse);
     }
