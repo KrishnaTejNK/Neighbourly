@@ -37,7 +37,7 @@ const ResidentAmenities = () => {
 
   useEffect(() => {
     fetchAmenities();
-  }, []);
+  }, [fetchAmenities]);
 
   const groupAmenitiesByName = (amenities) => {
     const grouped = {};
