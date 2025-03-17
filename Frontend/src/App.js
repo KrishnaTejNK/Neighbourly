@@ -17,6 +17,8 @@ import Resident from "./pages/resident";
 import Profile from "./pages/Profile";
 import Createpost   from "./pages/createpost";
 import Posts    from "./pages/PostsFeed";
+import CommunityManagerAmenities from "./pages/CommunityManagerAmenities";
+import ResidentAmenities from "./pages/ResidentAmenities";
 
 function App() {
     return(
@@ -40,6 +42,8 @@ function App() {
                     <Route path="/profile/:email" element={<Profile />} /> {/* Route for viewing other profiles */}
                     <Route path="/createpost" element={<Createpost />} />
                     <Route path="/PostsFeed" element={<Posts />} />
+                    <Route path="/CommunityManagerAmenities" element={<CommunityManagerAmenities />} />
+                    <Route path="/ResidentAmenities" element={<ResidentAmenities />} />
                 </Routes>
             </Router>
         </div>
