@@ -1,7 +1,7 @@
 # Define the sequence of stages for job execution
 stages:
   - compile
-  - verify
+  - test
   - release
   - launch
 
@@ -35,6 +35,13 @@ compile-frontend:
   artifacts:
     paths:
       - Frontend/build
+
+test:
+  stage: test
+  image: gradle:latest
+  script:
+    - cd Backend
+    - ./gradlew clean test
 
 release-backend:
   image: docker:latest
