@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import Navbar from "../components/Navbar";
 
@@ -23,7 +23,8 @@ const ResidentAmenities = () => {
   const userId = localStorage.getItem("userid");
   const neighbourhoodId = localStorage.getItem("neighbourhoodId");
 
-  const fetchAmenities = async () => {
+  // Memoizing fetchAmenities with useCallback
+  const fetchAmenities = useCallback(async () => {
     try {
       const response = await axios.get(
         `http://172.17.2.103:8080/api/amenities/${neighbourhoodId}`
@@ -33,7 +34,7 @@ const ResidentAmenities = () => {
     } catch (error) {
       console.error("Error fetching amenities:", error);
     }
-  };
+  }, [neighbourhoodId]);  // Dependency on neighbourhoodId
 
   useEffect(() => {
     fetchAmenities();
