@@ -7,7 +7,7 @@ const CommunityManagerAmenities = () => {
   const [amenities, setAmenities] = useState([]);
   const [bookingRequests, setBookingRequests] = useState([]);
   const navigate = useNavigate();
-  const [notifications, setNotifications] = useState([]);
+  
   const [showPopup, setShowPopup] = useState({ visible: false, message: "", type: "" });
   const [newAmenity, setNewAmenity] = useState({
     name: "",
