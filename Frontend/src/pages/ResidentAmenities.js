@@ -23,8 +23,6 @@ const ResidentAmenities = () => {
   const userId = localStorage.getItem("userid");
   const neighbourhoodId = localStorage.getItem("neighbourhoodId");
 
-
-
   const fetchAmenities = async () => {
     try {
       const response = await axios.get(
@@ -36,9 +34,10 @@ const ResidentAmenities = () => {
       console.error("Error fetching amenities:", error);
     }
   };
+
   useEffect(() => {
     fetchAmenities();
-  }, [fetchAmenities]);
+  }, []);
 
   const groupAmenitiesByName = (amenities) => {
     const grouped = {};
@@ -89,7 +88,7 @@ const ResidentAmenities = () => {
       setTimeout(() => {
         setShowPopup({ visible: false, message: "", type: "" });
       }, 5000);
-      //alert("Booking request submitted successfully!");
+      
       setShowBookingForm(false);
       setBookingDetails({
         name: "",
@@ -103,6 +102,7 @@ const ResidentAmenities = () => {
       console.error("Error submitting booking request:", error);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
@@ -7,7 +7,7 @@ const CommunityManagerAmenities = () => {
   const [amenities, setAmenities] = useState([]);
   const [bookingRequests, setBookingRequests] = useState([]);
   const navigate = useNavigate();
-  
+
   const [showPopup, setShowPopup] = useState({ visible: false, message: "", type: "" });
   const [newAmenity, setNewAmenity] = useState({
     name: "",
@@ -18,12 +18,10 @@ const CommunityManagerAmenities = () => {
 
   const neighbourhoodId = localStorage.getItem("neighbourhoodId");
 
- 
-
   const handleViewProfile = async (userId) => {
     try {
       const response = await axios.get(
-        `http://localhost:8081/api/user/details/${userId}`
+        `http://172.17.2.103:8080/api/user/details/${userId}`
       );
       const user = response.data;
       const email = user.email;
@@ -33,18 +31,20 @@ const CommunityManagerAmenities = () => {
     }
   };
 
-  const fetchAmenities = async () => {
+  // Refactored fetchAmenities using useCallback
+  const fetchAmenities = useCallback(async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8081/api/amenities/${neighbourhoodId}`
+        `http://172.17.2.103:8080/api/amenities/${neighbourhoodId}`
       );
       setAmenities(response.data);
     } catch (error) {
       console.error("Error fetching amenities:", error);
     }
-  };
+  }, [neighbourhoodId]); // Only re-create when neighbourhoodId changes
 
-  const fetchBookingRequests = async () => {
+  // Refactored fetchBookingRequests using useCallback
+  const fetchBookingRequests = useCallback(async () => {
     try {
       const response = await axios.get(
         `http://172.17.2.103:8080/api/booking-requests/${neighbourhoodId}`
@@ -53,11 +53,12 @@ const CommunityManagerAmenities = () => {
     } catch (error) {
       console.error("Error fetching booking requests:", error);
     }
-  };
+  }, [neighbourhoodId]); // Only re-create when neighbourhoodId changes
+
   useEffect(() => {
     fetchAmenities();
     fetchBookingRequests();
-  },  [fetchAmenities, fetchBookingRequests]);
+  }, [fetchAmenities, fetchBookingRequests]); // These functions are stable and won't change unless needed
 
   const handleApprove = async (bookingId, amenityId) => {
     try {
@@ -77,9 +78,9 @@ const CommunityManagerAmenities = () => {
 
       setShowPopup({ visible: true, message: "Booking Approved Successfully!", type: "success" });
 
-            setTimeout(() => {
-                setShowPopup({ visible: false, message: "", type: "" });
-            }, 5000);
+      setTimeout(() => {
+        setShowPopup({ visible: false, message: "", type: "" });
+      }, 5000);
     } catch (error) {
       console.error("Error approving booking request:", error);
     }
@@ -95,13 +96,14 @@ const CommunityManagerAmenities = () => {
       );
       setShowPopup({ visible: true, message: "Booking Denied Successfully!", type: "error" });
 
-            setTimeout(() => {
-                setShowPopup({ visible: false, message: "", type: "" });
-            }, 5000);
+      setTimeout(() => {
+        setShowPopup({ visible: false, message: "", type: "" });
+      }, 5000);
     } catch (error) {
       console.error("Error denying booking request:", error);
     }
   };
+
   const handleDelete = async (amenityId) => {
     try {
       await axios.delete(`http://172.17.2.103:8080/api/amenities/${amenityId}`);
