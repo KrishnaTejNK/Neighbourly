@@ -188,7 +188,7 @@ class BookingRequestServiceTest {
     @Test
     void testGetPendingRequests() {
         // Arrange
-        when(bookingRequestRepository.findByNeighbourhood_idAndStatus(101, "PENDING")).thenReturn(Arrays.asList(bookingRequest));
+        when(bookingRequestRepository.findByNeighbourhood_idAndStatus(101, BookingRequest.BookingStatus.PENDING)).thenReturn(Arrays.asList(bookingRequest));
 
         // Act
         List<BookingRequest> pendingRequests = bookingRequestService.getPendingRequests(101);
@@ -197,6 +197,6 @@ class BookingRequestServiceTest {
         assertNotNull(pendingRequests);
         assertEquals(1, pendingRequests.size());
         assertEquals("Birthday Party", pendingRequests.get(0).getName());
-        verify(bookingRequestRepository, times(1)).findByNeighbourhood_idAndStatus(101, "PENDING");
+        verify(bookingRequestRepository, times(1)).findByNeighbourhood_idAndStatus(101, BookingRequest.BookingStatus.PENDING);
     }
 }
