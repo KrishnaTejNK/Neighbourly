@@ -40,6 +40,7 @@ test:
   stage: test
   image: gradle:latest
   script:
+    - cd Backend
     - ls -la 
     - chmod +x gradlew  
     - ./gradlew clean test
