@@ -40,10 +40,8 @@ test:
   stage: test
   image: gradle:latest
   script:
-    - cd Backend
-    - if [ ! -f gradlew ]; then gradle wrapper; fi 
-    - chmod +x gradlew  
-    - ./gradlew clean test
+    - cd Backend  
+    - gradle test
 
 release-backend:
   image: docker:latest
