@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 const ResidentParkingRentals = () => {
     const [parkingRentals, setParkingRentals] = useState([]);
     const [showForm, setShowForm] = useState(false);
-    const [bookingSlot, setBookingSlot] = useState(null);
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [parkingRequests, setParkingRequests] = useState([]);
     const [newRental, setNewRental] = useState({
@@ -110,7 +109,7 @@ const ResidentParkingRentals = () => {
             })
             .catch(error => console.error("Error approving request:", error));
     };
-    const redirectpage = (event) => {
+    const redirectpage = () => {
         setShowConfirmation(false);
     }
     const handleDenyRequest = (requestId) => {
