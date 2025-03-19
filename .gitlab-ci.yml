@@ -1,12 +1,12 @@
 # Define the sequence of stages for job execution
 stages:
-  - compile
-  - verify
-  - release
-  - launch
+  - build
+  - test
+  - publish
+  - deploy
 
-compile-backend:
-  stage: compile
+build-backend:
+  stage: build
   tags:
     - Neighbourly-runner
   image: gradle:latest
@@ -20,8 +20,8 @@ compile-backend:
       - Backend/build/libs/*.jar
 
 
-compile-frontend:
-  stage: compile
+build-frontend:
+  stage: build
   tags:
     - Neighbourly-runner
   image: node:18-alpine
@@ -36,9 +36,17 @@ compile-frontend:
     paths:
       - Frontend/build
 
-release-backend:
+test:
+  stage: test
+  image: gradle:latest
+  script:
+    - cd Backend  
+    - gradle test
+
+
+publish-backend:
   image: docker:latest
-  stage: release
+  stage: publish
   tags:
     - Neighbourly-runner
   variables:
@@ -60,9 +68,10 @@ release-backend:
     - cicd_issue26
     - dev
     - main
-release-frontend:
+
+publish-frontend:
   image: docker:latest
-  stage: release
+  stage: publish
   tags:
     - Neighbourly-runner
   variables:
@@ -85,9 +94,9 @@ release-frontend:
     - dev
     - main
 
-launch-backend:
+deploy-backend:
   image: alpine:latest
-  stage: launch
+  stage: deploy
   tags:
     - Neighbourly-runner
   before_script:
@@ -134,9 +143,10 @@ launch-backend:
     - cicd_issue26
     - dev
     - main
-launch-frontend:
+
+deploy-frontend:
   image: alpine:latest
-  stage: launch
+  stage: deploy
   tags:
     - Neighbourly-runner
   before_script:
