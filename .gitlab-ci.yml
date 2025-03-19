@@ -43,7 +43,6 @@ test:
     - cd Backend  
     - gradle test
 
-
 publish-backend:
   image: docker:latest
   stage: publish
@@ -65,9 +64,11 @@ publish-backend:
     - docker build -t keshvigodhani/backend-api:$IMAGE_TAG . -f Dockerfile
     - docker push keshvigodhani/backend-api:$IMAGE_TAG
   only:
+    - feat/public-booking
     - cicd_issue26
     - dev
     - main
+    
 
 publish-frontend:
   image: docker:latest
@@ -90,6 +91,7 @@ publish-frontend:
     - docker build --build-arg BACKEND_BASE_URL=$BASE_URL -t keshvigodhani/frontend:$IMAGE_TAG . -f Dockerfile
     - docker push keshvigodhani/frontend:$IMAGE_TAG
   only:
+    - feat/public-booking
     - cicd_issue26
     - dev
     - main
@@ -140,6 +142,7 @@ deploy-backend:
     name: development
     url: http://$SERVER_IP:$SERVER_PORT
   only:
+    - feat/public-booking
     - cicd_issue26
     - dev
     - main
@@ -184,6 +187,7 @@ deploy-frontend:
     name: development
     url: http://$SERVER_IP:$SERVER_PORT
   only:
+    - feat/public-booking
     - cicd_issue26
     - dev
     - main
