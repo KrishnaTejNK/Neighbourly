@@ -63,7 +63,7 @@ const PostsFeed = () => {
 
     const viewProfile = async (userId) => {
         try {
-            const response = await axios.get(`http://localhost:8081/api/user/details/${userId}`);
+            const response = await axios.get(`http://172.17.2.103:8080/api/user/details/${userId}`);
             const user = response.data;
             navigate(`/profile/${user.email}`);
         } catch (error) {
