@@ -50,7 +50,7 @@ quality-check:
   script:
     - echo "Compiling the project"
     - mkdir smells/
-    - java -jar $CI_PROJECT_DIR/quality/DesigniteJava.jar -i $CI_PROJECT_DIR -o smells/ -d
+    - java -jar $CI_PROJECT_DIR/quality/DesigniteJava.jar -i $CI_PROJECT_DIR -o smells/
   artifacts:
     paths:
       - smells/
