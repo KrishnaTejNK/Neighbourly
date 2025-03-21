@@ -2,6 +2,7 @@
 stages:
   - build
   - test
+  - quality-check
   - publish
   - deploy
 
@@ -42,6 +43,18 @@ test:
   script:
     - cd Backend  
     - gradle test
+
+quality-check:
+  stage: quality-check
+  image: openjdk:17
+  script:
+    - echo "Compiling the project"
+    - mkdir smells/
+    - java -jar $CI_PROJECT_DIR/quality/DesigniteJava.jar -i $CI_PROJECT_DIR -o smells/
+  artifacts:
+    paths:
+      - smells/
+      - $CI_PROJECT_DIR
 
 publish-backend:
   image: docker:latest
