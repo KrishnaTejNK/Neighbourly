@@ -23,7 +23,7 @@ const PostsFeed = () => {
 
             try {
                 const response = await axios.get(
-                    `http://172.17.2.103:8080/api/posts/${neighbourhoodId}`
+                    `http://localhost:8081/api/posts/${neighbourhoodId}`
                 );
                 setPosts(response.data);
             } catch (error) {
@@ -36,7 +36,7 @@ const PostsFeed = () => {
         const fetchUserRole = async () => {
             try {
                 const response = await axios.get(
-                    `http://172.17.2.103:8080/api/user/role/${userEmail}`
+                    `http://localhost:8081/api/user/role/${userEmail}`
                 );
                 setUserRole(response.data.role);
             } catch (error) {
@@ -48,13 +48,31 @@ const PostsFeed = () => {
         fetchUserRole();
     }, [userEmail]);
 
-    const handleReport = (postId) => {
-        alert(`Reported post ID: ${postId}`);
+    const handleReport = async (postId) => {
+        const neighbourhoodId = localStorage.getItem("neighbourhoodId");
+
+        if (!neighbourhoodId || !userid) {
+            alert("Unable to report post. Please log in again.");
+            return;
+        }
+
+        try {
+            await axios.post("http://localhost:8081/api/reports/report", {
+                neighbourhoodId: neighbourhoodId,
+                postId: postId,
+                reporterId: userid,
+            });
+
+            alert("Post reported successfully. A community manager will review it.");
+        } catch (error) {
+            console.error("Error reporting post:", error);
+            alert("Failed to report post. Please try again later.");
+        }
     };
 
     const handleDeletePost = async (postId) => {
         try {
-            await axios.delete(`http://172.17.2.103:8080/api/posts/delete/${postId}`);
+            await axios.delete(`http://localhost:8081/api/posts/delete/${postId}`);
             setPosts(posts.filter((post) => post.postId !== postId));
         } catch (error) {
             console.error("Error deleting post:", error);
@@ -63,7 +81,7 @@ const PostsFeed = () => {
 
     const viewProfile = async (userId) => {
         try {
-            const response = await axios.get(`http://172.17.2.103:8080/api/user/details/${userId}`);
+            const response = await axios.get(`http://localhost:8081/api/user/details/${userId}`);
             const user = response.data;
             navigate(`/profile/${user.email}`);
         } catch (error) {

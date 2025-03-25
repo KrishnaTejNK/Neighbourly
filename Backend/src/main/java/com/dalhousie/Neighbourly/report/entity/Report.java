@@ -1,0 +1,39 @@
+package com.dalhousie.Neighbourly.report.entity;
+
+import com.dalhousie.Neighbourly.post.entity.Post;
+import com.dalhousie.Neighbourly.user.entity.User;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "report")
+public class Report {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int reportid;
+
+    @Column(nullable = true)
+    private int postid;  // The reported post
+
+    @Column(nullable = true)
+    private int userid; // Who reported the post
+
+    @Column(nullable = true)
+    private Integer neighbourhoodid;
+
+    private LocalDateTime reportedAt = LocalDateTime.now();
+
+    @Enumerated(EnumType.STRING)
+    private ReportStatus reportStatus = ReportStatus.PENDING;
+
+    public enum ReportStatus {
+        PENDING, REVIEWED, RESOLVED
+    }
+}

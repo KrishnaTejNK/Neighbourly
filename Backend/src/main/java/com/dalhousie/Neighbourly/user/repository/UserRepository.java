@@ -1,5 +1,6 @@
 package com.dalhousie.Neighbourly.user.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.dalhousie.Neighbourly.neighbourhood.entity.Neighbourhood;
@@ -33,6 +34,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query("SELECT u.id FROM User u WHERE u.neighbourhood_id = :neighbourhoodId AND u.userType = 'COMMUNITY_MANAGER'")
     String userRepositoryFindManagerIdByNeighbourhoodId(int neighbourhoodId);
 
-
+    @Query("SELECT u FROM User u WHERE u.neighbourhood_id = :neighbourhoodId")
+    List<User> findByNeighbourhood_id(int neighbourhoodId);
 
 }

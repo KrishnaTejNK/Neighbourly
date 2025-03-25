@@ -4,11 +4,7 @@ package com.dalhousie.Neighbourly.authentication.entity;
 import java.time.Instant;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import lombok.*;
 
 
 @Builder
@@ -20,6 +16,8 @@ import lombok.NoArgsConstructor;
 public class Otp {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Getter
+    @Setter
     private Integer id;
 
     private String otp;
@@ -28,4 +26,9 @@ public class Otp {
 
     @Column(name = "user_id", nullable = false, unique = true)
     private Integer userId;
+
+
+    public Otp(String otp) {
+        this.otp = otp;
+    }
 }

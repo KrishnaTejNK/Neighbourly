@@ -12,4 +12,6 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     @Query("SELECT p FROM Post p WHERE p.neighbourhood_id = :neighbourhoodId")
     List<Post> findAllByNeighbourhoodId(int neighbourhoodId);
 
+
+
 }

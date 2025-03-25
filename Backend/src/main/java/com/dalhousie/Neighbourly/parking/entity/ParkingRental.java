@@ -26,7 +26,7 @@ public class ParkingRental {
     private int userId;
 
     @Column(nullable = false)
-    private String spotNumber;
+    private String spot;
 
     @Column(nullable = false)
     private LocalDateTime startTime;

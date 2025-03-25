@@ -47,7 +47,7 @@ class ParkingRequestServiceTest {
                 .rentalId(1)
                 .userId(1001) // Owner of the rental
                 .neighbourhoodId(2001)
-                .spotNumber("10")
+                .spot("brunswik street")
                 .price(BigDecimal.valueOf(20.00))
                 .status(ParkingRental.ParkingRentalStatus.AVAILABLE)
                 .build();

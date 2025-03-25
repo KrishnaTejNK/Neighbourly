@@ -1,5 +1,6 @@
 package com.dalhousie.Neighbourly.user.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.dalhousie.Neighbourly.user.entity.User;
@@ -21,4 +22,6 @@ public interface UserService {
      UserType getUserRole(String email);
 
     Optional<User> getUserByEmail(String email);
+
+    List<User> getUsersByNeighbourhood(int neighbourhoodId);
 }

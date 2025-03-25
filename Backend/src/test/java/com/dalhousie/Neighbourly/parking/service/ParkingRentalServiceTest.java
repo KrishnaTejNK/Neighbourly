@@ -36,7 +36,7 @@ class ParkingRentalServiceTest {
                 .rentalId(1)
                 .neighbourhoodId(1001)
                 .userId(2001)
-                .spotNumber(String.valueOf(10))
+                .spot(String.valueOf(10))
                 .startTime(LocalDateTime.now().plusDays(1))
                 .endTime(LocalDateTime.now().plusDays(2))
                 .price(BigDecimal.valueOf(15.00))
@@ -47,7 +47,7 @@ class ParkingRentalServiceTest {
                 .rentalId(2)
                 .neighbourhoodId(1001)
                 .userId(2002)
-                .spotNumber("20")
+                .spot("20")
                 .startTime(LocalDateTime.now().plusDays(2))
                 .endTime(LocalDateTime.now().plusDays(3))
                 .price(BigDecimal.valueOf(20.00))
@@ -57,7 +57,7 @@ class ParkingRentalServiceTest {
         rentalDTO = new ParkingRentalDTO();
         rentalDTO.setNeighbourhoodId(1001);
         rentalDTO.setUserId(2003);
-        rentalDTO.setSpotNumber(String.valueOf(30));
+        rentalDTO.setSpot(String.valueOf(30));
         rentalDTO.setStartTime(LocalDateTime.now().plusDays(3));
         rentalDTO.setEndTime(LocalDateTime.now().plusDays(4));
         rentalDTO.setPrice(BigDecimal.valueOf(25.00));
@@ -72,8 +72,8 @@ class ParkingRentalServiceTest {
 
         assertNotNull(availableRentals);
         assertEquals(2, availableRentals.size());
-        assertEquals("10", availableRentals.get(0).getSpotNumber());
-        assertEquals("20", availableRentals.get(1).getSpotNumber());
+        assertEquals("10", availableRentals.get(0).getSpot());
+        assertEquals("20", availableRentals.get(1).getSpot());
 
         verify(parkingRentalRepository, times(1))
                 .findByNeighbourhoodIdAndStatus(1001, ParkingRental.ParkingRentalStatus.AVAILABLE);
@@ -85,7 +85,7 @@ class ParkingRentalServiceTest {
                 .rentalId(3)
                 .neighbourhoodId(rentalDTO.getNeighbourhoodId())
                 .userId(rentalDTO.getUserId())
-                .spotNumber(rentalDTO.getSpotNumber())
+                .spot(rentalDTO.getSpot())
                 .startTime(rentalDTO.getStartTime())
                 .endTime(rentalDTO.getEndTime())
                 .price(rentalDTO.getPrice())
@@ -98,7 +98,7 @@ class ParkingRentalServiceTest {
 
         assertNotNull(result);
         assertEquals(3, result.getRentalId());
-        assertEquals("30", result.getSpotNumber());
+        assertEquals("30", result.getSpot());
         assertEquals(BigDecimal.valueOf(25.00), result.getPrice());
 
         verify(parkingRentalRepository, times(1)).save(any(ParkingRental.class));

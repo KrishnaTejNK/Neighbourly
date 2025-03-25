@@ -9,7 +9,7 @@ const ResidentParkingRentals = () => {
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [parkingRequests, setParkingRequests] = useState([]);
     const [newRental, setNewRental] = useState({
-        spotNumber: "",
+        spot: "",
         startTime: "",
         endTime: "",
         price: ""
@@ -99,7 +99,7 @@ const ResidentParkingRentals = () => {
         const rentalData = {
             neighbourhoodId: parseInt(neighbourhoodId),
             userId: parseInt(userId),
-            spotNumber: newRental.spotNumber,
+            spot: newRental.spot,
             startTime: newRental.startTime,
             endTime: newRental.endTime,
             price: parseFloat(newRental.price)
@@ -147,138 +147,138 @@ const ResidentParkingRentals = () => {
               {showPopup.message}
             </div>
           )}
-            <div className="max-w-6xl mx-auto">
-                {/* Header Section */}
-                <div className="flex justify-between items-center mb-8 mt-4">
-                    <h2 className="text-3xl font-bold text-gray-800">Parking Rentals</h2>
-                    <button
-                        onClick={() => setShowForm(true)}
-                        className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition duration-300 flex items-center gap-2 shadow-md"
+        <div className="max-w-6xl mx-auto">
+            {/* Header Section */}
+            <div className="flex justify-between items-center mb-8 mt-4">
+                <h2 className="text-3xl font-bold text-gray-800">Parking Rentals</h2>
+                <button
+                    onClick={() => setShowForm(true)}
+                    className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition duration-300 flex items-center gap-2 shadow-md"
+                >
+                    <span>Add Parking Slot</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+
+            {/* Form Section */}
+            {showForm && (
+            <div className="mb-8 bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                    <h3 className="text-xl font-semibold mb-4 text-gray-800">Add New Parking Slot</h3>
+                    <form
+                        onSubmit={handleCreateRental}
+                        className="flex flex-col gap-4"
                     >
-                        <span>Add Parking Slot</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-                        </svg>
-                    </button>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Spot Details</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter spot Deatils"
+                                    required
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                                    onChange={(e) => setNewRental({ ...newRental, spot: e.target.value })}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+                                <input
+                                    type="number"
+                                    placeholder="Enter price"
+                                    required
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                                    onChange={(e) => setNewRental({ ...newRental, price: e.target.value })}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                                <input
+                                    type="datetime-local"
+                                    required
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                                    onChange={(e) => setNewRental({ ...newRental, startTime: e.target.value })}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                                <input
+                                    type="datetime-local"
+                                    required
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                                    onChange={(e) => setNewRental({ ...newRental, endTime: e.target.value })}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end gap-3 mt-2">
+                            <button
+                                type="button"
+                                onClick={() => setShowForm(false)}
+                                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 shadow-md transition"
+                            >
+                                Submit
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                
-                {/* Form Section */}
-                {showForm && (
-                    <div className="mb-8 bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-                        <h3 className="text-xl font-semibold mb-4 text-gray-800">Add New Parking Slot</h3>
-                        <form
-                            onSubmit={handleCreateRental}
-                            className="flex flex-col gap-4"
-                        >
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Spot Number</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Enter spot number"
-                                        required
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                                        onChange={(e) => setNewRental({ ...newRental, spotNumber: e.target.value })}
-                                    />
+            )}
+
+            {/* Available Parking Slots Section */}
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200">
+                <h3 className="text-xl font-semibold mb-6 text-gray-800">Available Parking Slots</h3>
+
+                {parkingRentals.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {parkingRentals.map((rental) => (
+                            <div
+                                key={rental.rentalId}
+                                className={`rounded-xl shadow-md overflow-hidden border ${getStatusColor(rental.status)} bg-opacity-10`}
+                            >
+                                <div className={`p-4 text-white ${getStatusColor(rental.status)}`}>
+                                    <p className="text-xl font-bold">Spot details: {rental.spot}</p>
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
-                                    <input
-                                        type="number"
-                                        placeholder="Enter price"
-                                        required
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                                        onChange={(e) => setNewRental({ ...newRental, price: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
-                                    <input
-                                        type="datetime-local"
-                                        required
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                                        onChange={(e) => setNewRental({ ...newRental, startTime: e.target.value })}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">End Time</label>
-                                    <input
-                                        type="datetime-local"
-                                        required
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                                        onChange={(e) => setNewRental({ ...newRental, endTime: e.target.value })}
-                                    />
+                                <div className={`p-4 ${getStatusColor(rental.status)} bg-opacity-5`}>
+                                    <div className="flex justify-between items-center mb-3">
+                                        <div className="text-sm text-gray-500">Start</div>
+                                        <div className="font-medium">{new Date(rental.startTime).toLocaleString()}</div>
+                                    </div>
+                                    <div className="flex justify-between items-center mb-3">
+                                        <div className="text-sm text-gray-500">End</div>
+                                        <div className="font-medium">{new Date(rental.endTime).toLocaleString()}</div>
+                                    </div>
+                                    <div className="flex justify-between items-center mb-4">
+                                        <div className="text-sm text-gray-500">Price</div>
+                                        <div className="text-lg font-bold text-green-600">${rental.price}</div>
+                                    </div>
+                                    <button
+                                        onClick={() => handleBookSlot(rental.rentalId, rental.userId)}
+                                        className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition shadow-md flex items-center justify-center gap-2"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                        </svg>
+                                        Book Now
+                                    </button>
                                 </div>
                             </div>
-                            
-                            <div className="flex justify-end gap-3 mt-2">
-                                <button
-                                    type="button"
-                                    onClick={() => setShowForm(false)}
-                                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 shadow-md transition"
-                                >
-                                    Submit
-                                </button>
-                            </div>
-                        </form>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-8 text-gray-500">
+                        No parking slots available at the moment.
                     </div>
                 )}
-                
-                {/* Available Parking Slots Section */}
-                <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200">
-    <h3 className="text-xl font-semibold mb-6 text-gray-800">Available Parking Slots</h3>
-    
-    {parkingRentals.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {parkingRentals.map((rental) => (
-                <div
-                    key={rental.rentalId}
-                    className={`rounded-xl shadow-md overflow-hidden border ${getStatusColor(rental.status)} bg-opacity-10`}
-                >
-                    <div className={`p-4 text-white ${getStatusColor(rental.status)}`}>
-                        <p className="text-xl font-bold">Spot #{rental.spotNumber}</p>
-                    </div>
-                    <div className={`p-4 ${getStatusColor(rental.status)} bg-opacity-5`}>
-                        <div className="flex justify-between items-center mb-3">
-                            <div className="text-sm text-gray-500">Start</div>
-                            <div className="font-medium">{new Date(rental.startTime).toLocaleString()}</div>
-                        </div>
-                        <div className="flex justify-between items-center mb-3">
-                            <div className="text-sm text-gray-500">End</div>
-                            <div className="font-medium">{new Date(rental.endTime).toLocaleString()}</div>
-                        </div>
-                        <div className="flex justify-between items-center mb-4">
-                            <div className="text-sm text-gray-500">Price</div>
-                            <div className="text-lg font-bold text-green-600">${rental.price}</div>
-                        </div>
-                        <button 
-                            onClick={() => handleBookSlot(rental.rentalId, rental.userId)}
-                            className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition shadow-md flex items-center justify-center gap-2"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                            Book Now
-                        </button>
-                    </div>
-                </div>
-            ))}
-        </div>
-    ) : (
-        <div className="text-center py-8 text-gray-500">
-            No parking slots available at the moment.
-        </div>
-    )}
-</div>
+            </div>
 
 {/* Requests Section */}
 <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
@@ -296,13 +296,13 @@ const ResidentParkingRentals = () => {
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
                                         <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                                     </svg>
-                                    <p className="font-medium">User ID: {request.userId}</p>
+                                    <p className="font-medium">User: {request.name}</p>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
                                         <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                                     </svg>
-                                    <p>Spot: {request.rentalId}</p>
+                                    <p>Spot: {request.spot}</p>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">

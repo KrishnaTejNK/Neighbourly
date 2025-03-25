@@ -45,16 +45,21 @@ public class JoinCommunityController {
 
         // Create a help request entry
         HelpRequestDTO helpRequestDTO = new HelpRequestDTO();
-        helpRequestDTO.setUserId(user.getId());  // Set fetched userId
-        helpRequestDTO.setNeighbourhoodId(neighbourhood.getNeighbourhoodId());  // Set fetched neighbourhoodId
+        helpRequestDTO.setUserId(user.getId());
+        helpRequestDTO.setNeighbourhoodId(neighbourhood.getNeighbourhoodId());
         helpRequestDTO.setRequestType("JOIN_COMMUNITY");
-        helpRequestDTO.setDescription(user.getName() + " has requested to join the community.");
+
+        // Include address and phone number in the description
+        helpRequestDTO.setDescription(user.getName() + " has requested to join the community. "
+                + "Phone: " + joinRequest.getPhone() + ", "
+                + "Address: " + joinRequest.getAddress());
 
         // Call service to handle request creation
         CommunityResponse joinCommunityResponse = joinCommunityService.storeJoinRequest(helpRequestDTO);
 
         return ResponseEntity.ok(new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS, joinCommunityResponse, "User request submitted successfully"));
     }
+
 
     @PostMapping("/approve-join/{requestId}")
     public ResponseEntity<CustomResponseBody<CommunityResponse>> approveJoinRequest(@PathVariable int requestId) {

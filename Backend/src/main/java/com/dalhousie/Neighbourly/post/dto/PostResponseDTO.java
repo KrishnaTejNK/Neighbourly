@@ -13,4 +13,7 @@ public class PostResponseDTO {
     private String userName;
     private String postContent;
     private LocalDateTime dateTime;
+
+    public PostResponseDTO(int postId, String postContent) {
+    }
 }
