@@ -34,6 +34,7 @@ public class ParkingRequestService {
         request.setParkingRental(rental);
         request.setUser(user);
         request.setStatus(ParkingRequest.ParkingRequestStatus.PENDING);
+
         parkingRequestRepository.save(request);
     }
 
@@ -58,7 +59,13 @@ public class ParkingRequestService {
                         request.getRequestId(),
                         request.getParkingRental().getRentalId(),
                         request.getUser().getId(),
-                        request.getStatus().name()))
+                        request.getStatus().name(),
+                        request.getUser().getName(),
+                        request.getParkingRental().getSpot()
+                        )
+
+                )
+
                 .collect(Collectors.toList());
     }
 

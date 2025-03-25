@@ -12,8 +12,9 @@ import java.time.LocalDateTime;
 public class ParkingRentalDTO {
     private int neighbourhoodId;
     private int userId;
-    private String spotNumber;
+    private String spot;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private BigDecimal price;
+
 }

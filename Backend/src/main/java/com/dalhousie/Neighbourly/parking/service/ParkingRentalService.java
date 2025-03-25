@@ -22,7 +22,7 @@ public class ParkingRentalService {
         ParkingRental rental = ParkingRental.builder()
                 .neighbourhoodId(dto.getNeighbourhoodId())
                 .userId(dto.getUserId())
-                .spotNumber(dto.getSpotNumber())
+                .spot(dto.getSpot())
                 .startTime(dto.getStartTime())
                 .endTime(dto.getEndTime())
                 .price(dto.getPrice())
