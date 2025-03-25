@@ -44,22 +44,31 @@ public class JoinCommunityService {
 
         User user = userOptional.get();
 
-        // Assign neighbourhood & update role
+        // Extract contact and address from description
+        String description = request.getDescription();
+        String phone = description.contains("Phone: ") ? description.split("Phone: ")[1].split(",")[0].trim() : null;
+        String address = description.contains("Address: ") ? description.split("Address: ")[1].trim() : null;
+
+        // Assign extracted details
         user.setUserType(UserType.RESIDENT);
         user.setNeighbourhood_id(request.getNeighbourhood().getNeighbourhoodId());
+
+        if (phone != null) user.setContact(phone);
+        if (address != null) user.setAddress(address);
 
         // Save updated user
         userRepository.save(user);
 
-        // Change the status of the request to APPROVED instead of deleting it
-        request.setStatus(HelpRequest.RequestStatus.APPROVED);  // Set status to APPROVED
-        helpRequestRepository.save(request);  // Save the updated request
+        // Change the status of the request to APPROVED
+        request.setStatus(HelpRequest.RequestStatus.APPROVED);
+        helpRequestRepository.save(request);
 
         // Create response
         CommunityResponse response = new CommunityResponse(user.getId(), user.getNeighbourhood_id(), HelpRequest.RequestStatus.APPROVED);
 
-        return new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS, response, "User approved and added as a resident");
+        return new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS, response, "User approved and added as a resident with contact and address.");
     }
+
 
     @Transactional
     public CustomResponseBody<CommunityResponse> denyJoinRequest(int requestId) {

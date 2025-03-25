@@ -31,17 +31,24 @@ public class CreateCommunityController {
         }
         User user = userOptional.get();
 
+        // Prepare structured description
+        String description = String.format(
+                "User %s requested to create a community at location: %s | Phone: %s | Address: %s",
+                user.getName(), createRequest.getAddress(), createRequest.getPhone(), createRequest.getPincode()
+        );
+
         // Prepare HelpRequestDTO
         HelpRequestDTO helpRequestDTO = new HelpRequestDTO();
         helpRequestDTO.setUserId(user.getId());
         helpRequestDTO.setRequestType("CREATE_COMMUNITY");
-        helpRequestDTO.setDescription("User " + user.getName() + " requested to create community at location: " + createRequest.getAddress() + " with pincode: " + createRequest.getPincode());
+        helpRequestDTO.setDescription(description);
 
         // Call service to create help request
         CommunityResponse response = createCommunityService.storeCreateRequest(helpRequestDTO);
 
         return ResponseEntity.ok(new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS, response, "Community creation request submitted successfully"));
     }
+
 
     @PostMapping("/approve-create/{requestId}")
     public ResponseEntity<CustomResponseBody<CommunityResponse>> approveCreateRequest(@PathVariable int requestId) {
