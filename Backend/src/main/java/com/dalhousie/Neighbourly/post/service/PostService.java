@@ -81,4 +81,21 @@ public class PostService {
         return false;
     }
 
+    public PostResponseDTO getPostById(int postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found with ID: " + postId));
+
+
+        User user = userRepository.findById(post.getUser_id()).orElse(null);
+
+
+        return new PostResponseDTO(
+                post.getPostId(),
+                post.getUser_id(),
+                user != null ? user.getName() : "Unknown User",
+                post.getPostContent(),
+                post.getDateTime()
+        );
+
+    }
 }
