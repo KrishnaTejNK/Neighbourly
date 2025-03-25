@@ -1,6 +1,7 @@
 package com.dalhousie.Neighbourly.user.service;
 
 
+import java.util.List;
 import java.util.Optional;
 
 import com.dalhousie.Neighbourly.user.entity.UserType;
@@ -46,6 +47,10 @@ public class UserServiceImpl implements UserService{
     public Optional<User> getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
-    
+
+
+    public List<User> getUsersByNeighbourhood(int neighbourhoodId) {
+        return userRepository.findByNeighbourhood_id(neighbourhoodId);
+    }
 }
 
