@@ -13,7 +13,7 @@ const CommunityManager = () => {
 
         const fetchResidents = async () => {
             try {
-                const response = await axios.get(`http://172.17.2.103:8080/api/user/${neighbourhoodId}`);
+                const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_USER}/${neighbourhoodId}`);
                 setResidents(response.data);
             } catch (error) {
                 console.error("Error fetching residents:", error);
@@ -22,7 +22,7 @@ const CommunityManager = () => {
 
         const fetchReportedPosts = async () => {
             try {
-                const response = await axios.get(`http://172.17.2.103:8080/api/reports/${neighbourhoodId}`);
+                const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_REPORT}/${neighbourhoodId}`);
 
                 const allPosts = response.data.flatMap(report =>
                     report.posts.map(post => ({
@@ -55,7 +55,7 @@ const CommunityManager = () => {
 
     const viewProfile = async (userId) => {
         try {
-            const response = await axios.get(`http://172.17.2.103:8080/api/user/details/${userId}`);
+            const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_USER_DETAILS}/${userId}`);
             const user = response.data;
             navigate(`/profile/${user.email}`);
         } catch (error) {
@@ -65,7 +65,7 @@ const CommunityManager = () => {
 
     const handleApprovePost = async (reportId) => {
         try {
-            await axios.put(`http://172.17.2.103:8080/api/reports/approve/${reportId}`);
+            await axios.put(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_REPORT_APPROVE}/${reportId}`);
             setReportedPosts(reportedPosts.filter((post) => post.reportId !== reportId));
         } catch (error) {
             console.error("Error approving post:", error);
@@ -74,7 +74,7 @@ const CommunityManager = () => {
 
     const handleDeletePost = async (reportId) => {
         try {
-            await axios.delete(`http://172.17.2.103:8080/api/reports/delete/${reportId}`);
+            await axios.delete(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_REPORT_DELETE}/${reportId}`);
             setReportedPosts(reportedPosts.filter((post) => post.reportId !== reportId));
         } catch (error) {
             console.error("Error deleting post:", error);

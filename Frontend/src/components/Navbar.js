@@ -9,7 +9,7 @@ const Navbar = () => {
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
-    const [postsCount, setPostsCount] = useState(0);
+    const [postsCount, setPostsCount] = useState(0); 
     const currentEmail = localStorage.getItem("email");
     const userType = localStorage.getItem("userType");
     const neighbourhoodId = localStorage.getItem("neighbourhoodId");
@@ -36,7 +36,7 @@ const Navbar = () => {
     const fetchPostsCount = async (neighbourhoodId) => {
         try {
             const response = await axios.get(
-                `http://172.17.2.103:8080/api/posts/${neighbourhoodId}`
+                `${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_POSTS}/${neighbourhoodId}`
             );
             setPostsCount(response.data.length);
         } catch (error) {
@@ -59,7 +59,7 @@ const Navbar = () => {
 
     const handleViewProfile = async (userId) => {
         try {
-            const response = await axios.get(`http://172.17.2.103:8080/api/user/details/${userId}`);
+            const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_USER_DETAILS}/${userId}`);
             const user = response.data;
             const email = user.email;
             navigate(`/profile/${email}`);

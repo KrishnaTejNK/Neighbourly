@@ -34,7 +34,7 @@ const CreatePost = () => {
 
         try {
             const response = await axios.post(
-                "http://172.17.2.103:8080/api/posts/create",
+                `${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_POSTS_CREATE}`,
                 postData
             );
             setMessage(response.data);
