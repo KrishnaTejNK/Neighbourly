@@ -21,7 +21,7 @@ const CommunityManagerAmenities = () => {
   const handleViewProfile = async (userId) => {
     try {
       const response = await axios.get(
-        `http://172.17.2.103:8080/api/user/details/${userId}`
+        `http://localhost:8081/api/user/details/${userId}`
       );
       const user = response.data;
       const email = user.email;
@@ -35,7 +35,7 @@ const CommunityManagerAmenities = () => {
   const fetchAmenities = useCallback(async () => {
     try {
       const response = await axios.get(
-        `http://172.17.2.103:8080/api/amenities/${neighbourhoodId}`
+        `http://localhost:8081/api/amenities/${neighbourhoodId}`
       );
       setAmenities(response.data);
     } catch (error) {
@@ -47,7 +47,7 @@ const CommunityManagerAmenities = () => {
   const fetchBookingRequests = useCallback(async () => {
     try {
       const response = await axios.get(
-        `http://172.17.2.103:8080/api/booking-requests/${neighbourhoodId}`
+        `http://localhost:8081/api/booking-requests/${neighbourhoodId}`
       );
       setBookingRequests(response.data);
     } catch (error) {
@@ -63,7 +63,7 @@ const CommunityManagerAmenities = () => {
   const handleApprove = async (bookingId, amenityId) => {
     try {
       await axios.put(
-        `http://172.17.2.103:8080/api/booking-requests/approve/${bookingId}`
+        `http://localhost:8081/api/booking-requests/approve/${bookingId}`
       );
       setBookingRequests(
         bookingRequests.filter((request) => request.bookingId !== bookingId)
@@ -89,7 +89,7 @@ const CommunityManagerAmenities = () => {
   const handleDeny = async (bookingId) => {
     try {
       await axios.put(
-        `http://172.17.2.103:8080/api/booking-requests/deny/${bookingId}`
+        `http://localhost:8081/api/booking-requests/deny/${bookingId}`
       );
       setBookingRequests(
         bookingRequests.filter((request) => request.bookingId !== bookingId)
@@ -106,7 +106,7 @@ const CommunityManagerAmenities = () => {
 
   const handleDelete = async (amenityId) => {
     try {
-      await axios.delete(`http://172.17.2.103:8080/api/amenities/${amenityId}`);
+      await axios.delete(`http://localhost:8081/api/amenities/${amenityId}`);
       setAmenities(
         amenities.filter((amenity) => amenity.amenityId !== amenityId)
       );
@@ -122,7 +122,7 @@ const CommunityManagerAmenities = () => {
   const handleCreateAmenity = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://172.17.2.103:8080/api/amenities", {
+      const response = await axios.post("http://localhost:8081/api/amenities", {
         ...newAmenity,
         neighbourhoodId,
       });

@@ -27,7 +27,7 @@ const ResidentAmenities = () => {
   const fetchAmenities = useCallback(async () => {
     try {
       const response = await axios.get(
-        `http://172.17.2.103:8080/api/amenities/${neighbourhoodId}`
+        `${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_AMENITIES}/${neighbourhoodId}`
       );
       const groupedAmenities = groupAmenitiesByName(response.data);
       setAmenities(groupedAmenities);
@@ -74,7 +74,7 @@ const ResidentAmenities = () => {
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://172.17.2.103:8080/api/booking-requests/create", {
+      await axios.post(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_BOOKING_REQUESTS_CREATE}`, {
         ...bookingDetails,
         user_id: userId,
         neighbourhood_id: neighbourhoodId,

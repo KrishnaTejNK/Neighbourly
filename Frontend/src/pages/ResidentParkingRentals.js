@@ -18,7 +18,8 @@ const ResidentParkingRentals = () => {
     const navigate = useNavigate();
     const neighbourhoodId = localStorage.getItem("neighbourhoodId");
     const userId = localStorage.getItem("userid");
-    const [showPopup, setShowPopup] = useState({
+    const [showPopup, 
+        setShowPopup] = useState({
         visible: false,
         message: "",
         type: "",
@@ -26,12 +27,12 @@ const ResidentParkingRentals = () => {
 
     useEffect(() => {
         // Fetch all parking slots in the neighborhood
-        axios.get(`http://172.17.2.103:8080/api/parking/${neighbourhoodId}`)
+        axios.get(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_PARKING}/${neighbourhoodId}`)
             .then(response => setParkingRentals(response.data))
             .catch(error => console.error("Error fetching parking rentals:", error));
 
         // Fetch all parking requests for the logged-in user (if they own a parking slot)
-        axios.get(`http://172.17.2.103:8080/api/parking/requests/${userId}`)
+        axios.get(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_PARKING_REQUESTS}/${userId}`)
             .then(response => setParkingRequests(response.data))
             .catch(error => console.error("Error fetching parking requests:", error));
     }, [neighbourhoodId, userId]);
@@ -51,7 +52,7 @@ const ResidentParkingRentals = () => {
 
     const handleViewProfile = async (userId) => {
         try {
-            const response = await axios.get(`http://172.17.2.103:8080/api/user/details/${userId}`);
+            const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_USER_DETAILS}/${userId}`);
             const user = response.data;
             navigate(`/profile/${user.email}`);
         } catch (error) {
@@ -73,9 +74,8 @@ const ResidentParkingRentals = () => {
             status: "PENDING"
         };
         
-        axios.post("http://172.17.2.103:8080/api/parking/requests", requestData)
+        axios.post(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_PARKING_REQUESTS}`, requestData)
             .then(() => {
-                // alert("Putting your request to the parking slot owner, please contact them for payment.");
                 setShowPopup({
                     visible: true,
                     message: "Putting your request to the parking slot owner, please contact them for payment.",
@@ -105,7 +105,7 @@ const ResidentParkingRentals = () => {
             price: parseFloat(newRental.price)
         };
 
-        axios.post("http://172.17.2.103:8080/api/parking/create", rentalData)
+        axios.post(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_PARKING_CREATE}`, rentalData)
             .then(() => {
                 setShowForm(false);
                 window.location.reload();
@@ -114,24 +114,40 @@ const ResidentParkingRentals = () => {
     };
 
     const handleApproveRequest = (requestId, rentalId) => {
-        axios.put(`http://172.17.2.103:8080/api/parking/requests/${requestId}/approve`)
+        axios.put(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_PARKING_REQUESTS}/${requestId}/approve`)
             .then(() => {
-                axios.put(`http://172.17.2.103:8080/api/parking/${rentalId}/booked`);
-                alert("Request approved. Parking slot is now booked.");
+                axios.put(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_PARKING}/${rentalId}/booked`);
+                setShowPopup({
+                    visible: true,
+                    message: "Request approved. Parking slot is now booked.",
+                    type: "success",
+                  });
                 window.location.reload();
             })
             .catch(error => console.error("Error approving request:", error));
+
+            setTimeout(() => {
+                setShowPopup({ visible: false, message: "", type: "" });
+              }, 9000);
     };
     const redirectpage = () => {
         setShowConfirmation(false);
     }
     const handleDenyRequest = (requestId) => {
-        axios.put(`http://172.17.2.103:8080/api/parking/requests/${requestId}/deny`)
+        axios.put(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_PARKING_REQUESTS}/${requestId}/deny`)
             .then(() => {
-                alert("Request denied.");
+                setShowPopup({
+                    visible: true,
+                    message: "Request denied.",
+                    type: "",
+                  });
                 window.location.reload();
             })
             .catch(error => console.error("Error denying request:", error));
+
+            setTimeout(() => {
+                setShowPopup({ visible: false, message: "", type: "" });
+              }, 9000);
     };
 
     return (

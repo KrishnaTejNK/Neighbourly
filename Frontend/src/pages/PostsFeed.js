@@ -28,7 +28,7 @@ const PostsFeed = () => {
 
       try {
         const response = await axios.get(
-          `http://172.17.2.103:8080/api/posts/${neighbourhoodId}`
+          `${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_POSTS}/${neighbourhoodId}`
         );
         setPosts(response.data);
       } catch (error) {
@@ -41,7 +41,7 @@ const PostsFeed = () => {
     const fetchUserRole = async () => {
       try {
         const response = await axios.get(
-          `http://172.17.2.103:8080/api/user/role/${userEmail}`
+          `${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_USER_ROLE}/${userEmail}`
         );
         setUserRole(response.data.role);
       } catch (error) {
@@ -57,7 +57,6 @@ const PostsFeed = () => {
     const neighbourhoodId = localStorage.getItem("neighbourhoodId");
 
     if (!neighbourhoodId || !userid) {
-      //alert("Unable to report post. Please log in again.");
 
         setShowPopup({
           visible: true,
@@ -69,7 +68,7 @@ const PostsFeed = () => {
     }
 
     try {
-      await axios.post("http://172.17.2.103:8080/api/reports/report", {
+      await axios.post(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_REPORT_REPORT}`, {
         neighbourhoodId: neighbourhoodId,
         postId: postId,
         reporterId: userid,
@@ -82,11 +81,8 @@ const PostsFeed = () => {
           type: "success",
         });
 
-
-      //alert("Post reported successfully. A community manager will review it.");
     } catch (error) {
       console.error("Error reporting post:", error);
-      //alert("Failed to report post. Please try again later.");
       
         setShowPopup({
           visible: true,
@@ -103,7 +99,7 @@ const PostsFeed = () => {
 
   const handleDeletePost = async (postId) => {
     try {
-      await axios.delete(`http://172.17.2.103:8080/api/posts/delete/${postId}`);
+      await axios.delete(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_POSTS_DELETE}/${postId}`);
       setPosts(posts.filter((post) => post.postId !== postId));
     } catch (error) {
       console.error("Error deleting post:", error);
@@ -113,7 +109,7 @@ const PostsFeed = () => {
   const viewProfile = async (userId) => {
     try {
       const response = await axios.get(
-        `http://172.17.2.103:8080/api/user/details/${userId}`
+        `${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_USER_DETAILS}/${userId}`
       );
       const user = response.data;
       navigate(`/profile/${user.email}`);
@@ -343,7 +339,7 @@ const PostsFeed = () => {
                   </h2>
                 </div>
                 {(userRole === "RESIDENT"
-                  ? posts.filter((post) => post.userId === userid)
+                  ? posts.filter((post) => post.userId.toString() === userid.toString())
                   : posts
                 ).map((post) => renderPostCard(post, true))}
               </div>
