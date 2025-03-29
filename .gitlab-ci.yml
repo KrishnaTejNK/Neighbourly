@@ -134,7 +134,7 @@ deploy-backend:
           ;;
         main)
           CONTAINER_NAME="neighbourly-prod-app"
-          SERVER_PORT=8073
+          SERVER_PORT=8070
           DB_URL=$PROD_DB_URL
           DB_USER=$PROD_DB_USER
           DB_PASSWORD=$PROD_DB_PASSWORD
