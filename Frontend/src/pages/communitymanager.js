@@ -1,212 +1,192 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, Users, Search, HandHelping, ParkingSquare, Building2, UserCircle, X } from "lucide-react";
+import Navbar from "../components/Navbar";
 import axios from "axios";
 
 const CommunityManager = () => {
-    // Rest of the code remains exactly the same
+    const [residents, setResidents] = useState([]);
+    const [reportedPosts, setReportedPosts] = useState([]);
     const navigate = useNavigate();
-    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-    const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-    const [notifications, setNotifications] = useState([]);
-    const [actionMessage, setActionMessage] = useState("");
-    const [unreadCount, setUnreadCount] = useState(0);
-
-    const neighbourhoodId = localStorage.getItem("neighbourhoodId");
 
     useEffect(() => {
-        if (neighbourhoodId) {
-            fetchNotifications(neighbourhoodId);
-        }
-    }, [neighbourhoodId]);
+        const neighbourhoodId = localStorage.getItem("neighbourhoodId");
 
-    const fetchNotifications = async (neighbourhoodId) => {
+        const fetchResidents = async () => {
+            try {
+                const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_USER}/${neighbourhoodId}`);
+                setResidents(response.data);
+            } catch (error) {
+                console.error("Error fetching residents:", error);
+            }
+        };
+
+        const fetchReportedPosts = async () => {
+            try {
+                const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_REPORT}/${neighbourhoodId}`);
+
+                const allPosts = response.data.flatMap(report =>
+                    report.posts.map(post => ({
+                        ...post,
+                        reportId: report.id,
+                    }))
+                );
+
+                setReportedPosts(allPosts);
+                console.log(allPosts);
+            } catch (error) {
+                console.error("Error fetching reported posts:", error);
+            }
+        };
+
+        fetchResidents();
+        fetchReportedPosts();
+    }, []);
+
+    const formatDate = (dateString) => {
+        const options = {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        };
+        return new Date(dateString).toLocaleDateString(undefined, options);
+    };
+
+    const viewProfile = async (userId) => {
         try {
-            const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_NOTIFICATIONS_ENDPOINT}/${neighbourhoodId}`); 
-            setNotifications(response.data);
-            setUnreadCount(response.data.length);
+            const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_USER_DETAILS}/${userId}`);
+            const user = response.data;
+            navigate(`/profile/${user.email}`);
         } catch (error) {
-            console.error("Error fetching notifications:", error);
+            console.error("Error fetching User Details:", error);
         }
     };
 
-    const handleNotificationAction = async (id, action) => {
+    const handleApprovePost = async (reportId) => {
         try {
-           const endpoint = action === 'approve'
-                           ? `${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_JOIN_COMMUNITY_APPROVE_ENDPOINT}/${id}`
-                           : `${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_JOIN_COMMUNITY_DENY_ENDPOINT}/${id}`;
-
-            await axios.post(endpoint);
-            setActionMessage(`${action.charAt(0).toUpperCase() + action.slice(1)} successfully`);
-            setNotifications(notifications.filter(notification => notification.requestId !== id));
-            setUnreadCount(prev => Math.max(0, prev - 1));
-            setTimeout(() => setActionMessage(""), 3000);
+            await axios.put(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_REPORT_APPROVE}/${reportId}`);
+            setReportedPosts(reportedPosts.filter((post) => post.reportId !== reportId));
         } catch (error) {
-            console.error(`Error ${action} request:`, error);
+            console.error("Error approving post:", error);
         }
     };
 
-    const handleLogout = () => {
-        localStorage.clear();
-        navigate("/login");
+    const handleDeletePost = async (reportId) => {
+        try {
+            await axios.delete(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_REPORT_DELETE}/${reportId}`);
+            setReportedPosts(reportedPosts.filter((post) => post.reportId !== reportId));
+        } catch (error) {
+            console.error("Error deleting post:", error);
+        }
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <header className="bg-white shadow-md py-4 w-full">
-                <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
-                    <div className="flex items-center space-x-4 w-full">
-                        <button onClick={() => navigate('/')} className="hover:bg-gray-100 p-1 rounded-lg">
-                            <Users className="h-7 w-7 text-[#4873AB]" />
-                        </button>
-
-                        <h1 className="text-2xl font-bold text-[#4873AB] cursor-pointer" onClick={() => navigate('/')}>
-                            Neighborly
-                        </h1>
-
-                        <div className="relative w-full max-w-md">
-                            <input
-                                type="text"
-                                placeholder="Search..."
-                                className="w-full pl-4 pr-12 h-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#4873AB] focus:border-transparent"
-                            />
-                            <button className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 flex items-center justify-center bg-[#4873AB] text-white rounded-md hover:bg-blue-600 transition-colors">
-                                <Search className="w-4 h-4" />
-                            </button>
+        <div className="min-h-screen bg-blue-50">
+            <Navbar />
+            <main className="container mx-auto px-6 py-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Residents Column */}
+                    <div className="bg-white rounded-xl shadow-md border border-blue-100">
+                        <div className="bg-blue-100 p-4 border-b border-blue-100">
+                            <h3 className="text-xl font-semibold text-blue-900">Residents</h3>
                         </div>
-
-                        <div className="flex items-center space-x-6">
-                            <button onClick={() => navigate("/help-requests")} className="hover:bg-gray-100 p-2 rounded-lg flex items-center space-x-2">
-                                <HandHelping className="w-6 h-6 text-[#4873AB]" />
-                                <span className="text-sm font-medium text-gray-700">Help Requests</span>
-                            </button>
-
-                            <button onClick={() => navigate("/parking-rentals")} className="hover:bg-gray-100 p-2 rounded-lg flex items-center space-x-2">
-                                <ParkingSquare className="w-6 h-6 text-[#4873AB]" />
-                                <span className="text-sm font-medium text-gray-700">Parking</span>
-                            </button>
-
-                            <button onClick={() => navigate("/public-bookings")} className="hover:bg-gray-100 p-2 rounded-lg flex items-center space-x-2">
-                                <Building2 className="w-6 h-6 text-[#4873AB]" />
-                                <span className="text-sm font-medium text-gray-700">Public Places</span>
-                            </button>
-
-                            <button
-                                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                                className="relative hover:bg-gray-100 p-2 rounded-lg flex items-center space-x-2 group"
-                            >
-                                <div className="relative">
-                                    <Bell className="w-6 h-6 text-[#4873AB]" />
-                                    {unreadCount > 0 && (
-                                        <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 transform transition-transform group-hover:scale-110">
-                                            {unreadCount}
-                                        </div>
-                                    )}
-                                </div>
-                                <span className="text-sm font-medium text-gray-700">Notifications</span>
-                            </button>
-
-                            <div className="relative">
-                                <button
-                                    onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                                    className="hover:bg-gray-100 p-2 rounded-lg flex items-center space-x-2"
-                                    title="Profile"
-                                >
-                                    <UserCircle className="w-7 h-7 text-[#4873AB]" />
-                                </button>
-
-                                {isProfileMenuOpen && (
-                                    <div className="absolute right-0 mt-2 w-40 bg-white shadow-md rounded-lg py-2 z-50">
-                                        <button
-                                            onClick={handleLogout}
-                                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                        <div className="p-4 max-h-[600px] overflow-y-auto">
+                            {residents.length > 0 ? (
+                                <ul className="space-y-2">
+                                    {residents.map((resident) => (
+                                        <li
+                                            key={resident.id}
+                                            className="p-2 hover:bg-blue-50 rounded-lg cursor-pointer transition-colors"
+                                            onClick={() => viewProfile(resident.id)}
                                         >
-                                            Logout
-                                        </button>
-                                    </div>
-                                )}
+                                            <div className="flex justify-between items-center">
+                                                <div>
+                                                    <p className="font-medium text-gray-800">{resident.name}</p>
+                                                    <p className="text-sm text-gray-500">{resident.email}</p>
+                                                </div>
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                </svg>
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className="text-gray-500 text-center">No residents found.</p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Welcome Column */}
+                    <div className="flex items-center justify-center">
+                        <div className="text-center bg-white rounded-xl shadow-md border border-blue-100 p-8">
+                            <h2 className="text-3xl font-bold text-blue-800 mb-4">Welcome, Community Manager!</h2>
+                            <p className="text-gray-600 mb-6">
+                                Manage your neighborhood effortlessly with ease and efficiency.
+                            </p>
+                            <div className="inline-block p-4 bg-blue-50 rounded-xl">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.768-.231-1.49-.634-2.081M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.768.231-1.49.634-2.081m0 0a5.002 5.002 0 019.536 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
                             </div>
                         </div>
                     </div>
-                </div>
-            </header>
 
-            {isNotificationsOpen && (
-                <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40" onClick={() => setIsNotificationsOpen(false)} />
-            )}
-
-            <div
-                className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg transform transition-transform duration-300 ease-in-out z-50 ${
-                    isNotificationsOpen ? "translate-x-0" : "translate-x-full"
-                }`}
-            >
-                <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                    <h3 className="text-lg font-semibold text-gray-800">Notifications</h3>
-                    <button
-                        onClick={() => setIsNotificationsOpen(false)}
-                        className="p-1 hover:bg-gray-100 rounded-full"
-                    >
-                        <X className="w-5 h-5 text-gray-500" />
-                    </button>
-                </div>
-
-                <div className="p-4 max-h-[calc(100vh-5rem)] overflow-y-auto">
-                    {Array.isArray(notifications) && notifications.length > 0 ? (
-                        <div className="space-y-3">
-                            {notifications.map((notification) => (
-                                <div
-                                    key={notification.requestId}
-                                    className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow"
-                                >
-                                    <div className="space-y-3">
-                                        <div>
-                                            <p className="font-semibold text-gray-800">{notification.requestType}</p>
-                                            <p className="text-sm text-gray-600 mt-1">
-                                                {notification.user.name} wants to join the community
-                                            </p>
-                                        </div>
-                                        <div className="flex space-x-2 pt-2">
-                                            <button
-                                                onClick={() => handleNotificationAction(notification.requestId, "approve")}
-                                                className="flex-1 bg-[#4873AB] text-white px-4 py-2 rounded-lg hover:bg-[#3b5d89] transition-colors"
-                                            >
-                                                Approve
-                                            </button>
-                                            <button
-                                                onClick={() => handleNotificationAction(notification.requestId, "deny")}
-                                                className="flex-1 border border-red-500 text-red-500 px-4 py-2 rounded-lg hover:bg-red-50 transition-colors"
-                                            >
-                                                Deny
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
+                    {/* Reported Posts Column */}
+                    <div className="bg-white rounded-xl shadow-md border border-blue-100">
+                        <div className="bg-blue-100 p-4 border-b border-blue-100">
+                            <h3 className="text-xl font-semibold text-blue-900">Reported Posts</h3>
                         </div>
-                    ) : (
-                        <div className="flex flex-col items-center justify-center py-8">
-                            <Bell className="w-12 h-12 text-gray-300 mb-2" />
-                            <p className="text-gray-500 text-lg font-medium">No Notifications</p>
-                            <p className="text-gray-400 text-sm text-center mt-1">
-                                You'll see notifications here when you receive new requests
-                            </p>
+                        <div className="p-4 max-h-[600px] overflow-y-auto">
+                            {reportedPosts.length > 0 ? (
+                                <ul className="space-y-4">
+                                    {reportedPosts.map((post) => (
+                                        <li key={post.postId} className="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className="flex items-center">
+                                                    <img
+                                                        src={`https://api.dicebear.com/7.x/identicon/svg?seed=${post.userId}`}
+                                                        alt="Profile"
+                                                        className="w-12 h-12 rounded-full border-2 border-blue-300"
+                                                    />
+                                                    <div className="ml-3">
+                                                        <p className="font-semibold text-gray-800">{post.userId}</p>
+                                                        <p className="text-xs text-gray-500">{formatDate(post.dateTime)}</p>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={() => viewProfile(post.userId)}
+                                                    className="text-sm bg-blue-500 text-white px-3 py-1 rounded-full hover:bg-blue-600 transition-colors"
+                                                >
+                                                    View Profile
+                                                </button>
+                                            </div>
+                                            <p className="text-gray-700 mb-3">{post.postContent}</p>
+                                            <div className="flex space-x-2">
+                                                <button
+                                                    className="flex-1 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition-colors"
+                                                    onClick={() => handleApprovePost(post.reportId)}
+                                                >
+                                                    Approve
+                                                </button>
+                                                <button
+                                                    className="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors"
+                                                    onClick={() => handleDeletePost(post.reportId)}
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className="text-gray-500 text-center">No reported posts.</p>
+                            )}
                         </div>
-                    )}
-
-                    {actionMessage && (
-                        <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg transform transition-transform duration-300">
-                            {actionMessage}
-                        </div>
-                    )}
-                </div>
-            </div>
-            <main className="flex justify-center items-center min-h-screen bg-blue-50">
-                <div className="text-center -mt-20">
-                    <h2 className="text-4xl font-bold text-gray-800">Welcome, Community Manager!</h2>
-                    <p className="text-gray-600 mt-4 text-lg">Manage your neighborhood effortlessly with ease and efficiency.</p>
+                    </div>
                 </div>
             </main>
-
         </div>
     );
 };

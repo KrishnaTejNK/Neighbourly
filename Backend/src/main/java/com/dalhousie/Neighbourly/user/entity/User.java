@@ -21,11 +21,15 @@ public class User implements UserDetails{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Getter
+    @Setter
     private Integer id;
 
     @Column(nullable = false)
     private String name;
 
+    @Setter
+    @Getter
     @Column(nullable = false, unique = true)
     private String email;
 

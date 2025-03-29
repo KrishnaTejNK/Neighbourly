@@ -6,9 +6,10 @@ const JoinOrCreate = () => {
   const navigate = useNavigate();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const menuRef = useRef(null); // Create a ref for the profile menu
+  const currentemail = localStorage.getItem("email")
 
   const headerIcons = [
-    { icon: HandHelping, text: "Help Requests" },
+    { icon: HandHelping, text: "Post" },
     { icon: ParkingSquare, text: "Parking" },
     { icon: Building2, text: "Public Places" }
   ];
@@ -20,7 +21,9 @@ const JoinOrCreate = () => {
   const handleJoinCommunity = () => {
     navigate('/joinCommunity');
   };
-
+  const handelProfile = () => {
+    navigate(`/profile/${currentemail}`);
+  }
   const handleLogout = () => {
     navigate('/');
   };
@@ -123,6 +126,9 @@ const JoinOrCreate = () => {
 
                   {isProfileMenuOpen && (
                       <div className="absolute right-0 mt-2 w-40 bg-white shadow-md rounded-lg py-2 z-50">
+                        <button onClick={handelProfile} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                          Profile Info
+                        </button>
                         <button
                             onClick={handleLogout}
                             className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"

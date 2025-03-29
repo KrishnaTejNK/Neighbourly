@@ -27,4 +27,7 @@ public class PasswordReset {
     private Instant expiryDate;
 
 
+    public PasswordReset(String token) {
+        this.token = token;
+    }
 }
