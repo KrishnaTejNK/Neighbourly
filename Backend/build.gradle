@@ -60,5 +60,5 @@ jar {
 }
 
 application {
-    mainClass = 'com.dalhousie.NeighbourlyApplication'  // Replace with your actual main class
+    mainClass = 'com.dalhousie.Neighbourly.NeighbourlyApplication'  // Replace with your actual main class
 }
