@@ -35,9 +35,10 @@ public class ApplicationConfig {
 
     @Bean
     public JavaMailSender javaMailSender() {
+        int port = 587;
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost("smtp.gmail.com");
-        mailSender.setPort(587);
+        mailSender.setPort(port);
         mailSender.setUsername("devpatel43543@gmail.com");
         mailSender.setPassword("dfjragryfjtqnkwp");
 

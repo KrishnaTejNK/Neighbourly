@@ -27,15 +27,39 @@ public class BookingRequestService {
     @Autowired
     private NeighbourhoodRepository neighbourhoodRepository;
 
+    @Autowired
+    private AmenityRepository amenityRepository;
+
+    // Helper method to fetch a User by ID
+    private User getUserById(int userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found for user " + userId));
+    }
+
+    // Helper method to fetch a Neighbourhood by ID
+    private Neighbourhood getNeighbourhoodById(int neighbourhoodId) {
+        return neighbourhoodRepository.findById(neighbourhoodId)
+                .orElseThrow(() -> new RuntimeException("Neighbourhood not found for neighbourhood " + neighbourhoodId));
+    }
+
+    // Helper method to fetch a BookingRequest by ID
+    private BookingRequest getBookingRequestById(int bookingId) {
+        return bookingRequestRepository.findById(bookingId)
+                .orElseThrow(() -> new InvalidConfigurationPropertyValueException("Empty value", bookingId, "Booking Request not found"));
+    }
+
+    // Helper method to fetch an Amenity by ID
+    private Amenity getAmenityById(int amenityId) {
+        return amenityRepository.findById(amenityId)
+                .orElseThrow(() -> new InvalidConfigurationPropertyValueException("Empty value", amenityId, "Amenity not found"));
+    }
+
+    // Refactor: Create BookingRequest with necessary DTO
     public BookingRequest createBookingRequest(BookingRequestDTO bookingRequestDTO) {
+        User user = getUserById(bookingRequestDTO.getUser_id());
+        Neighbourhood neighbourhood = getNeighbourhoodById(bookingRequestDTO.getNeighbourhood_id());
+
         BookingRequest bookingRequest = new BookingRequest();
-        System.out.println(bookingRequestDTO);
-        User user = userRepository.findById(bookingRequestDTO.getUser_id()).orElseThrow(() -> new RuntimeException("User not found for user"));
-        Neighbourhood neighbourhood = neighbourhoodRepository.findById(bookingRequestDTO.getNeighbourhood_id())
-                .orElseThrow(() -> new RuntimeException("Neighbourhood not found"));
-
-
-
         bookingRequest.setUser_id(user.getId());
         bookingRequest.setNeighbourhood_id(neighbourhood.getNeighbourhoodId());
         bookingRequest.setAmenity_id(bookingRequestDTO.getAmenityId());
@@ -49,38 +73,34 @@ public class BookingRequestService {
         return bookingRequestRepository.save(bookingRequest);
     }
 
+    // Refactor: Get bookings by neighborhood
     public List<BookingRequest> getBookingsByNeighbourhood(int neighbourhoodId) {
         return bookingRequestRepository.findByNeighbourhood_id(neighbourhoodId);
     }
-    public List<BookingRequest> getBookingsByAmenity(int amenityId) {  // NEW METHOD
+
+    // Refactor: Get bookings by amenity
+    public List<BookingRequest> getBookingsByAmenity(int amenityId) {
         return bookingRequestRepository.findByAmenity_id(amenityId);
     }
 
-    @Autowired
-    private AmenityRepository amenityRepository;
-
+    // Refactor: Get pending booking requests by neighbourhood
     public List<BookingRequest> getPendingRequests(int neighbourhoodId) {
-        return  bookingRequestRepository.findByNeighbourhood_idAndStatus(neighbourhoodId, BookingRequest.BookingStatus.PENDING);
+        return bookingRequestRepository.findByNeighbourhood_idAndStatus(neighbourhoodId, BookingRequest.BookingStatus.PENDING);
     }
 
+    // Refactor: Get a booking request by ID
     public BookingRequest getRequestById(int bookingId) {
-        return bookingRequestRepository.findById(bookingId)
-                .orElseThrow(() -> new InvalidConfigurationPropertyValueException("Empty value",bookingId,"Amenity not found"));
+        return getBookingRequestById(bookingId);
     }
-
-
 
     @Transactional
+    // Refactor: Approve Booking Request
     public boolean approveBooking(int bookingId) {
-        BookingRequest request = bookingRequestRepository.findById(bookingId)
-                .orElseThrow(() -> new InvalidConfigurationPropertyValueException ("Empty value",bookingId,"Amenity not found"));
-
+        BookingRequest request = getBookingRequestById(bookingId);
         request.setStatus(BookingRequest.BookingStatus.APPROVED);
         bookingRequestRepository.save(request);
 
-        Amenity amenity = amenityRepository.findById(request.getAmenity_id())
-                .orElseThrow(() -> new InvalidConfigurationPropertyValueException ("Empty value",request.getAmenity_id(),"Amenity not found"));
-
+        Amenity amenity = getAmenityById(request.getAmenity_id());
         amenity.setStatus(Amenity.Status.BOOKED);
         amenityRepository.save(amenity);
 
@@ -88,14 +108,12 @@ public class BookingRequestService {
     }
 
     @Transactional
+    // Refactor: Deny Booking Request
     public boolean denyBooking(int bookingId) {
-        BookingRequest request = bookingRequestRepository.findById(bookingId)
-                .orElseThrow(() -> new InvalidConfigurationPropertyValueException ("Empty value",bookingId,"Amenity not found"));
-
+        BookingRequest request = getBookingRequestById(bookingId);
         request.setStatus(BookingRequest.BookingStatus.REJECTED);
         bookingRequestRepository.save(request);
 
         return true;
     }
 }
-

@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.time.Instant;
@@ -25,109 +24,92 @@ class ResetTokenServiceImplTest {
     private ResetTokenServiceImpl resetTokenService;
 
     private PasswordReset passwordReset;
-    private final Integer userId = 1;
+
+    private static final int TEST_USER_ID = 1;
+    private static final long TOKEN_EXPIRY_DURATION_MS = 10 * 60 * 1000L; // 10 minutes
+    private static final long TOKEN_ALREADY_EXPIRED_MS = 1000L; // 1 second
+    private static final String EXPIRED_TOKEN_MESSAGE = "Token has expired.";
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        // Setting up a PasswordReset entity for testing
         passwordReset = PasswordReset.builder()
-                .userId(userId)
+                .userId(TEST_USER_ID)
                 .token(UUID.randomUUID().toString())
-                .expiryDate(Instant.now().plusMillis(1000L * 60 * 10)) // token valid for 10 minutes
+                .expiryDate(Instant.now().plusMillis(TOKEN_EXPIRY_DURATION_MS))
                 .build();
     }
 
     @Test
     void testCreateResetPasswordToken() {
-        // Mock the behavior of passwordResetTokenRepository.findByUserId to return empty
-        Mockito.when(passwordResetTokenRepository.findByUserId(userId)).thenReturn(Optional.empty());
-        // Mock the behavior of passwordResetTokenRepository.save to return the passwordReset entity
-        Mockito.when(passwordResetTokenRepository.save(any(PasswordReset.class))).thenReturn(passwordReset);
+        when(passwordResetTokenRepository.findByUserId(TEST_USER_ID)).thenReturn(Optional.empty());
+        when(passwordResetTokenRepository.save(any(PasswordReset.class))).thenReturn(passwordReset);
 
-        PasswordReset createdToken = resetTokenService.createResetPasswordToken(userId);
+        PasswordReset createdToken = resetTokenService.createResetPasswordToken(TEST_USER_ID);
 
-        // Assert the token is created and saved
         assertNotNull(createdToken);
-        assertEquals(userId, createdToken.getUserId());
+        assertEquals(TEST_USER_ID, createdToken.getUserId());
         assertNotNull(createdToken.getToken());
         assertTrue(createdToken.getExpiryDate().isAfter(Instant.now()));
 
-        // Verify that save method was called once
         verify(passwordResetTokenRepository, times(1)).save(any(PasswordReset.class));
     }
 
     @Test
     void testCreateResetPasswordToken_ExistingTokenDeleted() {
-        // Mock the behavior of passwordResetTokenRepository.findByUserId to return an existing token
-        Mockito.when(passwordResetTokenRepository.findByUserId(userId)).thenReturn(Optional.of(passwordReset));
+        when(passwordResetTokenRepository.findByUserId(TEST_USER_ID)).thenReturn(Optional.of(passwordReset));
+        when(passwordResetTokenRepository.save(any(PasswordReset.class))).thenReturn(passwordReset);
 
-        // Mock the behavior of passwordResetTokenRepository.save to return the new password reset token
-        Mockito.when(passwordResetTokenRepository.save(any(PasswordReset.class))).thenReturn(passwordReset);
+        PasswordReset createdToken = resetTokenService.createResetPasswordToken(TEST_USER_ID);
 
-        // Create a new reset token (which should delete the existing one)
-        PasswordReset createdToken = resetTokenService.createResetPasswordToken(userId);
-
-        // Verify that delete method was called once
         verify(passwordResetTokenRepository, times(1)).delete(any(PasswordReset.class));
         verify(passwordResetTokenRepository, times(1)).save(any(PasswordReset.class));
     }
 
     @Test
     void testFindByUserId() {
-        // Mock the behavior of passwordResetTokenRepository.findByUserId to return an existing token
-        Mockito.when(passwordResetTokenRepository.findByUserId(userId)).thenReturn(Optional.of(passwordReset));
+        when(passwordResetTokenRepository.findByUserId(TEST_USER_ID)).thenReturn(Optional.of(passwordReset));
 
-        Optional<PasswordReset> foundToken = resetTokenService.findByUserId(userId);
+        Optional<PasswordReset> foundToken = resetTokenService.findByUserId(TEST_USER_ID);
 
-        // Assert that the token is found and matches the userId
         assertTrue(foundToken.isPresent());
-        assertEquals(userId, foundToken.get().getUserId());
+        assertEquals(TEST_USER_ID, foundToken.get().getUserId());
     }
 
     @Test
     void testDeleteResetPasswordToken() {
-        // Mock behavior for deletion, assuming it's successful
         doNothing().when(passwordResetTokenRepository).delete(passwordReset);
 
-        // Delete the password reset token
         resetTokenService.deleteResetPasswordToken(passwordReset);
 
-        // Verify delete method was called once
         verify(passwordResetTokenRepository, times(1)).delete(passwordReset);
     }
 
     @Test
     void testIsTokenValid_ValidToken() {
         boolean isValid = resetTokenService.isTokenValid(passwordReset);
-
-        // Assert that the token is valid as it has not expired
         assertTrue(isValid);
     }
 
     @Test
     void testIsTokenValid_ExpiredToken() {
-        // Create an expired token
         PasswordReset expiredToken = PasswordReset.builder()
-                .userId(userId)
+                .userId(TEST_USER_ID)
                 .token(UUID.randomUUID().toString())
-                .expiryDate(Instant.now().minusMillis(1000L)) // expired token
+                .expiryDate(Instant.now().minusMillis(TOKEN_ALREADY_EXPIRED_MS))
                 .build();
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
             resetTokenService.isTokenValid(expiredToken);
         });
 
-        // Assert that the exception is thrown with the correct message
-        assertEquals("token has expired.", exception.getMessage());
+        assertEquals(EXPIRED_TOKEN_MESSAGE, exception.getMessage());
     }
 
     @Test
     void testIsTokenValid_NullToken() {
         boolean isValid = resetTokenService.isTokenValid(null);
-
-        // Assert that the token is not valid because it is null
         assertFalse(isValid);
     }
 }

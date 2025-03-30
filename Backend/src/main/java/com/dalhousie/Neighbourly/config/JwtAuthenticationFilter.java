@@ -53,8 +53,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-
-        jwt = authHeader.substring(7);
+        int beginIndex = 7;
+        jwt = authHeader.substring(beginIndex);
 
         // Extract user email from JWT and handle errors
         try {

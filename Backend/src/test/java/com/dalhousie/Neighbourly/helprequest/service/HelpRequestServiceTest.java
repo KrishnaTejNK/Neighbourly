@@ -112,8 +112,10 @@ class HelpRequestServiceTest {
 
     @Test
     void testGetAllJoinCommunityRequests() {
-        when(neighbourhoodRepository.findByNeighbourhoodId(1)).thenReturn(Optional.of(neighbourhood));
+        // Mock Neighbourhood Repository
+        when(neighbourhoodRepository.findById(1)).thenReturn(Optional.of(neighbourhood));
 
+        // Mock HelpRequest Repository
         HelpRequest request = new HelpRequest();
         request.setUser(user);
         request.setNeighbourhood(neighbourhood);
@@ -121,16 +123,22 @@ class HelpRequestServiceTest {
         request.setStatus(HelpRequest.RequestStatus.OPEN);
         request.setCreatedAt(LocalDateTime.now());
 
-        when(helpRequestRepository.findByNeighbourhoodAndRequestTypeAndStatus(any(Neighbourhood.class), any(), any()))
+        // Mocking the repository call to return a list of requests
+        when(helpRequestRepository.findByNeighbourhoodAndRequestTypeAndStatus(any(Neighbourhood.class),
+                any(HelpRequest.RequestType.class),
+                any(HelpRequest.RequestStatus.class)))
                 .thenReturn(List.of(request));
 
+        // Test the service method
         List<HelpRequest> requests = helpRequestService.getAllJoinCommunityRequests(1);
 
-        assertNotNull(requests);
-        assertEquals(1, requests.size());
-        assertEquals(HelpRequest.RequestType.JOIN, requests.get(0).getRequestType());
-        assertEquals(HelpRequest.RequestStatus.OPEN, requests.get(0).getStatus());
+        // Assertions
+        assertNotNull(requests); // Ensure the list is not null
+        assertEquals(1, requests.size()); // Ensure only one request is returned
+        assertEquals(HelpRequest.RequestType.JOIN, requests.get(0).getRequestType()); // Ensure the request type is JOIN
+        assertEquals(HelpRequest.RequestStatus.OPEN, requests.get(0).getStatus()); // Ensure the request status is OPEN
     }
+
 
     @Test
     void testGetAllOpenCommunityRequests() {

@@ -33,6 +33,15 @@ public class Report {
     @Enumerated(EnumType.STRING)
     private ReportStatus reportStatus = ReportStatus.PENDING;
 
+
+
+    public Report(int userid, Integer neighbourhoodid, int postid, ReportStatus reportStatus) {
+        this.userid = userid;
+        this.neighbourhoodid = neighbourhoodid;
+        this.postid = postid;
+        this.reportStatus = reportStatus;
+    }
+
     public enum ReportStatus {
         PENDING, REVIEWED, RESOLVED
     }

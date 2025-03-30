@@ -27,11 +27,12 @@ public class UserController {
     public ResponseEntity<UserResponse> getUserProfile(@PathVariable String email) {
         Optional<User> userOptional = userService.getUserByEmail(email);
         if (userOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();      }
-
+            return ResponseEntity.notFound().build();
+        }
 
         User user = userService.findUserByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+
         UserResponse userResponse = UserResponse.builder()
                 .id(user.getId())
                 .name(user.getName())
@@ -43,7 +44,6 @@ public class UserController {
                 .userType(user.getUserType())
                 .build();
 
-
         return ResponseEntity.ok(userResponse);
     }
 
@@ -51,7 +51,8 @@ public class UserController {
     public ResponseEntity<UserResponse> getUserProfile(@PathVariable int userId) {
         Optional<User> userOptional = userService.findUserById(userId);
         if (userOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();      }
+            return ResponseEntity.notFound().build();
+        }
 
         User user = userOptional.get();
 
@@ -73,7 +74,8 @@ public class UserController {
     @GetMapping("/role/{email}")
     public ResponseEntity<String> getUserRole(@PathVariable String email) {
         UserType role = userService.getUserRole(email);
-        return ResponseEntity.ok("{\"role\": \"" + role + "\"}");
+        String responseBody = "{\"role\": \"" + role + "\"}";
+        return ResponseEntity.ok(responseBody);
     }
 
     @GetMapping("/{neighbourhoodId}")
@@ -83,5 +85,4 @@ public class UserController {
                 .map(user -> new UserDTO(user.getId(), user.getName(), user.getEmail()))
                 .collect(Collectors.toList());
     }
-
 }

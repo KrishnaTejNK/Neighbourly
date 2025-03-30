@@ -26,96 +26,83 @@ class OtpServiceImplTest {
 
     private Otp otp;
 
+    private static final String TEST_OTP = "123456";
+    private static final int TEST_USER_ID = 1;
+    private static final long OTP_EXPIRY_DURATION_MS = 1000L * 60 * 10; // 10 minutes
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         otp = Otp.builder()
-                .otp("123456")
-                .expiryDate(Instant.now().plusMillis(1000L * 60 * 10))
-                .userId(1)
+                .otp(TEST_OTP)
+                .expiryDate(Instant.now().plusMillis(OTP_EXPIRY_DURATION_MS))
+                .userId(TEST_USER_ID)
                 .build();
     }
 
     @Test
     void testGenerateOtp() {
-        // Mock the behavior of otpRepository.save
         Mockito.when(otpRepository.save(Mockito.any(Otp.class))).thenReturn(otp);
 
-        Otp generatedOtp = otpService.generateOtp(1);
+        Otp generatedOtp = otpService.generateOtp(TEST_USER_ID);
 
         assertNotNull(generatedOtp);
-        assertEquals(otp.getOtp(), generatedOtp.getOtp());
-        assertEquals(otp.getUserId(), generatedOtp.getUserId());
+        assertEquals(TEST_OTP, generatedOtp.getOtp());
+        assertEquals(TEST_USER_ID, generatedOtp.getUserId());
         Mockito.verify(otpRepository).save(Mockito.any(Otp.class));
     }
 
     @Test
     void testResendOtp() {
-        // Mock the behavior of otpRepository.findByUserId
         Mockito.when(otpRepository.findByUserId(anyInt())).thenReturn(Optional.of(otp));
         Mockito.when(otpRepository.save(Mockito.any(Otp.class))).thenReturn(otp);
 
-        Otp newOtp = otpService.resendOtp(1);
+        Otp newOtp = otpService.resendOtp(TEST_USER_ID);
 
         assertNotNull(newOtp);
-        assertEquals(otp.getOtp(), newOtp.getOtp());
-
-        // Verify that deleteByUserId is called once, despite being called indirectly
-        Mockito.verify(otpRepository, Mockito.times(2)).deleteByUserId(Mockito.anyInt());
+        assertEquals(TEST_OTP, newOtp.getOtp());
+        Mockito.verify(otpRepository, Mockito.times(2)).deleteByUserId(anyInt());
         Mockito.verify(otpRepository).save(Mockito.any(Otp.class));
     }
 
-
     @Test
     void testDeleteOtp() {
-        // Mock the delete behavior
         Mockito.doNothing().when(otpRepository).deleteByUserId(anyInt());
-
         otpService.deleteOtp(otp);
-
         Mockito.verify(otpRepository).deleteByUserId(anyInt());
     }
 
     @Test
     void testFindByOtp() {
-        // Mock the behavior of otpRepository.findByOtp
         Mockito.when(otpRepository.findByOtp(anyString())).thenReturn(Optional.of(otp));
 
-        Optional<Otp> foundOtp = otpService.findByOtp("123456");
+        Optional<Otp> foundOtp = otpService.findByOtp(TEST_OTP);
 
         assertTrue(foundOtp.isPresent());
-        assertEquals(otp.getOtp(), foundOtp.get().getOtp());
+        assertEquals(TEST_OTP, foundOtp.get().getOtp());
     }
 
     @Test
     void testIsOtpValid_ValidOtp() {
-        // Check for valid OTP
-        boolean isValid = otpService.isOtpValid(otp);
-
-        assertTrue(isValid);
+        assertTrue(otpService.isOtpValid(otp));
     }
 
     @Test
     void testIsOtpValid_InvalidOtp() {
-        // Set OTP expiry to a past time
-        otp.setExpiryDate(Instant.now().minusMillis(1000L * 60 * 10));
-
-        // Check for expired OTP
+        otp.setExpiryDate(Instant.now().minusMillis(OTP_EXPIRY_DURATION_MS));
         assertThrows(OtpServiceImpl.TokenExpiredException.class, () -> otpService.isOtpValid(otp));
     }
 
     @Test
     void testGenerateOtp_WhenExistingOtpExists() {
-        // Mock the behavior of otpRepository.findByUserId
         Mockito.when(otpRepository.findByUserId(anyInt())).thenReturn(Optional.of(otp));
         Mockito.when(otpRepository.save(Mockito.any(Otp.class))).thenReturn(otp);
 
-        Otp newOtp = otpService.generateOtp(1);
+        Otp newOtp = otpService.generateOtp(TEST_USER_ID);
 
         assertNotNull(newOtp);
-        assertEquals(otp.getOtp(), newOtp.getOtp());
-        Mockito.verify(otpRepository).deleteByUserId(Mockito.anyInt());
+        assertEquals(TEST_OTP, newOtp.getOtp());
+        Mockito.verify(otpRepository).deleteByUserId(anyInt());
         Mockito.verify(otpRepository).save(Mockito.any(Otp.class));
     }
-
 }

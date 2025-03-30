@@ -18,6 +18,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class JoinCommunityService {
+
     private final HelpRequestService helpRequestService;
     private final HelpRequestRepository helpRequestRepository;
     private final UserRepository userRepository;
@@ -28,36 +29,19 @@ public class JoinCommunityService {
 
     @Transactional
     public CustomResponseBody<CommunityResponse> approveJoinRequest(int requestId) {
-        // Fetch help request details
-        Optional<HelpRequest> requestOptional = helpRequestRepository.findById(requestId);
+        Optional<HelpRequest> requestOptional = fetchRequestById(requestId);
         if (requestOptional.isEmpty()) {
             return new CustomResponseBody<>(CustomResponseBody.Result.FAILURE, null, "Join request not found");
         }
 
         HelpRequest request = requestOptional.get();
-
-        // Fetch user details
-        Optional<User> userOptional = userRepository.findById(request.getUser().getId());
+        Optional<User> userOptional = fetchUserById(request.getUser().getId());
         if (userOptional.isEmpty()) {
             return new CustomResponseBody<>(CustomResponseBody.Result.FAILURE, null, "User not found");
         }
 
         User user = userOptional.get();
-
-        // Extract contact and address from description
-        String description = request.getDescription();
-        String phone = description.contains("Phone: ") ? description.split("Phone: ")[1].split(",")[0].trim() : null;
-        String address = description.contains("Address: ") ? description.split("Address: ")[1].trim() : null;
-
-        // Assign extracted details
-        user.setUserType(UserType.RESIDENT);
-        user.setNeighbourhood_id(request.getNeighbourhood().getNeighbourhoodId());
-
-        if (phone != null) user.setContact(phone);
-        if (address != null) user.setAddress(address);
-
-        // Save updated user
-        userRepository.save(user);
+        updateUserDetails(user, request);
 
         // Change the status of the request to APPROVED
         request.setStatus(HelpRequest.RequestStatus.APPROVED);
@@ -69,20 +53,17 @@ public class JoinCommunityService {
         return new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS, response, "User approved and added as a resident with contact and address.");
     }
 
-
     @Transactional
     public CustomResponseBody<CommunityResponse> denyJoinRequest(int requestId) {
-        // Fetch the help request details
-        Optional<HelpRequest> requestOptional = helpRequestRepository.findById(requestId);
+        Optional<HelpRequest> requestOptional = fetchRequestById(requestId);
         if (requestOptional.isEmpty()) {
             return new CustomResponseBody<>(CustomResponseBody.Result.FAILURE, null, "Join request not found");
         }
 
         HelpRequest request = requestOptional.get();
-
-        // Change the status of the request to DECLINED instead of deleting it
-        request.setStatus(HelpRequest.RequestStatus.DECLINED);  // Set status to DECLINED
-        helpRequestRepository.save(request);  // Save the updated request
+        // Change the status of the request to DECLINED
+        request.setStatus(HelpRequest.RequestStatus.DECLINED);
+        helpRequestRepository.save(request);
 
         // Create the response
         CommunityResponse response = new CommunityResponse(request.getUser().getId(), request.getNeighbourhood().getNeighbourhoodId(), HelpRequest.RequestStatus.DECLINED);
@@ -90,10 +71,44 @@ public class JoinCommunityService {
         return new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS, response, "User denied and request status updated");
     }
 
+    // Helper method to fetch request by ID
+    private Optional<HelpRequest> fetchRequestById(int requestId) {
+        return helpRequestRepository.findById(requestId);
+    }
 
+    // Helper method to fetch user by ID
+    private Optional<User> fetchUserById(int userId) {
+        return userRepository.findById(userId);
+    }
+
+    // Helper method to update user details from request
+    private void updateUserDetails(User user, HelpRequest request) {
+        String description = request.getDescription();
+        String phone = extractPhone(description);
+        String address = extractAddress(description);
+
+        user.setUserType(UserType.RESIDENT);
+        user.setNeighbourhood_id(request.getNeighbourhood().getNeighbourhoodId());
+
+        if (phone != null) user.setContact(phone);
+        if (address != null) user.setAddress(address);
+
+        userRepository.save(user);
+    }
+
+    // Helper method to extract phone from description
+    private String extractPhone(String description) {
+        if (description.contains("Phone: ")) {
+            return description.split("Phone: ")[1].split(",")[0].trim();
+        }
+        return null;
+    }
+
+    // Helper method to extract address from description
+    private String extractAddress(String description) {
+        if (description.contains("Address: ")) {
+            return description.split("Address: ")[1].trim();
+        }
+        return null;
+    }
 }
-
-
-
-
-

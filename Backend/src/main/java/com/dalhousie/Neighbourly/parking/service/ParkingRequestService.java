@@ -48,8 +48,7 @@ public class ParkingRequestService {
         if (rentalIds.isEmpty()) {
             return Collections.emptyList(); // Return empty list if no rentals exist
         }
-        System.out.println("Hi");
-        System.out.println(rentalIds);
+
         // Step 2: Find all parking requests where rental_id is in the owner's rental list
         List<ParkingRequest> requests = parkingRequestRepository.findByParkingRental_RentalIdIn(rentalIds);
 
@@ -88,4 +87,5 @@ public class ParkingRequestService {
         request.setStatus(ParkingRequest.ParkingRequestStatus.DENIED);
         parkingRequestRepository.save(request);
     }
+
 }

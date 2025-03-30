@@ -29,31 +29,40 @@ public class HelpRequestController {
         return ResponseEntity.ok(requests);
     }
 
-@GetMapping("/openCommunityRequests")
-public ResponseEntity<CustomResponseBody<List<HelpRequestDTO>>> getOpenCommunityRequests() {
-    try {
-        log.info("Fetching all open community requests");
-        List<HelpRequestDTO> requests = helpRequestService.getAllOpenCommunityRequests();
+    @GetMapping("/openCommunityRequests")
+    public ResponseEntity<CustomResponseBody<List<HelpRequestDTO>>> getOpenCommunityRequests() {
+        try {
+            log.info("Fetching all open community requests");
+            List<HelpRequestDTO> requests = helpRequestService.getAllOpenCommunityRequests();
 
-        if (requests.isEmpty()) {
-            log.info("No open community requests found");
+            if (requests.isEmpty()) {
+                log.info("No open community requests found");
+                CustomResponseBody<List<HelpRequestDTO>> responseBody =
+                        new CustomResponseBody<>(
+                                CustomResponseBody.Result.SUCCESS,
+                                requests,
+                                "No open requests available"
+                        );
+                return ResponseEntity.status(HttpStatus.OK).body(responseBody);
+            }
+
             CustomResponseBody<List<HelpRequestDTO>> responseBody =
-                    new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS, requests, "No open requests available");
+                    new CustomResponseBody<>(
+                            CustomResponseBody.Result.SUCCESS,
+                            requests,
+                            "Open community requests retrieved successfully"
+                    );
             return ResponseEntity.status(HttpStatus.OK).body(responseBody);
+
+        } catch (Exception e) {
+            log.error("Error fetching open community requests: {}", e.getMessage());
+            CustomResponseBody<List<HelpRequestDTO>> responseBody =
+                    new CustomResponseBody<>(
+                            CustomResponseBody.Result.FAILURE,
+                            null,
+                            "Something went wrong while fetching open requests"
+                    );
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseBody);
         }
-
-        CustomResponseBody<List<HelpRequestDTO>> responseBody =
-                new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS, requests, "Open community requests retrieved successfully");
-        return ResponseEntity.status(HttpStatus.OK).body(responseBody);
-
-    } catch (Exception e) {
-        log.error("Error fetching open community requests: {}", e.getMessage());
-        CustomResponseBody<List<HelpRequestDTO>> responseBody =
-                new CustomResponseBody<>(CustomResponseBody.Result.FAILURE, null, "Something went wrong while fetching open requests");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseBody);
     }
-}
-
-
-
 }
