@@ -28,7 +28,7 @@ class ResetTokenServiceImplTest {
     private static final int TEST_USER_ID = 1;
     private static final long TOKEN_EXPIRY_DURATION_MS = 10 * 60 * 1000L; // 10 minutes
     private static final long TOKEN_ALREADY_EXPIRED_MS = 1000L; // 1 second
-    private static final String EXPIRED_TOKEN_MESSAGE = "token has expired.";
+    private static final String EXPIRED_TOKEN_MESSAGE = "Token has expired.";
 
     @BeforeEach
     void setUp() {

@@ -34,12 +34,8 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     @Transactional
-    public void reportPost(int neighbouhoodid,int postId, int userId) {
-        Report report = new Report();
-        report.setUserid(userId);
-        report.setNeighbourhoodid(neighbouhoodid);
-        report.setPostid(postId);
-        report.setReportStatus(Report.ReportStatus.PENDING);
+    public void reportPost(int neighbouhoodid, int postId, int userId) {
+        Report report = new Report(userId, neighbouhoodid, postId, Report.ReportStatus.PENDING);
         reportRepository.save(report);
     }
 
@@ -48,33 +44,26 @@ public class ReportServiceImpl implements ReportService {
         // Fetch all reports for the given neighborhood
         List<Report> reports = reportRepository.findByPost_NeighbourhoodId(neighbourhoodId);
 
-        // Fetch post details only for reported posts
-        List<PostResponseDTO> reportedPosts = reports.stream()
-                .map(report -> postService.getPostById(report.getPostid())) // Fetch post details for each reported post
-                .toList();
-
-        // Convert to DTO format
-        return reports.stream().map(report -> new ReportDTO(
-                report.getReportid(),
-                report.getPostid(),
-                reportedPosts.stream()
-                        .filter(post -> post.getPostId() == report.getPostid()) // Filter to get the correct post details
-                        .findFirst()
-                        .map(List::of) // Convert to a single-item list to match the DTO structure
-                        .orElse(List.of()), // If no post found, return an empty list
-                report.getUserid(),
-                report.getNeighbourhoodid(),
-                report.getReportedAt(),
-                report.getReportStatus()
-        )).collect(Collectors.toList());
+        // Fetch post details only for reported posts and map to DTO
+        return reports.stream()
+                .map(report -> {
+                    PostResponseDTO postDetails = postService.getPostById(report.getPostid());
+                    return new ReportDTO(
+                            report.getReportid(),
+                            report.getPostid(),
+                            postDetails == null ? List.of() : List.of(postDetails), // If post is not found, return empty list
+                            report.getUserid(),
+                            report.getNeighbourhoodid(),
+                            report.getReportedAt(),
+                            report.getReportStatus()
+                    );
+                }).collect(Collectors.toList());
     }
 
     @Override
     @Transactional
     public void approvePost(int reportId) {
-        Report report = reportRepository.findById(reportId)
-                .orElseThrow(() -> new RuntimeException("Report not found"));
-
+        Report report = getReportById(reportId);
         report.setReportStatus(Report.ReportStatus.REVIEWED);
         reportRepository.save(report);
     }
@@ -82,10 +71,14 @@ public class ReportServiceImpl implements ReportService {
     @Override
     @Transactional
     public void deletePost(int reportId) {
-        Report report = reportRepository.findById(reportId)
-                .orElseThrow(() -> new RuntimeException("Report not found"));
+        Report report = getReportById(reportId);
         report.setReportStatus(Report.ReportStatus.RESOLVED);
         postRepository.deleteById(report.getPostid());
+    }
 
+    // Helper method to get Report by ID and handle exception in one place
+    private Report getReportById(int reportId) {
+        return reportRepository.findById(reportId)
+                .orElseThrow(() -> new RuntimeException("Report not found"));
     }
 }

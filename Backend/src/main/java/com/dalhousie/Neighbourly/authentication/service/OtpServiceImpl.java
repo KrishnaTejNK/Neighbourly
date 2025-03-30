@@ -18,13 +18,15 @@ public class OtpServiceImpl implements OtpService {
     @Transactional
     @Override
     public Otp generateOtp(Integer userId) {
-        long duration = 1000L * 60 * 10;
-        String ransomStart = "100000";
+        int hours = 60;
+        int sec = 10;
+        long duration = 1000L * hours * sec;
+        long ransomStart = 100000;
         int bound = 900000;
         Optional<Otp> existingOtp = otpRepository.findByUserId(userId);
         existingOtp.ifPresent(this::deleteOtp);
 
-        String otpValue = ransomStart + new Random().nextInt(bound);
+        String otpValue = String.valueOf(ransomStart + new Random().nextInt(bound)) ;
 
         Otp otp = Otp.builder()
                 .otp(otpValue)

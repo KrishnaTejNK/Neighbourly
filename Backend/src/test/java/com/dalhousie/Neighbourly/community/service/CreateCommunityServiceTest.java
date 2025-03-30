@@ -150,11 +150,12 @@ class CreateCommunityServiceTest {
         assertNotNull(response.data());
         assertEquals(TEST_USER_ID, response.data().getUserId());
         assertEquals(0, response.data().getNeighbourhoodId());
-        assertEquals(HelpRequest.RequestStatus.APPROVED, response.data().getStatus());
+        assertEquals(HelpRequest.RequestStatus.DECLINED, response.data().getStatus());  // Expect DECLINED, not APPROVED
         assertEquals("Community creation request denied", response.message());
 
         verify(helpRequestRepository, times(1)).save(helpRequest);
     }
+
 
     @Test
     void testDenyCreateRequest_RequestNotFound() {

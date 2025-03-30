@@ -14,12 +14,22 @@ public class ParkingRentalService {
     @Autowired
     private ParkingRentalRepository parkingRentalRepository;
 
+    // Refactored to enhance readability and reduce complexity
     public List<ParkingRental> getAvailableParkingRentals(int neighbourhoodId) {
-        return parkingRentalRepository.findByNeighbourhoodIdAndStatus(neighbourhoodId, ParkingRental.ParkingRentalStatus.AVAILABLE);
+        return getParkingRentalsByStatus(neighbourhoodId, ParkingRental.ParkingRentalStatus.AVAILABLE);
+    }
+
+    private List<ParkingRental> getParkingRentalsByStatus(int neighbourhoodId, ParkingRental.ParkingRentalStatus status) {
+        return parkingRentalRepository.findByNeighbourhoodIdAndStatus(neighbourhoodId, status);
     }
 
     public ParkingRental createParkingRental(ParkingRentalDTO dto) {
-        ParkingRental rental = ParkingRental.builder()
+        ParkingRental rental = buildParkingRental(dto);
+        return parkingRentalRepository.save(rental);
+    }
+
+    private ParkingRental buildParkingRental(ParkingRentalDTO dto) {
+        return ParkingRental.builder()
                 .neighbourhoodId(dto.getNeighbourhoodId())
                 .userId(dto.getUserId())
                 .spot(dto.getSpot())
@@ -28,7 +38,6 @@ public class ParkingRentalService {
                 .price(dto.getPrice())
                 .status(ParkingRental.ParkingRentalStatus.AVAILABLE)
                 .build();
-
-        return parkingRentalRepository.save(rental);
     }
+
 }

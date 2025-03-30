@@ -27,6 +27,7 @@ public class PostService {
     @Autowired
     private NeighbourhoodRepository neighbourhoodRepository;
 
+    // Refactored method to improve readability and reduce long statements
     public String createPost(PostRequest postRequest) {
         Optional<User> userOpt = userRepository.findByEmail(postRequest.getEmail());
         if (userOpt.isEmpty()) {
@@ -38,40 +39,39 @@ public class PostService {
             return "Neighbourhood not found!";
         }
 
-        Post post = new Post();
-        post.setUser_id(userOpt.get().getId());
-        post.setNeighbourhood_id(neighbourhoodOpt.get().getNeighbourhoodId());
-        post.setPostType(postRequest.getPostType());
-        post.setPostContent(postRequest.getPostContent());
-
+        Post post = buildPost(postRequest, userOpt.get(), neighbourhoodOpt.get());
         postRepository.save(post);
         return "Post created successfully!";
     }
 
-
-    public List<PostResponseDTO> getPostsByNeighbourhood(int neighbourhoodId) {
-        List<Post> posts = postRepository.findAllByNeighbourhoodId(neighbourhoodId);
-
-        return posts.stream().map(post -> {
-            User user = userRepository.findById(post.getUser_id()).orElse(null);
-
-
-            return new PostResponseDTO(
-                    post.getPostId(),
-                    post.getUser_id(),
-                    user != null ? user.getName() : "Unknown User",
-                    post.getPostContent(),
-                    post.getDateTime()
-            );
-        }).collect(Collectors.toList());
+    private Post buildPost(PostRequest postRequest, User user, Neighbourhood neighbourhood) {
+        Post post = new Post();
+        post.setUser_id(user.getId());
+        post.setNeighbourhood_id(neighbourhood.getNeighbourhoodId());
+        post.setPostType(postRequest.getPostType());
+        post.setPostContent(postRequest.getPostContent());
+        return post;
     }
 
-//    // Get all posts for a specific neighborhood
-//    public List<Post> getPostsByNeighbourhood(int neighbourhoodId) {
-//        return postRepository.findByNeighbourhoodId(neighbourhoodId);
-//    }
+    // Refactored method to improve clarity and avoid repeating logic
+    public List<PostResponseDTO> getPostsByNeighbourhood(int neighbourhoodId) {
+        List<Post> posts = postRepository.findAllByNeighbourhoodId(neighbourhoodId);
+        return posts.stream()
+                .map(this::mapPostToPostResponseDTO)
+                .collect(Collectors.toList());
+    }
 
-    // Delete a post
+    private PostResponseDTO mapPostToPostResponseDTO(Post post) {
+        User user = userRepository.findById(post.getUser_id()).orElse(null);
+        return new PostResponseDTO(
+                post.getPostId(),
+                post.getUser_id(),
+                user != null ? user.getName() : "Unknown User",
+                post.getPostContent(),
+                post.getDateTime()
+        );
+    }
+
     public boolean deletePost(int postId) {
         Optional<Post> post = postRepository.findById(postId);
         if (post.isPresent()) {

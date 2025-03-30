@@ -17,106 +17,120 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class CreateCommunityService {
+
     private final HelpRequestService helpRequestService;
     private final HelpRequestRepository helpRequestRepository;
     private final NeighbourhoodRepository neighbourhoodRepository;
     private final UserRepository userRepository;
 
-
     public CommunityResponse storeCreateRequest(HelpRequestDTO dto) {
         return helpRequestService.storeCreateRequest(dto);
     }
 
-
     @Transactional
     public CustomResponseBody<CommunityResponse> approveCreateRequest(int requestId) {
-
         Optional<HelpRequest> requestOptional = helpRequestRepository.findByRequestId(requestId);
         if (requestOptional.isEmpty()) {
-            log.error("Create request with ID {} not found in the database", requestId);
-            return new CustomResponseBody<>(CustomResponseBody.Result.FAILURE, null, "Create request not found");
+            return handleRequestNotFound(requestId);
         }
 
         HelpRequest request = requestOptional.get();
+        if (isNotCreateRequest(request, requestId)) return handleInvalidRequestType(requestId);
 
-        // Verify request type
-        if (request.getRequestType() != HelpRequest.RequestType.CREATE) {
-            log.error("Request ID {} is not a CREATE request, but a {}", requestId, request.getRequestType());
-            return new CustomResponseBody<>(CustomResponseBody.Result.FAILURE, null, "Invalid request type");
-        }
-
-        // Fetch user details
         Optional<User> userOptional = userRepository.findById(request.getUser().getId());
         if (userOptional.isEmpty()) {
             return new CustomResponseBody<>(CustomResponseBody.Result.FAILURE, null, "User not found");
         }
 
         User user = userOptional.get();
+        String[] details = extractDetailsFromDescription(request.getDescription());
+        String location = details[0], phone = details[1], address = details[2];
 
-        // Extract details from description
-        String description = request.getDescription();
+        Neighbourhood savedNeighbourhood = createNewNeighbourhood(location,address);
+
+        updateUserAndSave(user, savedNeighbourhood, phone, address);
+
+        updateRequestStatusToApproved(request);
+
+        CommunityResponse response = new CommunityResponse(user.getId(), savedNeighbourhood.getNeighbourhoodId(), HelpRequest.RequestStatus.APPROVED);
+        return new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS, response, "Community successfully created");
+    }
+
+    private String[] extractDetailsFromDescription(String description) {
         String location = extractDetail(description, "location: ", " | Phone:");
         String phone = extractDetail(description, "Phone: ", " | Address:");
-        String address = extractDetail(description, "Address: ", null); // Last field, no end delimiter
-
-        log.info("Extracted location: {}, phone: {}, address: {}", location, phone, address);
-
-        // Create new neighborhood
-        Neighbourhood neighbourhood = new Neighbourhood();
-        neighbourhood.setLocation(location);
-        neighbourhood.setName(location);
-        Neighbourhood savedNeighbourhood = neighbourhoodRepository.save(neighbourhood);
-
-        // Update user details
-        user.setUserType(UserType.COMMUNITY_MANAGER);
-        user.setNeighbourhood_id(savedNeighbourhood.getNeighbourhoodId());
-        user.setContact(phone);
-        user.setAddress(address);
-        userRepository.save(user);
-
-        // Update request status
-        request.setStatus(HelpRequest.RequestStatus.APPROVED);
-        helpRequestRepository.save(request);
-
-        // Create response
-        CommunityResponse response = new CommunityResponse(user.getId(), savedNeighbourhood.getNeighbourhoodId(), HelpRequest.RequestStatus.APPROVED);
-
-        return new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS, response, "Community successfully created");
+        String address = extractDetail(description, "Address: ", null);
+        return new String[]{location, phone, address};
     }
     private String extractDetail(String description, String startDelimiter, String endDelimiter) {
         int start = description.indexOf(startDelimiter) + startDelimiter.length();
-        if (start == -1) return null; // Return null if not found
+        if (start == -1) return null;
 
         if (endDelimiter == null) {
-            return description.substring(start).trim(); // If no end delimiter, return rest of string
+            return description.substring(start).trim();
         }
 
         int end = description.indexOf(endDelimiter, start);
         return end == -1 ? description.substring(start).trim() : description.substring(start, end).trim();
     }
 
+    private Neighbourhood createNewNeighbourhood( String location,String address) {
+        Neighbourhood neighbourhood = new Neighbourhood();
+        neighbourhood.setLocation(address);
+        neighbourhood.setName(location);
+        return neighbourhoodRepository.save(neighbourhood);
+    }
+
+    private void updateUserAndSave(User user, Neighbourhood savedNeighbourhood, String phone, String address) {
+        user.setUserType(UserType.COMMUNITY_MANAGER);
+        user.setNeighbourhood_id(savedNeighbourhood.getNeighbourhoodId());
+        user.setContact(phone);
+        user.setAddress(address);
+        userRepository.save(user);
+    }
+
+    private void updateRequestStatusToApproved(HelpRequest request) {
+        request.setStatus(HelpRequest.RequestStatus.APPROVED);
+        helpRequestRepository.save(request);
+    }
+
+    private boolean isNotCreateRequest(HelpRequest request, int requestId) {
+        if (request.getRequestType() != HelpRequest.RequestType.CREATE) {
+            log.error("Request ID {} is not a CREATE request, but a {}", requestId, request.getRequestType());
+            return true;
+        }
+        return false;
+    }
+
+    private CustomResponseBody<CommunityResponse> handleRequestNotFound(int requestId) {
+        log.error("Create request with ID {} not found in the database", requestId);
+        return new CustomResponseBody<>(CustomResponseBody.Result.FAILURE, null, "Create request not found");
+    }
+
+    private CustomResponseBody<CommunityResponse> handleInvalidRequestType(int requestId) {
+        log.error("Request ID {} is not a CREATE request", requestId);
+        return new CustomResponseBody<>(CustomResponseBody.Result.FAILURE, null, "Invalid request type");
+    }
+
+
 
     @Transactional
     public CustomResponseBody<CommunityResponse> denyCreateRequest(int requestId) {
-        // Fetch request details
         Optional<HelpRequest> requestOptional = helpRequestRepository.findByRequestId(requestId);
         if (requestOptional.isEmpty()) {
             return new CustomResponseBody<>(CustomResponseBody.Result.FAILURE, null, "Create request not found");
         }
 
         HelpRequest request = requestOptional.get();
-
-        // Update request status to DECLINED
         request.setStatus(HelpRequest.RequestStatus.DECLINED);
         helpRequestRepository.save(request);
-        int initialNeighbourhoodId = 0;
-        // Create response
-        CommunityResponse response = new CommunityResponse(request.getUser().getId(), initialNeighbourhoodId, HelpRequest.RequestStatus.APPROVED);
 
+        CommunityResponse response = new CommunityResponse(request.getUser().getId(), 0, HelpRequest.RequestStatus.DECLINED);
         return new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS, response, "Community creation request denied");
     }
 }

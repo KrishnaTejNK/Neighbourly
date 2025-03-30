@@ -87,4 +87,5 @@ public class ParkingRequestService {
         request.setStatus(ParkingRequest.ParkingRequestStatus.DENIED);
         parkingRequestRepository.save(request);
     }
+
 }
