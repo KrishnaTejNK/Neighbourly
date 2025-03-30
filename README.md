@@ -103,8 +103,7 @@ The **Community Neighborhood Software Application** is a platform designed to fo
 ## Dependencies
 ------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------
-The application consists of a backend built with **Java and Spring Boot**, and a frontend built with **React**. Below are the dependencies required for each part, along with the commands to install or configure them.
-
+The application consists of a backend built with **Java and Spring Boot**, and a frontend built with **React**.
 ---
 
 ## Backend Dependencies
@@ -117,7 +116,7 @@ The backend dependencies are managed by **Gradle** and listed in the `build.grad
 | `spring-boot-starter-web` | * | Web application development (REST APIs, MVC) |
 | `spring-boot-starter-security` | * | Security features (authentication, authorization) |
 | `spring-boot-starter-data-jpa` | * | JPA for database access and ORM |
-| `mysql-connector-j` | 8.3.0 | MySQL database connector |
+| `mysql-connector-j` | 8.3.0 | MySQL <br/>database connector |
 | `h2` | * | In-memory database for testing (runtime only) |
 | `jjwt-api` | 0.11.5 | JWT token handling API |
 | `jjwt-impl` | 0.11.5 | JWT implementation |
@@ -190,8 +189,8 @@ or, if you prefer using Yarn:
 ```bash
 yarn install
 ```
-
 This command installs all dependencies listed in `package.json`, including both runtime and development dependencies. The exact versions are locked in the `package-lock.json` file to ensure consistent builds.
+
 ---
 
 ## Notes
@@ -206,10 +205,9 @@ This command installs all dependencies listed in `package.json`, including both 
 
 ------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------
-Below are detailed build and deployment instructions for an application consisting of a backend built with Java and Spring Boot, and a frontend built with React. These instructions assume you have the necessary tools installed and guide you through the process of building and deploying the application from scratch.
-------------------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------------------
 ## Build and Deployment Instructions
+------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
 
 This application has two main components: a backend (Java/Spring Boot) and a frontend (React). Follow the steps below to build and deploy each part.
 
