@@ -3,15 +3,15 @@ package com.dalhousie.Neighbourly.booking.entity;
 import com.dalhousie.Neighbourly.neighbourhood.entity.Neighbourhood;
 import com.dalhousie.Neighbourly.user.entity.User;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Data
 @Entity
 @Table(name = "booking_requests")
+@NoArgsConstructor
+@AllArgsConstructor
 public class BookingRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,23 +49,6 @@ public class BookingRequest {
 
     @Enumerated(EnumType.STRING)
     private BookingStatus status = BookingStatus.PENDING;
-
-    public BookingRequest(int bookingId, Integer neighbourhood_id, int user_id, int amenity_id, String name, String description, LocalDateTime bookingFrom, LocalDateTime bookingTo, int expectedAttendees, BookingStatus status) {
-        this.bookingId = bookingId;
-        this.neighbourhood_id = neighbourhood_id;
-        this.user_id = user_id;
-        this.amenity_id = amenity_id;
-        this.name = name;
-        this.description = description;
-        this.bookingFrom = bookingFrom;
-        this.bookingTo = bookingTo;
-        this.expectedAttendees = expectedAttendees;
-        this.status = status;
-    }
-
-    public BookingRequest() {
-
-    }
 
 
     // Getters & Setters
