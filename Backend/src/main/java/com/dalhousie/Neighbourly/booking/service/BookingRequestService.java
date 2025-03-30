@@ -29,7 +29,6 @@ public class BookingRequestService {
 
     public BookingRequest createBookingRequest(BookingRequestDTO bookingRequestDTO) {
         BookingRequest bookingRequest = new BookingRequest();
-        System.out.println(bookingRequestDTO);
         User user = userRepository.findById(bookingRequestDTO.getUser_id()).orElseThrow(() -> new RuntimeException("User not found for user"));
         Neighbourhood neighbourhood = neighbourhoodRepository.findById(bookingRequestDTO.getNeighbourhood_id())
                 .orElseThrow(() -> new RuntimeException("Neighbourhood not found"));

@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +28,19 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BookingRequestServiceTest {
+
+    // Constants for magic numbers
+    private static final int USER_ID = 1;
+    private static final int NEIGHBOURHOOD_ID = 101;
+    private static final int AMENITY_ID = 1;
+    private static final String USER_NAME = "John Doe";
+    private static final String NEIGHBOURHOOD_NAME = "Greenwood";
+    private static final String AMENITY_NAME = "Community Hall";
+    private static final String EVENT_NAME = "Birthday Party";
+    private static final String EVENT_DESCRIPTION = "Booking for a birthday celebration";
+    private static final LocalDateTime BOOKING_FROM = LocalDateTime.of(2025, 3, 15, 12, 0, 0, 0);
+    private static final LocalDateTime BOOKING_TO = LocalDateTime.of(2025, 3, 15, 16, 0, 0, 0);
+    private static final int EXPECTED_ATTENDEES = 50;
 
     @Mock
     private BookingRequestRepository bookingRequestRepository;
@@ -52,46 +66,46 @@ class BookingRequestServiceTest {
     @BeforeEach
     void setUp() {
         user = new User();
-        user.setId(1);
-        user.setName("John Doe");
+        user.setId(USER_ID);
+        user.setName(USER_NAME);
 
         neighbourhood = new Neighbourhood();
-        neighbourhood.setNeighbourhoodId(101);
-        neighbourhood.setName("Greenwood");
+        neighbourhood.setNeighbourhoodId(NEIGHBOURHOOD_ID);
+        neighbourhood.setName(NEIGHBOURHOOD_NAME);
 
-        amenity = new Amenity(1, 101, "Community Hall",
-                Timestamp.valueOf("2025-03-15 10:00:00"),
-                Timestamp.valueOf("2025-03-15 20:00:00"),
+        amenity = new Amenity(AMENITY_ID, NEIGHBOURHOOD_ID, AMENITY_NAME,
+                Timestamp.valueOf(BOOKING_FROM),
+                Timestamp.valueOf(BOOKING_TO),
                 Amenity.Status.AVAILABLE);
 
         bookingRequestDTO = new BookingRequestDTO();
-        bookingRequestDTO.setUser_id(1);
-        bookingRequestDTO.setNeighbourhood_id(101);
-        bookingRequestDTO.setAmenityId(1);
-        bookingRequestDTO.setName("Birthday Party");
-        bookingRequestDTO.setDescription("Booking for a birthday celebration");
-        bookingRequestDTO.setBookingFrom(Timestamp.valueOf("2025-03-15 12:00:00").toLocalDateTime());
-        bookingRequestDTO.setBookingTo(Timestamp.valueOf("2025-03-15 16:00:00").toLocalDateTime());
-        bookingRequestDTO.setExpectedAttendees(50);
+        bookingRequestDTO.setUser_id(USER_ID);
+        bookingRequestDTO.setNeighbourhood_id(NEIGHBOURHOOD_ID);
+        bookingRequestDTO.setAmenityId(AMENITY_ID);
+        bookingRequestDTO.setName(EVENT_NAME);
+        bookingRequestDTO.setDescription(EVENT_DESCRIPTION);
+        bookingRequestDTO.setBookingFrom(BOOKING_FROM);
+        bookingRequestDTO.setBookingTo(BOOKING_TO);
+        bookingRequestDTO.setExpectedAttendees(EXPECTED_ATTENDEES);
 
         bookingRequest = new BookingRequest();
         bookingRequest.setBookingId(1);
-        bookingRequest.setUser_id(1);
-        bookingRequest.setNeighbourhood_id(101);
-        bookingRequest.setAmenity_id(1);
-        bookingRequest.setName("Birthday Party");
-        bookingRequest.setDescription("Booking for a birthday celebration");
-        bookingRequest.setBookingFrom(Timestamp.valueOf("2025-03-15 12:00:00").toLocalDateTime());
-        bookingRequest.setBookingTo(Timestamp.valueOf("2025-03-15 16:00:00").toLocalDateTime());
-        bookingRequest.setExpectedAttendees(50);
+        bookingRequest.setUser_id(USER_ID);
+        bookingRequest.setNeighbourhood_id(NEIGHBOURHOOD_ID);
+        bookingRequest.setAmenity_id(AMENITY_ID);
+        bookingRequest.setName(EVENT_NAME);
+        bookingRequest.setDescription(EVENT_DESCRIPTION);
+        bookingRequest.setBookingFrom(BOOKING_FROM);
+        bookingRequest.setBookingTo(BOOKING_TO);
+        bookingRequest.setExpectedAttendees(EXPECTED_ATTENDEES);
         bookingRequest.setStatus(BookingRequest.BookingStatus.PENDING);
     }
 
     @Test
     void testCreateBookingRequest() {
         // Arrange
-        when(userRepository.findById(1)).thenReturn(Optional.of(user));
-        when(neighbourhoodRepository.findById(101)).thenReturn(Optional.of(neighbourhood));
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+        when(neighbourhoodRepository.findById(NEIGHBOURHOOD_ID)).thenReturn(Optional.of(neighbourhood));
         when(bookingRequestRepository.save(any(BookingRequest.class))).thenReturn(bookingRequest);
 
         // Act
@@ -99,48 +113,48 @@ class BookingRequestServiceTest {
 
         // Assert
         assertNotNull(savedBooking);
-        assertEquals(1, savedBooking.getUser_id());
-        assertEquals(101, savedBooking.getNeighbourhood_id());
-        assertEquals(1, savedBooking.getAmenity_id());
-        assertEquals("Birthday Party", savedBooking.getName());
+        assertEquals(USER_ID, savedBooking.getUser_id());
+        assertEquals(NEIGHBOURHOOD_ID, savedBooking.getNeighbourhood_id());
+        assertEquals(AMENITY_ID, savedBooking.getAmenity_id());
+        assertEquals(EVENT_NAME, savedBooking.getName());
         verify(bookingRequestRepository, times(1)).save(any(BookingRequest.class));
     }
 
     @Test
     void testGetBookingsByNeighbourhood() {
         // Arrange
-        when(bookingRequestRepository.findByNeighbourhood_id(101)).thenReturn(Arrays.asList(bookingRequest));
+        when(bookingRequestRepository.findByNeighbourhood_id(NEIGHBOURHOOD_ID)).thenReturn(Arrays.asList(bookingRequest));
 
         // Act
-        List<BookingRequest> bookings = bookingRequestService.getBookingsByNeighbourhood(101);
+        List<BookingRequest> bookings = bookingRequestService.getBookingsByNeighbourhood(NEIGHBOURHOOD_ID);
 
         // Assert
         assertNotNull(bookings);
         assertEquals(1, bookings.size());
-        assertEquals("Birthday Party", bookings.get(0).getName());
-        verify(bookingRequestRepository, times(1)).findByNeighbourhood_id(101);
+        assertEquals(EVENT_NAME, bookings.get(0).getName());
+        verify(bookingRequestRepository, times(1)).findByNeighbourhood_id(NEIGHBOURHOOD_ID);
     }
 
     @Test
     void testGetBookingsByAmenity() {
         // Arrange
-        when(bookingRequestRepository.findByAmenity_id(1)).thenReturn(Arrays.asList(bookingRequest));
+        when(bookingRequestRepository.findByAmenity_id(AMENITY_ID)).thenReturn(Arrays.asList(bookingRequest));
 
         // Act
-        List<BookingRequest> bookings = bookingRequestService.getBookingsByAmenity(1);
+        List<BookingRequest> bookings = bookingRequestService.getBookingsByAmenity(AMENITY_ID);
 
         // Assert
         assertNotNull(bookings);
         assertEquals(1, bookings.size());
-        assertEquals("Birthday Party", bookings.get(0).getName());
-        verify(bookingRequestRepository, times(1)).findByAmenity_id(1);
+        assertEquals(EVENT_NAME, bookings.get(0).getName());
+        verify(bookingRequestRepository, times(1)).findByAmenity_id(AMENITY_ID);
     }
 
     @Test
     void testApproveBooking() {
         // Arrange
         when(bookingRequestRepository.findById(1)).thenReturn(Optional.of(bookingRequest));
-        when(amenityRepository.findById(1)).thenReturn(Optional.of(amenity));
+        when(amenityRepository.findById(AMENITY_ID)).thenReturn(Optional.of(amenity));
         when(bookingRequestRepository.save(any(BookingRequest.class))).thenReturn(bookingRequest);
         when(amenityRepository.save(any(Amenity.class))).thenReturn(amenity);
 
@@ -180,23 +194,24 @@ class BookingRequestServiceTest {
 
         // Assert
         assertNotNull(foundRequest);
-        assertEquals(1, foundRequest.getUser_id ());
-        assertEquals("Birthday Party", foundRequest.getName());
+        assertEquals(USER_ID, foundRequest.getUser_id());
+        assertEquals(EVENT_NAME, foundRequest.getName());
         verify(bookingRequestRepository, times(1)).findById(1);
     }
 
     @Test
     void testGetPendingRequests() {
         // Arrange
-        when(bookingRequestRepository.findByNeighbourhood_idAndStatus(101, BookingRequest.BookingStatus.PENDING)).thenReturn(Arrays.asList(bookingRequest));
+        when(bookingRequestRepository.findByNeighbourhood_idAndStatus(NEIGHBOURHOOD_ID, BookingRequest.BookingStatus.PENDING))
+                .thenReturn(Arrays.asList(bookingRequest));
 
         // Act
-        List<BookingRequest> pendingRequests = bookingRequestService.getPendingRequests(101);
+        List<BookingRequest> pendingRequests = bookingRequestService.getPendingRequests(NEIGHBOURHOOD_ID);
 
         // Assert
         assertNotNull(pendingRequests);
         assertEquals(1, pendingRequests.size());
-        assertEquals("Birthday Party", pendingRequests.get(0).getName());
-        verify(bookingRequestRepository, times(1)).findByNeighbourhood_idAndStatus(101, BookingRequest.BookingStatus.PENDING);
+        assertEquals(EVENT_NAME, pendingRequests.get(0).getName());
+        verify(bookingRequestRepository, times(1)).findByNeighbourhood_idAndStatus(NEIGHBOURHOOD_ID, BookingRequest.BookingStatus.PENDING);
     }
 }

@@ -24,6 +24,15 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class JoinCommunityServiceTest {
 
+    private static final int TEST_REQUEST_ID = 100;
+    private static final int TEST_USER_ID = 1;
+    private static final int TEST_NEIGHBOURHOOD_ID = 10;
+    private static final String TEST_CONTACT = "1234567890";
+    private static final String TEST_ADDRESS = "123 Test St";
+    private static final String TEST_DESCRIPTION = "Phone: 9876543210, Address: 456 Main St";
+    private static final String UPDATED_CONTACT = "9876543210";
+    private static final String UPDATED_ADDRESS = "456 Main St";
+
     @Mock
     private HelpRequestService helpRequestService;
 
@@ -44,50 +53,51 @@ class JoinCommunityServiceTest {
     void setUp() {
         // Create mock user
         user = new User();
-        user.setId(1);
+        user.setId(TEST_USER_ID);
         user.setUserType(UserType.USER);
-        user.setContact("1234567890");
-        user.setAddress("123 Test St");
+        user.setContact(TEST_CONTACT);
+        user.setAddress(TEST_ADDRESS);
 
         // Create mock neighbourhood
         neighbourhood = new Neighbourhood();
-        neighbourhood.setNeighbourhoodId(10);
+        neighbourhood.setNeighbourhoodId(TEST_NEIGHBOURHOOD_ID);
         neighbourhood.setName("Test Community");
         neighbourhood.setLocation("Test City");
 
         // Create mock help request
         helpRequest = new HelpRequest();
-        helpRequest.setRequestId(100);
+        helpRequest.setRequestId(TEST_REQUEST_ID);
         helpRequest.setUser(user);
         helpRequest.setNeighbourhood(neighbourhood);
-        helpRequest.setDescription("Phone: 9876543210, Address: 456 Main St");
+        helpRequest.setDescription(TEST_DESCRIPTION);
         helpRequest.setStatus(HelpRequest.RequestStatus.OPEN);
     }
 
     @Test
     void testApproveJoinRequest_Success() {
-        when(helpRequestRepository.findById(100)).thenReturn(Optional.of(helpRequest));
-        when(userRepository.findById(1)).thenReturn(Optional.of(user));
+        when(helpRequestRepository.findById(TEST_REQUEST_ID)).thenReturn(Optional.of(helpRequest));
+        when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).thenReturn(user);
         when(helpRequestRepository.save(any(HelpRequest.class))).thenReturn(helpRequest);
 
-        CustomResponseBody<CommunityResponse> response = joinCommunityService.approveJoinRequest(100);
+        CustomResponseBody<CommunityResponse> response = joinCommunityService.approveJoinRequest(TEST_REQUEST_ID);
 
         assertNotNull(response);
         assertEquals(CustomResponseBody.Result.SUCCESS, response.result());
         assertEquals(UserType.RESIDENT, user.getUserType());
         assertEquals(neighbourhood.getNeighbourhoodId(), user.getNeighbourhood_id());
-        assertEquals("9876543210", user.getContact());
-        assertEquals("456 Main St", user.getAddress());
+        assertEquals(UPDATED_CONTACT, user.getContact());
+        assertEquals(UPDATED_ADDRESS, user.getAddress());
         assertEquals(HelpRequest.RequestStatus.APPROVED, helpRequest.getStatus());
         verify(userRepository, times(1)).save(user);
         verify(helpRequestRepository, times(1)).save(helpRequest);
     }
+
     @Test
     void testApproveJoinRequest_RequestNotFound() {
-        when(helpRequestRepository.findById(100)).thenReturn(Optional.empty());
+        when(helpRequestRepository.findById(TEST_REQUEST_ID)).thenReturn(Optional.empty());
 
-        CustomResponseBody<CommunityResponse> response = joinCommunityService.approveJoinRequest(100);
+        CustomResponseBody<CommunityResponse> response = joinCommunityService.approveJoinRequest(TEST_REQUEST_ID);
 
         assertNotNull(response);
         assertEquals(CustomResponseBody.Result.FAILURE, response.result());
@@ -95,23 +105,25 @@ class JoinCommunityServiceTest {
         verify(userRepository, never()).save(any());
         verify(helpRequestRepository, never()).save(any());
     }
+
     @Test
     void testDenyJoinRequest_Success() {
-        when(helpRequestRepository.findById(100)).thenReturn(Optional.of(helpRequest));
+        when(helpRequestRepository.findById(TEST_REQUEST_ID)).thenReturn(Optional.of(helpRequest));
         when(helpRequestRepository.save(any(HelpRequest.class))).thenReturn(helpRequest);
 
-        CustomResponseBody<CommunityResponse> response = joinCommunityService.denyJoinRequest(100);
+        CustomResponseBody<CommunityResponse> response = joinCommunityService.denyJoinRequest(TEST_REQUEST_ID);
 
         assertNotNull(response);
         assertEquals(CustomResponseBody.Result.SUCCESS, response.result());
         assertEquals(HelpRequest.RequestStatus.DECLINED, helpRequest.getStatus());
         verify(helpRequestRepository, times(1)).save(helpRequest);
     }
+
     @Test
     void testDenyJoinRequest_RequestNotFound() {
-        when(helpRequestRepository.findById(100)).thenReturn(Optional.empty());
+        when(helpRequestRepository.findById(TEST_REQUEST_ID)).thenReturn(Optional.empty());
 
-        CustomResponseBody<CommunityResponse> response = joinCommunityService.denyJoinRequest(100);
+        CustomResponseBody<CommunityResponse> response = joinCommunityService.denyJoinRequest(TEST_REQUEST_ID);
 
         assertNotNull(response);
         assertEquals(CustomResponseBody.Result.FAILURE, response.result());

@@ -16,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +24,15 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ParkingRequestServiceTest {
+
+    private static final int RENTAL_ID = 1;
+    private static final int OWNER_USER_ID = 1001;
+    private static final int NEIGHBOURHOOD_ID = 2001;
+    private static final int REQUESTER_USER_ID = 3001;
+    private static final BigDecimal RENTAL_PRICE = BigDecimal.valueOf(20.00);
+    private static final String SPOT_NAME = "Brunswick Street";
+    private static final String USER_NAME = "John Doe";
+    private static final String USER_EMAIL = "john.doe@example.com";
 
     @Mock
     private ParkingRequestRepository parkingRequestRepository;
@@ -44,35 +52,35 @@ class ParkingRequestServiceTest {
     @BeforeEach
     void setUp() {
         rental = ParkingRental.builder()
-                .rentalId(1)
-                .userId(1001) // Owner of the rental
-                .neighbourhoodId(2001)
-                .spot("brunswik street")
-                .price(BigDecimal.valueOf(20.00))
+                .rentalId(RENTAL_ID)
+                .userId(OWNER_USER_ID)
+                .neighbourhoodId(NEIGHBOURHOOD_ID)
+                .spot(SPOT_NAME)
+                .price(RENTAL_PRICE)
                 .status(ParkingRental.ParkingRentalStatus.AVAILABLE)
                 .build();
 
         user = User.builder()
-                .id(3001)
-                .name("John Doe")
-                .email("john.doe@example.com")
+                .id(REQUESTER_USER_ID)
+                .name(USER_NAME)
+                .email(USER_EMAIL)
                 .build();
 
         request = new ParkingRequest();
-        request.setRequestId(1);
+        request.setRequestId(RENTAL_ID);
         request.setParkingRental(rental);
         request.setUser(user);
         request.setStatus(ParkingRequest.ParkingRequestStatus.PENDING);
 
         requestDTO = new ParkingRequestDTO();
-        requestDTO.setRentalId(1);
-        requestDTO.setUserId(3001);
+        requestDTO.setRentalId(RENTAL_ID);
+        requestDTO.setUserId(REQUESTER_USER_ID);
     }
 
     @Test
     void testCreateParkingRequest() {
-        when(parkingRentalRepository.findById(1)).thenReturn(Optional.of(rental));
-        when(userRepository.findById(3001)).thenReturn(Optional.of(user));
+        when(parkingRentalRepository.findById(RENTAL_ID)).thenReturn(Optional.of(rental));
+        when(userRepository.findById(REQUESTER_USER_ID)).thenReturn(Optional.of(user));
         when(parkingRequestRepository.save(any(ParkingRequest.class))).thenReturn(request);
 
         parkingRequestService.createParkingRequest(requestDTO);
@@ -82,24 +90,24 @@ class ParkingRequestServiceTest {
 
     @Test
     void testGetParkingRequestsForOwner() {
-        when(parkingRentalRepository.findByUserId(1001)).thenReturn(List.of(rental));
-        when(parkingRequestRepository.findByParkingRental_RentalIdIn(List.of(1))).thenReturn(List.of(request));
+        when(parkingRentalRepository.findByUserId(OWNER_USER_ID)).thenReturn(List.of(rental));
+        when(parkingRequestRepository.findByParkingRental_RentalIdIn(List.of(RENTAL_ID))).thenReturn(List.of(request));
 
-        List<ParkingResponseDTO> requests = parkingRequestService.getParkingRequestsForOwner(1001);
+        List<ParkingResponseDTO> requests = parkingRequestService.getParkingRequestsForOwner(OWNER_USER_ID);
 
         assertNotNull(requests);
         assertEquals(1, requests.size());
         assertEquals(ParkingRequest.ParkingRequestStatus.PENDING.name(), requests.get(0).getStatus());
 
-        verify(parkingRequestRepository, times(1)).findByParkingRental_RentalIdIn(List.of(1));
+        verify(parkingRequestRepository, times(1)).findByParkingRental_RentalIdIn(List.of(RENTAL_ID));
     }
 
     @Test
     void testApproveRequest() {
-        when(parkingRequestRepository.findById(1)).thenReturn(Optional.of(request));
+        when(parkingRequestRepository.findById(RENTAL_ID)).thenReturn(Optional.of(request));
         when(parkingRentalRepository.save(any(ParkingRental.class))).thenReturn(rental);
 
-        parkingRequestService.approveRequest(1);
+        parkingRequestService.approveRequest(RENTAL_ID);
 
         assertEquals(ParkingRequest.ParkingRequestStatus.APPROVED, request.getStatus());
         assertEquals(ParkingRental.ParkingRentalStatus.BOOKED, rental.getStatus());
@@ -110,9 +118,9 @@ class ParkingRequestServiceTest {
 
     @Test
     void testDenyRequest() {
-        when(parkingRequestRepository.findById(1)).thenReturn(Optional.of(request));
+        when(parkingRequestRepository.findById(RENTAL_ID)).thenReturn(Optional.of(request));
 
-        parkingRequestService.denyRequest(1);
+        parkingRequestService.denyRequest(RENTAL_ID);
 
         assertEquals(ParkingRequest.ParkingRequestStatus.DENIED, request.getStatus());
 

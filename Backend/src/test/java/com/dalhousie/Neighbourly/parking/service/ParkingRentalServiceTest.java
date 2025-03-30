@@ -21,6 +21,20 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ParkingRentalServiceTest {
 
+    private static final int NEIGHBOURHOOD_ID = 1001;
+    private static final int USER_ID_1 = 2001;
+    private static final int USER_ID_2 = 2002;
+    private static final int USER_ID_3 = 2003;
+    private static final int RENTAL_ID_1 = 1;
+    private static final int RENTAL_ID_2 = 2;
+    private static final int RENTAL_ID_3 = 3;
+    private static final String SPOT_10 = "10";
+    private static final String SPOT_20 = "20";
+    private static final String SPOT_30 = "30";
+    private static final BigDecimal PRICE_15 = BigDecimal.valueOf(15.00);
+    private static final BigDecimal PRICE_20 = BigDecimal.valueOf(20.00);
+    private static final BigDecimal PRICE_25 = BigDecimal.valueOf(25.00);
+
     @Mock
     private ParkingRentalRepository parkingRentalRepository;
 
@@ -33,56 +47,56 @@ class ParkingRentalServiceTest {
     @BeforeEach
     void setUp() {
         rental1 = ParkingRental.builder()
-                .rentalId(1)
-                .neighbourhoodId(1001)
-                .userId(2001)
-                .spot(String.valueOf(10))
+                .rentalId(RENTAL_ID_1)
+                .neighbourhoodId(NEIGHBOURHOOD_ID)
+                .userId(USER_ID_1)
+                .spot(SPOT_10)
                 .startTime(LocalDateTime.now().plusDays(1))
                 .endTime(LocalDateTime.now().plusDays(2))
-                .price(BigDecimal.valueOf(15.00))
+                .price(PRICE_15)
                 .status(ParkingRental.ParkingRentalStatus.AVAILABLE)
                 .build();
 
         rental2 = ParkingRental.builder()
-                .rentalId(2)
-                .neighbourhoodId(1001)
-                .userId(2002)
-                .spot("20")
+                .rentalId(RENTAL_ID_2)
+                .neighbourhoodId(NEIGHBOURHOOD_ID)
+                .userId(USER_ID_2)
+                .spot(SPOT_20)
                 .startTime(LocalDateTime.now().plusDays(2))
                 .endTime(LocalDateTime.now().plusDays(3))
-                .price(BigDecimal.valueOf(20.00))
+                .price(PRICE_20)
                 .status(ParkingRental.ParkingRentalStatus.AVAILABLE)
                 .build();
 
         rentalDTO = new ParkingRentalDTO();
-        rentalDTO.setNeighbourhoodId(1001);
-        rentalDTO.setUserId(2003);
-        rentalDTO.setSpot(String.valueOf(30));
+        rentalDTO.setNeighbourhoodId(NEIGHBOURHOOD_ID);
+        rentalDTO.setUserId(USER_ID_3);
+        rentalDTO.setSpot(SPOT_30);
         rentalDTO.setStartTime(LocalDateTime.now().plusDays(3));
         rentalDTO.setEndTime(LocalDateTime.now().plusDays(4));
-        rentalDTO.setPrice(BigDecimal.valueOf(25.00));
+        rentalDTO.setPrice(PRICE_25);
     }
 
     @Test
     void testGetAvailableParkingRentals() {
-        when(parkingRentalRepository.findByNeighbourhoodIdAndStatus(1001, ParkingRental.ParkingRentalStatus.AVAILABLE))
+        when(parkingRentalRepository.findByNeighbourhoodIdAndStatus(NEIGHBOURHOOD_ID, ParkingRental.ParkingRentalStatus.AVAILABLE))
                 .thenReturn(Arrays.asList(rental1, rental2));
 
-        List<ParkingRental> availableRentals = parkingRentalService.getAvailableParkingRentals(1001);
+        List<ParkingRental> availableRentals = parkingRentalService.getAvailableParkingRentals(NEIGHBOURHOOD_ID);
 
         assertNotNull(availableRentals);
         assertEquals(2, availableRentals.size());
-        assertEquals("10", availableRentals.get(0).getSpot());
-        assertEquals("20", availableRentals.get(1).getSpot());
+        assertEquals(SPOT_10, availableRentals.get(0).getSpot());
+        assertEquals(SPOT_20, availableRentals.get(1).getSpot());
 
         verify(parkingRentalRepository, times(1))
-                .findByNeighbourhoodIdAndStatus(1001, ParkingRental.ParkingRentalStatus.AVAILABLE);
+                .findByNeighbourhoodIdAndStatus(NEIGHBOURHOOD_ID, ParkingRental.ParkingRentalStatus.AVAILABLE);
     }
 
     @Test
     void testCreateParkingRental() {
         ParkingRental savedRental = ParkingRental.builder()
-                .rentalId(3)
+                .rentalId(RENTAL_ID_3)
                 .neighbourhoodId(rentalDTO.getNeighbourhoodId())
                 .userId(rentalDTO.getUserId())
                 .spot(rentalDTO.getSpot())
@@ -97,9 +111,9 @@ class ParkingRentalServiceTest {
         ParkingRental result = parkingRentalService.createParkingRental(rentalDTO);
 
         assertNotNull(result);
-        assertEquals(3, result.getRentalId());
-        assertEquals("30", result.getSpot());
-        assertEquals(BigDecimal.valueOf(25.00), result.getPrice());
+        assertEquals(RENTAL_ID_3, result.getRentalId());
+        assertEquals(SPOT_30, result.getSpot());
+        assertEquals(PRICE_25, result.getPrice());
 
         verify(parkingRentalRepository, times(1)).save(any(ParkingRental.class));
     }

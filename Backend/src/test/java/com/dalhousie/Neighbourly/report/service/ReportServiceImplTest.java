@@ -26,6 +26,11 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ReportServiceImplTest {
 
+    private static final int SAMPLE_USER_ID = 1;
+    private static final int SAMPLE_POST_ID = 100;
+    private static final int SAMPLE_NEIGHBOURHOOD_ID = 50;
+    private static final int SAMPLE_REPORT_ID = 1;
+
     @Mock
     private ReportRepository reportRepository;
 
@@ -48,19 +53,19 @@ class ReportServiceImplTest {
     @BeforeEach
     void setUp() {
         user = new User();
-        user.setId(1);
+        user.setId(SAMPLE_USER_ID);
         user.setName("John Doe");
 
         post = new Post();
-        post.setPostId(100);
+        post.setPostId(SAMPLE_POST_ID);
         post.setUser_id(user.getId());
         post.setPostContent("Test post content");
 
         report = new Report();
-        report.setReportid(1);
+        report.setReportid(SAMPLE_REPORT_ID);
         report.setUserid(user.getId());
         report.setPostid(post.getPostId());
-        report.setNeighbourhoodid(50);
+        report.setNeighbourhoodid(SAMPLE_NEIGHBOURHOOD_ID);
         report.setReportedAt(LocalDateTime.now());
         report.setReportStatus(Report.ReportStatus.PENDING);
     }
@@ -69,33 +74,33 @@ class ReportServiceImplTest {
     void testReportPost() {
         when(reportRepository.save(any(Report.class))).thenReturn(report);
 
-        assertDoesNotThrow(() -> reportService.reportPost(50, 100, 1));
+        assertDoesNotThrow(() -> reportService.reportPost(SAMPLE_NEIGHBOURHOOD_ID, SAMPLE_POST_ID, SAMPLE_USER_ID));
 
         verify(reportRepository, times(1)).save(any(Report.class));
     }
 
     @Test
     void testGetReportedPosts() {
-        when(reportRepository.findByPost_NeighbourhoodId(50)).thenReturn(List.of(report));
+        when(reportRepository.findByPost_NeighbourhoodId(SAMPLE_NEIGHBOURHOOD_ID)).thenReturn(List.of(report));
 
         // Create mock PostResponseDTO
         PostResponseDTO postResponseDTO = new PostResponseDTO(post.getPostId(), post.getPostContent());
         when(postService.getPostById(report.getPostid())).thenReturn(postResponseDTO);
 
-        List<ReportDTO> reportDTOS = reportService.getReportedPosts(50);
+        List<ReportDTO> reportDTOS = reportService.getReportedPosts(SAMPLE_NEIGHBOURHOOD_ID);
 
         assertFalse(reportDTOS.isEmpty());
         assertEquals(1, reportDTOS.size());
         assertEquals(post.getPostId(), reportDTOS.get(0).getPostId());
-        verify(reportRepository, times(1)).findByPost_NeighbourhoodId(50);
+        verify(reportRepository, times(1)).findByPost_NeighbourhoodId(SAMPLE_NEIGHBOURHOOD_ID);
         verify(postService, times(1)).getPostById(report.getPostid());
     }
 
     @Test
     void testApprovePost() {
-        when(reportRepository.findById(1)).thenReturn(Optional.of(report));
+        when(reportRepository.findById(SAMPLE_REPORT_ID)).thenReturn(Optional.of(report));
 
-        assertDoesNotThrow(() -> reportService.approvePost(1));
+        assertDoesNotThrow(() -> reportService.approvePost(SAMPLE_REPORT_ID));
 
         assertEquals(Report.ReportStatus.REVIEWED, report.getReportStatus());
         verify(reportRepository, times(1)).save(report);
@@ -103,9 +108,9 @@ class ReportServiceImplTest {
 
     @Test
     void testDeletePost() {
-        when(reportRepository.findById(1)).thenReturn(Optional.of(report));
+        when(reportRepository.findById(SAMPLE_REPORT_ID)).thenReturn(Optional.of(report));
 
-        assertDoesNotThrow(() -> reportService.deletePost(1));
+        assertDoesNotThrow(() -> reportService.deletePost(SAMPLE_REPORT_ID));
 
         assertEquals(Report.ReportStatus.RESOLVED, report.getReportStatus());
         verify(postRepository, times(1)).deleteById(report.getPostid());
