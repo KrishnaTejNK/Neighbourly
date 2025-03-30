@@ -219,12 +219,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public String getURL(HttpServletRequest request) {String siteURL = request.getRequestURL().toString().replace(request.getServletPath(), "");
+        int port = 3000;
         try {
             java.net.URL oldURL = new java.net.URL(siteURL);
 
             // URL for the local environment
             if ("localhost".equalsIgnoreCase(oldURL.getHost())) {
-                return new java.net.URL(oldURL.getProtocol(), oldURL.getHost(), 3000, oldURL.getFile()).toString();
+                return new java.net.URL(oldURL.getProtocol(), oldURL.getHost(), port, oldURL.getFile()).toString();
             }
 
             // URL for the production environment

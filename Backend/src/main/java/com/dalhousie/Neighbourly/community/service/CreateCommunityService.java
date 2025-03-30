@@ -110,18 +110,12 @@ public class CreateCommunityService {
 
         HelpRequest request = requestOptional.get();
 
-// Extract the pincode from the description
-        String description = request.getDescription();
-        String pincode = description.substring(description.lastIndexOf("pincode: ") + 9).trim();
-
-// Extract location part from the description
-        String locationPart = description.split("location: ")[1].split(" with pincode")[0].trim();
         // Update request status to DECLINED
         request.setStatus(HelpRequest.RequestStatus.DECLINED);
         helpRequestRepository.save(request);
-
+        int initialNeighbourhoodId = 0;
         // Create response
-        CommunityResponse response = new CommunityResponse(request.getUser().getId(), 0, HelpRequest.RequestStatus.APPROVED);
+        CommunityResponse response = new CommunityResponse(request.getUser().getId(), initialNeighbourhoodId, HelpRequest.RequestStatus.APPROVED);
 
         return new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS, response, "Community creation request denied");
     }
