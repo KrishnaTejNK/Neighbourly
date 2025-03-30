@@ -21,7 +21,7 @@ const CommunityManagerAmenities = () => {
   const handleViewProfile = async (userId) => {
     try {
       const response = await axios.get(
-        `http://localhost:8081/api/user/details/${userId}`
+        `${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_USER_DETAILS}/${userId}`
       );
       const user = response.data;
       const email = user.email;
@@ -35,19 +35,19 @@ const CommunityManagerAmenities = () => {
   const fetchAmenities = useCallback(async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8081/api/amenities/${neighbourhoodId}`
+        `${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_AMENITIES}`
       );
       setAmenities(response.data);
     } catch (error) {
       console.error("Error fetching amenities:", error);
     }
-  }, [neighbourhoodId]); // Only re-create when neighbourhoodId changes
+  }, []); // Only re-create when neighbourhoodId changes
 
   // Refactored fetchBookingRequests using useCallback
   const fetchBookingRequests = useCallback(async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8081/api/booking-requests/${neighbourhoodId}`
+        `${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_BOOKING_REQUESTS}/${neighbourhoodId}`
       );
       setBookingRequests(response.data);
     } catch (error) {
@@ -63,7 +63,7 @@ const CommunityManagerAmenities = () => {
   const handleApprove = async (bookingId, amenityId) => {
     try {
       await axios.put(
-        `http://localhost:8081/api/booking-requests/approve/${bookingId}`
+        `${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_BOOKING_REQUESTS_APPROVE}/${bookingId}`
       );
       setBookingRequests(
         bookingRequests.filter((request) => request.bookingId !== bookingId)
@@ -89,7 +89,7 @@ const CommunityManagerAmenities = () => {
   const handleDeny = async (bookingId) => {
     try {
       await axios.put(
-        `http://localhost:8081/api/booking-requests/deny/${bookingId}`
+        `${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_BOOKING_REQUESTS_DENY}/${bookingId}`
       );
       setBookingRequests(
         bookingRequests.filter((request) => request.bookingId !== bookingId)
@@ -106,7 +106,7 @@ const CommunityManagerAmenities = () => {
 
   const handleDelete = async (amenityId) => {
     try {
-      await axios.delete(`http://localhost:8081/api/amenities/${amenityId}`);
+      await axios.delete(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_AMENITIES}/${amenityId}`);
       setAmenities(
         amenities.filter((amenity) => amenity.amenityId !== amenityId)
       );
@@ -122,7 +122,7 @@ const CommunityManagerAmenities = () => {
   const handleCreateAmenity = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:8081/api/amenities", {
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_AMENITIES}`, {
         ...newAmenity,
         neighbourhoodId,
       });

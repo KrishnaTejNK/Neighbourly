@@ -11,14 +11,14 @@ spring:
 #    username: ${PROD_DB_USER}
 #    password: ${PROD_DB_PASSWORD}
   datasource:
-    url: jdbc:mysql://localhost:3306/neighbourly
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: root
-#    url: jdbc:mysql://db-5308.cs.dal.ca/CSCI5308_4_DEVINT
+#    url: jdbc:mysql://localhost:3306/neighbourly
 #    driver-class-name: com.mysql.cj.jdbc.Driver
-#    username: ${DEVINT_DB_USER}
-#    password: ${DEVINT_DB_PASSWORD}
+#    username: root
+#    password: root
+    url: jdbc:mysql://db-5308.cs.dal.ca/CSCI5308_4_DEVINT
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DEVINT_DB_USER}
+    password: ${DEVINT_DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
