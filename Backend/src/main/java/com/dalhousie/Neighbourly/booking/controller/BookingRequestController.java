@@ -3,49 +3,44 @@ package com.dalhousie.Neighbourly.booking.controller;
 import com.dalhousie.Neighbourly.amenity.dto.BookingRequestDTO;
 import com.dalhousie.Neighbourly.booking.entity.BookingRequest;
 import com.dalhousie.Neighbourly.booking.service.BookingRequestService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/booking-requests")
 public class BookingRequestController {
-    @Autowired
-    private BookingRequestService bookingRequestService;
+
+    private final BookingRequestService bookingRequestService;
+
+
 
     @PostMapping("/create")
     public ResponseEntity<BookingRequest> createBookingRequest(@RequestBody BookingRequestDTO bookingRequestDTO) {
         BookingRequest savedRequest = bookingRequestService.createBookingRequest(bookingRequestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedRequest);
+        return ResponseEntity.status(201).body(savedRequest);
     }
 
     @GetMapping("/{neighbourhoodId}")
     public ResponseEntity<List<BookingRequest>> getBookingsByNeighbourhood(@PathVariable int neighbourhoodId) {
-        return ResponseEntity.ok(bookingRequestService.getPendingRequests(neighbourhoodId));
+        List<BookingRequest> bookings = bookingRequestService.getPendingRequests(neighbourhoodId);
+        return ResponseEntity.ok(bookings);
     }
+
     @PutMapping("/approve/{bookingId}")
     public ResponseEntity<String> approveBooking(@PathVariable int bookingId) {
-        boolean success = bookingRequestService.approveBooking(bookingId);
-        if (success) {
-            return ResponseEntity.ok("Booking approved successfully.");
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to approve booking.");
-        }
+        return bookingRequestService.approveBooking(bookingId)
+                ? ResponseEntity.ok("Booking approved successfully.")
+                : ResponseEntity.badRequest().body("Failed to approve booking.");
     }
 
     @PutMapping("/deny/{bookingId}")
     public ResponseEntity<String> denyBooking(@PathVariable int bookingId) {
-        boolean success = bookingRequestService.denyBooking(bookingId);
-        if (success) {
-            return ResponseEntity.ok("Booking request denied.");
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to deny booking.");
-        }
+        return bookingRequestService.denyBooking(bookingId)
+                ? ResponseEntity.ok("Booking request denied.")
+                : ResponseEntity.badRequest().body("Failed to deny booking.");
     }
-
-
 }
-
