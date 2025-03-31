@@ -17,7 +17,7 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:3000") // Allow frontend calls
 @RequiredArgsConstructor
 public class ParkingRequestController {
-
+    private static final int SUCCESS_STATUS = 201;
     private final ParkingRequestService parkingRequestService;
 
     /**
@@ -27,8 +27,9 @@ public class ParkingRequestController {
      */
     @PostMapping
     public ResponseEntity<String> createParkingRequest(@RequestBody ParkingRequestDTO parkingRequestDTO) {
+
         parkingRequestService.createParkingRequest(parkingRequestDTO);
-        return ResponseEntity.status(201).body("Parking request created successfully.");
+        return ResponseEntity.status(SUCCESS_STATUS).body("Parking request created successfully.");
     }
 
     /**

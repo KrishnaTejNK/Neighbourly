@@ -16,12 +16,12 @@ public class BookingRequestController {
 
     private final BookingRequestService bookingRequestService;
 
-
+    private static final int SUCCESS_STATUS = 201;
 
     @PostMapping("/create")
     public ResponseEntity<BookingRequest> createBookingRequest(@RequestBody BookingRequestDTO bookingRequestDTO) {
         BookingRequest savedRequest = bookingRequestService.createBookingRequest(bookingRequestDTO);
-        return ResponseEntity.status(201).body(savedRequest);
+        return ResponseEntity.status(SUCCESS_STATUS).body(savedRequest);
     }
 
     @GetMapping("/{neighbourhoodId}")

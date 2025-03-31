@@ -31,6 +31,14 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class ParkingRequestServiceImplTest {
 
+    private static final int TEST_USER_ID = 1;
+    private static final int TEST_RENTAL_ID = 2;
+    private static final int TEST_OWNER_ID = 3;
+    private static final int TEST_REQUEST_ID = 1;
+    private static final int MISSING_REQUEST_ID = 999;
+    private static final int EXPECTED_LIST_SIZE = 1;
+    private static final int EXPECTED_CALL_COUNT = 1;
+
     @Mock
     private ParkingRequestRepository parkingRequestRepository;
 
@@ -51,113 +59,108 @@ public class ParkingRequestServiceImplTest {
     @BeforeEach
     void setUp() {
         testUser = new User();
-        testUser.setId(1);
+        testUser.setId(TEST_USER_ID);
         testUser.setName("Test User");
 
         testRental = new ParkingRental();
-        testRental.setRentalId(2);
-        testRental.setUserId(3); // Owner
+        testRental.setRentalId(TEST_RENTAL_ID);
+        testRental.setUserId(TEST_OWNER_ID); // Owner
         testRental.setSpot("Spot A");
         testRental.setStatus(ParkingRentalStatus.AVAILABLE);
 
         testRequest = new ParkingRequest();
-        testRequest.setRequestId(1);
+        testRequest.setRequestId(TEST_REQUEST_ID);
         testRequest.setUser(testUser);
         testRequest.setParkingRental(testRental);
         testRequest.setStatus(ParkingRequestStatus.PENDING);
 
         testRequestDTO = new ParkingRequestDTO();
-        testRequestDTO.setUserId(1);
-        testRequestDTO.setRentalId(2);
+        testRequestDTO.setUserId(TEST_USER_ID);
+        testRequestDTO.setRentalId(TEST_RENTAL_ID);
     }
 
     @Test
     void createParkingRequest_successful() {
         // Arrange
-        when(userRepository.findById(1)).thenReturn(Optional.of(testUser));
-        when(parkingRentalRepository.findById(2)).thenReturn(Optional.of(testRental));
+        when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
+        when(parkingRentalRepository.findById(TEST_RENTAL_ID)).thenReturn(Optional.of(testRental));
         when(parkingRequestRepository.save(any(ParkingRequest.class))).thenReturn(testRequest);
 
         // Act
         parkingRequestService.createParkingRequest(testRequestDTO);
 
         // Assert
-        verify(userRepository, times(1)).findById(1);
-        verify(parkingRentalRepository, times(1)).findById(2);
-        verify(parkingRequestRepository, times(1)).save(any(ParkingRequest.class));
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).findById(TEST_USER_ID);
+        verify(parkingRentalRepository, times(EXPECTED_CALL_COUNT)).findById(TEST_RENTAL_ID);
+        verify(parkingRequestRepository, times(EXPECTED_CALL_COUNT)).save(any(ParkingRequest.class));
     }
-
 
     @Test
     void getParkingRequestsForOwner_returnsRequests() {
         // Arrange
-        int ownerId = 3;
-        when(parkingRentalRepository.findByUserId(ownerId)).thenReturn(List.of(testRental));
-        when(parkingRequestRepository.findByParkingRental_RentalIdIn(List.of(2))).thenReturn(List.of(testRequest));
+        when(parkingRentalRepository.findByUserId(TEST_OWNER_ID)).thenReturn(List.of(testRental));
+        when(parkingRequestRepository.findByParkingRental_RentalIdIn(List.of(TEST_RENTAL_ID))).thenReturn(List.of(testRequest));
 
         // Act
-        List<ParkingResponseDTO> result = parkingRequestService.getParkingRequestsForOwner(ownerId);
+        List<ParkingResponseDTO> result = parkingRequestService.getParkingRequestsForOwner(TEST_OWNER_ID);
 
         // Assert
         assertNotNull(result);
-        assertEquals(1, result.size());
+        assertEquals(EXPECTED_LIST_SIZE, result.size());
         ParkingResponseDTO dto = result.get(0);
-        assertEquals(1, dto.getRequestId());
-        assertEquals(2, dto.getRentalId());
-        assertEquals(1, dto.getUserId());
+        assertEquals(TEST_REQUEST_ID, dto.getRequestId());
+        assertEquals(TEST_RENTAL_ID, dto.getRentalId());
+        assertEquals(TEST_USER_ID, dto.getUserId());
         assertEquals("PENDING", dto.getStatus());
         assertEquals("Test User", dto.getName());
         assertEquals("Spot A", dto.getSpot());
-        verify(parkingRentalRepository, times(1)).findByUserId(ownerId);
-        verify(parkingRequestRepository, times(1)).findByParkingRental_RentalIdIn(List.of(2));
+        verify(parkingRentalRepository, times(EXPECTED_CALL_COUNT)).findByUserId(TEST_OWNER_ID);
+        verify(parkingRequestRepository, times(EXPECTED_CALL_COUNT)).findByParkingRental_RentalIdIn(List.of(TEST_RENTAL_ID));
     }
 
     @Test
     void getParkingRequestsForOwner_noRentals_returnsEmptyList() {
         // Arrange
-        int ownerId = 3;
-        when(parkingRentalRepository.findByUserId(ownerId)).thenReturn(Collections.emptyList());
+        when(parkingRentalRepository.findByUserId(TEST_OWNER_ID)).thenReturn(Collections.emptyList());
 
         // Act
-        List<ParkingResponseDTO> result = parkingRequestService.getParkingRequestsForOwner(ownerId);
+        List<ParkingResponseDTO> result = parkingRequestService.getParkingRequestsForOwner(TEST_OWNER_ID);
 
         // Assert
         assertNotNull(result);
         assertTrue(result.isEmpty());
-        verify(parkingRentalRepository, times(1)).findByUserId(ownerId);
+        verify(parkingRentalRepository, times(EXPECTED_CALL_COUNT)).findByUserId(TEST_OWNER_ID);
         verify(parkingRequestRepository, never()).findByParkingRental_RentalIdIn(any());
     }
 
     @Test
     void approveRequest_successful() {
         // Arrange
-        int requestId = 1;
-        when(parkingRequestRepository.findById(requestId)).thenReturn(Optional.of(testRequest));
+        when(parkingRequestRepository.findById(TEST_REQUEST_ID)).thenReturn(Optional.of(testRequest));
         when(parkingRequestRepository.save(any(ParkingRequest.class))).thenReturn(testRequest);
         when(parkingRentalRepository.save(any(ParkingRental.class))).thenReturn(testRental);
 
         // Act
-        parkingRequestService.approveRequest(requestId);
+        parkingRequestService.approveRequest(TEST_REQUEST_ID);
 
         // Assert
         assertEquals(ParkingRequestStatus.APPROVED, testRequest.getStatus());
         assertEquals(ParkingRentalStatus.BOOKED, testRental.getStatus());
-        verify(parkingRequestRepository, times(1)).findById(requestId);
-        verify(parkingRequestRepository, times(1)).save(testRequest);
-        verify(parkingRentalRepository, times(1)).save(testRental);
+        verify(parkingRequestRepository, times(EXPECTED_CALL_COUNT)).findById(TEST_REQUEST_ID);
+        verify(parkingRequestRepository, times(EXPECTED_CALL_COUNT)).save(testRequest);
+        verify(parkingRentalRepository, times(EXPECTED_CALL_COUNT)).save(testRental);
     }
 
     @Test
     void approveRequest_requestNotFound_throwsException() {
         // Arrange
-        int requestId = 999;
-        when(parkingRequestRepository.findById(requestId)).thenReturn(Optional.empty());
+        when(parkingRequestRepository.findById(MISSING_REQUEST_ID)).thenReturn(Optional.empty());
 
         // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> parkingRequestService.approveRequest(requestId));
+                () -> parkingRequestService.approveRequest(MISSING_REQUEST_ID));
         assertEquals("Request not found", exception.getMessage());
-        verify(parkingRequestRepository, times(1)).findById(requestId);
+        verify(parkingRequestRepository, times(EXPECTED_CALL_COUNT)).findById(MISSING_REQUEST_ID);
         verify(parkingRequestRepository, never()).save(any());
         verify(parkingRentalRepository, never()).save(any());
     }
@@ -165,31 +168,29 @@ public class ParkingRequestServiceImplTest {
     @Test
     void denyRequest_successful() {
         // Arrange
-        int requestId = 1;
-        when(parkingRequestRepository.findById(requestId)).thenReturn(Optional.of(testRequest));
+        when(parkingRequestRepository.findById(TEST_REQUEST_ID)).thenReturn(Optional.of(testRequest));
         when(parkingRequestRepository.save(any(ParkingRequest.class))).thenReturn(testRequest);
 
         // Act
-        parkingRequestService.denyRequest(requestId);
+        parkingRequestService.denyRequest(TEST_REQUEST_ID);
 
         // Assert
         assertEquals(ParkingRequestStatus.DENIED, testRequest.getStatus());
-        verify(parkingRequestRepository, times(1)).findById(requestId);
-        verify(parkingRequestRepository, times(1)).save(testRequest);
+        verify(parkingRequestRepository, times(EXPECTED_CALL_COUNT)).findById(TEST_REQUEST_ID);
+        verify(parkingRequestRepository, times(EXPECTED_CALL_COUNT)).save(testRequest);
         verify(parkingRentalRepository, never()).save(any());
     }
 
     @Test
     void denyRequest_requestNotFound_throwsException() {
         // Arrange
-        int requestId = 999;
-        when(parkingRequestRepository.findById(requestId)).thenReturn(Optional.empty());
+        when(parkingRequestRepository.findById(MISSING_REQUEST_ID)).thenReturn(Optional.empty());
 
         // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> parkingRequestService.denyRequest(requestId));
+                () -> parkingRequestService.denyRequest(MISSING_REQUEST_ID));
         assertEquals("Request not found", exception.getMessage());
-        verify(parkingRequestRepository, times(1)).findById(requestId);
+        verify(parkingRequestRepository, times(EXPECTED_CALL_COUNT)).findById(MISSING_REQUEST_ID);
         verify(parkingRequestRepository, never()).save(any());
         verify(parkingRentalRepository, never()).save(any());
     }

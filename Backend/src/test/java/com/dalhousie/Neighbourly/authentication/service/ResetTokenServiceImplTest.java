@@ -17,6 +17,12 @@ import static org.mockito.Mockito.*;
 
 class ResetTokenServiceImplTest {
 
+    private static final int TEST_USER_ID = 1;
+    private static final long TOKEN_EXPIRY_DURATION_MS = 10 * 60 * 1000L; // 10 minutes
+    private static final long TOKEN_ALREADY_EXPIRED_MS = 1000L; // 1 second
+    private static final String EXPIRED_TOKEN_MESSAGE = "Token has expired.";
+    private static final int EXPECTED_CALL_COUNT = 1;
+
     @Mock
     private PasswordResetTokenRepository passwordResetTokenRepository;
 
@@ -24,11 +30,6 @@ class ResetTokenServiceImplTest {
     private ResetTokenServiceImpl resetTokenService;
 
     private PasswordReset passwordReset;
-
-    private static final int TEST_USER_ID = 1;
-    private static final long TOKEN_EXPIRY_DURATION_MS = 10 * 60 * 1000L; // 10 minutes
-    private static final long TOKEN_ALREADY_EXPIRED_MS = 1000L; // 1 second
-    private static final String EXPIRED_TOKEN_MESSAGE = "Token has expired.";
 
     @BeforeEach
     void setUp() {
@@ -53,7 +54,7 @@ class ResetTokenServiceImplTest {
         assertNotNull(createdToken.getToken());
         assertTrue(createdToken.getExpiryDate().isAfter(Instant.now()));
 
-        verify(passwordResetTokenRepository, times(1)).save(any(PasswordReset.class));
+        verify(passwordResetTokenRepository, times(EXPECTED_CALL_COUNT)).save(any(PasswordReset.class));
     }
 
     @Test
@@ -63,8 +64,8 @@ class ResetTokenServiceImplTest {
 
         PasswordReset createdToken = resetTokenService.createResetPasswordToken(TEST_USER_ID);
 
-        verify(passwordResetTokenRepository, times(1)).delete(any(PasswordReset.class));
-        verify(passwordResetTokenRepository, times(1)).save(any(PasswordReset.class));
+        verify(passwordResetTokenRepository, times(EXPECTED_CALL_COUNT)).delete(any(PasswordReset.class));
+        verify(passwordResetTokenRepository, times(EXPECTED_CALL_COUNT)).save(any(PasswordReset.class));
     }
 
     @Test
@@ -83,7 +84,7 @@ class ResetTokenServiceImplTest {
 
         resetTokenService.deleteResetPasswordToken(passwordReset);
 
-        verify(passwordResetTokenRepository, times(1)).delete(passwordReset);
+        verify(passwordResetTokenRepository, times(EXPECTED_CALL_COUNT)).delete(passwordReset);
     }
 
     @Test

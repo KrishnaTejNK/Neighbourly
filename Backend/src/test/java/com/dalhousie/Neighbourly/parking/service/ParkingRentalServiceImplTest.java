@@ -21,6 +21,16 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ParkingRentalServiceImplTest {
 
+    private static final int TEST_NEIGHBOURHOOD_ID = 1;
+    private static final int TEST_USER_ID = 1;
+    private static final int TEST_RENTAL_ID = 1;
+    private static final int EXPECTED_LIST_SIZE = 1;
+    private static final int EXPECTED_CALL_COUNT = 1;
+    private static final String TEST_SPOT = "A1";
+    private static final LocalDateTime TEST_START_TIME = LocalDateTime.of(2025, 4, 1, 10, 0);
+    private static final LocalDateTime TEST_END_TIME = LocalDateTime.of(2025, 4, 1, 12, 0);
+    private static final BigDecimal TEST_PRICE = BigDecimal.valueOf(10.0);
+
     @Mock
     private ParkingRentalRepository parkingRentalRepository;
 
@@ -33,21 +43,21 @@ class ParkingRentalServiceImplTest {
     @BeforeEach
     void setUp() {
         testDto = new ParkingRentalDTO();
-        testDto.setNeighbourhoodId(1);
-        testDto.setUserId(1);
-        testDto.setSpot("A1");
-        testDto.setStartTime(LocalDateTime.of(2025, 4, 1, 10, 0));
-        testDto.setEndTime(LocalDateTime.of(2025, 4, 1, 12, 0));
-        testDto.setPrice(BigDecimal.valueOf(10.0));
+        testDto.setNeighbourhoodId(TEST_NEIGHBOURHOOD_ID);
+        testDto.setUserId(TEST_USER_ID);
+        testDto.setSpot(TEST_SPOT);
+        testDto.setStartTime(TEST_START_TIME);
+        testDto.setEndTime(TEST_END_TIME);
+        testDto.setPrice(TEST_PRICE);
 
         testRental = ParkingRental.builder()
-                .rentalId(1)
-                .neighbourhoodId(1)
-                .userId(1)
-                .spot("A1")
-                .startTime(LocalDateTime.of(2025, 4, 1, 10, 0))
-                .endTime(LocalDateTime.of(2025, 4, 1, 12, 0))
-                .price(BigDecimal.valueOf(10.0))
+                .rentalId(TEST_RENTAL_ID)
+                .neighbourhoodId(TEST_NEIGHBOURHOOD_ID)
+                .userId(TEST_USER_ID)
+                .spot(TEST_SPOT)
+                .startTime(TEST_START_TIME)
+                .endTime(TEST_END_TIME)
+                .price(TEST_PRICE)
                 .status(ParkingRentalStatus.AVAILABLE)
                 .build();
     }
@@ -55,25 +65,25 @@ class ParkingRentalServiceImplTest {
     @Test
     void getAvailableParkingRentals_returnsAvailableRentals() {
         List<ParkingRental> expectedRentals = List.of(testRental);
-        when(parkingRentalRepository.findByNeighbourhoodIdAndStatus(1, ParkingRentalStatus.AVAILABLE))
+        when(parkingRentalRepository.findByNeighbourhoodIdAndStatus(TEST_NEIGHBOURHOOD_ID, ParkingRentalStatus.AVAILABLE))
                 .thenReturn(expectedRentals);
 
-        List<ParkingRental> result = parkingRentalService.getAvailableParkingRentals(1);
+        List<ParkingRental> result = parkingRentalService.getAvailableParkingRentals(TEST_NEIGHBOURHOOD_ID);
 
-        assertEquals(1, result.size());
+        assertEquals(EXPECTED_LIST_SIZE, result.size());
         assertEquals(testRental, result.get(0));
-        verify(parkingRentalRepository).findByNeighbourhoodIdAndStatus(1, ParkingRentalStatus.AVAILABLE);
+        verify(parkingRentalRepository, times(EXPECTED_CALL_COUNT)).findByNeighbourhoodIdAndStatus(TEST_NEIGHBOURHOOD_ID, ParkingRentalStatus.AVAILABLE);
     }
 
     @Test
     void getAvailableParkingRentals_noRentals_returnsEmptyList() {
-        when(parkingRentalRepository.findByNeighbourhoodIdAndStatus(1, ParkingRentalStatus.AVAILABLE))
+        when(parkingRentalRepository.findByNeighbourhoodIdAndStatus(TEST_NEIGHBOURHOOD_ID, ParkingRentalStatus.AVAILABLE))
                 .thenReturn(List.of());
 
-        List<ParkingRental> result = parkingRentalService.getAvailableParkingRentals(1);
+        List<ParkingRental> result = parkingRentalService.getAvailableParkingRentals(TEST_NEIGHBOURHOOD_ID);
 
         assertTrue(result.isEmpty());
-        verify(parkingRentalRepository).findByNeighbourhoodIdAndStatus(1, ParkingRentalStatus.AVAILABLE);
+        verify(parkingRentalRepository, times(EXPECTED_CALL_COUNT)).findByNeighbourhoodIdAndStatus(TEST_NEIGHBOURHOOD_ID, ParkingRentalStatus.AVAILABLE);
     }
 
     @Test
@@ -83,7 +93,7 @@ class ParkingRentalServiceImplTest {
         ParkingRental result = parkingRentalService.createParkingRental(testDto);
 
         assertNotNull(result);
-        assertEquals(testRental.getRentalId(), result.getRentalId());
+        assertEquals(TEST_RENTAL_ID, result.getRentalId());
         assertEquals(testDto.getNeighbourhoodId(), result.getNeighbourhoodId());
         assertEquals(testDto.getUserId(), result.getUserId());
         assertEquals(testDto.getSpot(), result.getSpot());
@@ -91,26 +101,28 @@ class ParkingRentalServiceImplTest {
         assertEquals(testDto.getEndTime(), result.getEndTime());
         assertEquals(testDto.getPrice(), result.getPrice());
         assertEquals(ParkingRentalStatus.AVAILABLE, result.getStatus());
-        verify(parkingRentalRepository).save(argThat(rental ->
-                rental.getNeighbourhoodId() == 1 &&
-                        rental.getUserId() == 1 &&
-                        rental.getSpot().equals("A1") &&
+        verify(parkingRentalRepository, times(EXPECTED_CALL_COUNT)).save(argThat(rental ->
+                rental.getNeighbourhoodId() == TEST_NEIGHBOURHOOD_ID &&
+                        rental.getUserId() == TEST_USER_ID &&
+                        rental.getSpot().equals(TEST_SPOT) &&
                         rental.getStatus() == ParkingRentalStatus.AVAILABLE
         ));
     }
 
     @Test
     void buildParkingRental_createsCorrectEntity() {
+        when(parkingRentalRepository.save(any(ParkingRental.class))).thenReturn(testRental);
+
         ParkingRental result = parkingRentalService.createParkingRental(testDto);
 
         // Since buildParkingRental is private, we test it through createParkingRental
-        verify(parkingRentalRepository).save(argThat(rental ->
+        verify(parkingRentalRepository, times(EXPECTED_CALL_COUNT)).save(argThat(rental ->
                 rental.getNeighbourhoodId() == testDto.getNeighbourhoodId() &&
                         rental.getUserId() == testDto.getUserId() &&
                         rental.getSpot().equals(testDto.getSpot()) &&
                         rental.getStartTime().equals(testDto.getStartTime()) &&
                         rental.getEndTime().equals(testDto.getEndTime()) &&
-                        rental.getPrice() == testDto.getPrice() &&
+                        rental.getPrice().equals(testDto.getPrice()) &&
                         rental.getStatus() == ParkingRentalStatus.AVAILABLE
         ));
     }

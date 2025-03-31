@@ -27,6 +27,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CreateCommunityServiceImpl implements CreateCommunityService {
 
+    private static final int NO_NEIGHBOURHOOD_ID = 0;
+    private static final int ADDRESS_INDEX = 2;
     private final HelpRequestService helpRequestService;
     private final HelpRequestRepository helpRequestRepository;
     private final NeighbourhoodRepository neighbourhoodRepository;
@@ -46,7 +48,9 @@ public class CreateCommunityServiceImpl implements CreateCommunityService {
         }
 
         HelpRequest request = requestOptional.get();
-        if (isNotCreateRequest(request, requestId)) return handleInvalidRequestType(requestId);
+        if (isNotCreateRequest(request, requestId)) {
+            return handleInvalidRequestType(requestId);
+        }
 
         Optional<User> userOptional = userRepository.findById(request.getUser().getId());
         if (userOptional.isEmpty()) {
@@ -55,13 +59,9 @@ public class CreateCommunityServiceImpl implements CreateCommunityService {
 
         User user = userOptional.get();
         String[] details = extractDetailsFromDescription(request.getDescription());
-        String location = details[0], phone = details[1], address = details[2];
-
-        Neighbourhood savedNeighbourhood = createNewNeighbourhood(location, address);
-
-        updateUserAndSave(user, savedNeighbourhood, phone, address);
-
-        updateRequestStatusToApproved(request);
+        Neighbourhood savedNeighbourhood = createAndSaveNeighbourhood(details[0], details[ADDRESS_INDEX]);
+        updateUserDetails(user, savedNeighbourhood, details[1], details[ADDRESS_INDEX]);
+        updateRequestStatus(request, RequestStatus.APPROVED);
 
         CommunityResponse response = new CommunityResponse(user.getId(), savedNeighbourhood.getNeighbourhoodId(), RequestStatus.APPROVED);
         return new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS, response, "Community successfully created");
@@ -86,23 +86,23 @@ public class CreateCommunityServiceImpl implements CreateCommunityService {
         return end == -1 ? description.substring(start).trim() : description.substring(start, end).trim();
     }
 
-    private Neighbourhood createNewNeighbourhood(String location, String address) {
+    private Neighbourhood createAndSaveNeighbourhood(String location, String address) {
         Neighbourhood neighbourhood = new Neighbourhood();
         neighbourhood.setLocation(address);
         neighbourhood.setName(location);
         return neighbourhoodRepository.save(neighbourhood);
     }
 
-    private void updateUserAndSave(User user, Neighbourhood savedNeighbourhood, String phone, String address) {
+    private void updateUserDetails(User user, Neighbourhood neighbourhood, String phone, String address) {
         user.setUserType(UserType.COMMUNITY_MANAGER);
-        user.setNeighbourhood_id(savedNeighbourhood.getNeighbourhoodId());
+        user.setNeighbourhood_id(neighbourhood.getNeighbourhoodId());
         user.setContact(phone);
         user.setAddress(address);
         userRepository.save(user);
     }
 
-    private void updateRequestStatusToApproved(HelpRequest request) {
-        request.setStatus(RequestStatus.APPROVED);
+    private void updateRequestStatus(HelpRequest request, RequestStatus status) {
+        request.setStatus(status);
         helpRequestRepository.save(request);
     }
 
@@ -133,10 +133,9 @@ public class CreateCommunityServiceImpl implements CreateCommunityService {
         }
 
         HelpRequest request = requestOptional.get();
-        request.setStatus(RequestStatus.DECLINED);
-        helpRequestRepository.save(request);
+        updateRequestStatus(request, RequestStatus.DECLINED);
 
-        CommunityResponse response = new CommunityResponse(request.getUser().getId(), 0, RequestStatus.DECLINED);
+        CommunityResponse response = new CommunityResponse(request.getUser().getId(), NO_NEIGHBOURHOOD_ID, RequestStatus.DECLINED);
         return new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS, response, "Community creation request denied");
     }
 }

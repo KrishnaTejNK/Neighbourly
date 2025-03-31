@@ -20,6 +20,11 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
 
+    private static final int TEST_USER_ID = 1;
+    private static final int TEST_NEIGHBOURHOOD_ID = 1;
+    private static final int EXPECTED_LIST_SIZE = 1;
+    private static final int EXPECTED_CALL_COUNT = 1;
+
     @Mock
     private UserRepository userRepository;
 
@@ -31,11 +36,11 @@ class UserServiceImplTest {
     @BeforeEach
     void setUp() {
         testUser = new User();
-        testUser.setId(1);
+        testUser.setId(TEST_USER_ID);
         testUser.setEmail("test@example.com");
         testUser.setPassword("password");
         testUser.setUserType(UserType.USER);
-        testUser.setNeighbourhood_id(1);
+        testUser.setNeighbourhood_id(TEST_NEIGHBOURHOOD_ID);
     }
 
     @Test
@@ -45,7 +50,7 @@ class UserServiceImplTest {
         boolean result = userService.isUserPresent("test@example.com");
 
         assertTrue(result);
-        verify(userRepository).findByEmail("test@example.com");
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).findByEmail("test@example.com");
     }
 
     @Test
@@ -55,7 +60,7 @@ class UserServiceImplTest {
         boolean result = userService.isUserPresent("test@example.com");
 
         assertFalse(result);
-        verify(userRepository).findByEmail("test@example.com");
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).findByEmail("test@example.com");
     }
 
     @Test
@@ -66,32 +71,32 @@ class UserServiceImplTest {
 
         assertTrue(result.isPresent());
         assertEquals(testUser, result.get());
-        verify(userRepository).findByEmail("test@example.com");
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).findByEmail("test@example.com");
     }
 
     @Test
     void saveUser_savesSuccessfully() {
         userService.saveUser(testUser);
 
-        verify(userRepository).save(testUser);
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).save(testUser);
     }
 
     @Test
     void findUserById_userExists_returnsUser() {
-        when(userRepository.findById(1)).thenReturn(Optional.of(testUser));
+        when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
 
-        Optional<User> result = userService.findUserById(1);
+        Optional<User> result = userService.findUserById(TEST_USER_ID);
 
         assertTrue(result.isPresent());
         assertEquals(testUser, result.get());
-        verify(userRepository).findById(1);
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).findById(TEST_USER_ID);
     }
 
     @Test
     void updatePassword_updatesSuccessfully() {
         userService.updatePassword("test@example.com", "newPassword");
 
-        verify(userRepository).updatePassword("test@example.com", "newPassword");
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).updatePassword("test@example.com", "newPassword");
     }
 
     @Test
@@ -101,7 +106,7 @@ class UserServiceImplTest {
         UserType result = userService.getUserRole("test@example.com");
 
         assertEquals(UserType.USER, result);
-        verify(userRepository).findByEmail("test@example.com");
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).findByEmail("test@example.com");
     }
 
     @Test
@@ -111,7 +116,7 @@ class UserServiceImplTest {
         UserType result = userService.getUserRole("test@example.com");
 
         assertEquals(UserType.USER, result);
-        verify(userRepository).findByEmail("test@example.com");
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).findByEmail("test@example.com");
     }
 
     @Test
@@ -122,18 +127,18 @@ class UserServiceImplTest {
 
         assertTrue(result.isPresent());
         assertEquals(testUser, result.get());
-        verify(userRepository).findByEmail("test@example.com");
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).findByEmail("test@example.com");
     }
 
     @Test
     void getUsersByNeighbourhood_returnsUserList() {
         List<User> users = Arrays.asList(testUser);
-        when(userRepository.findByNeighbourhood_id(1)).thenReturn(users);
+        when(userRepository.findByNeighbourhood_id(TEST_NEIGHBOURHOOD_ID)).thenReturn(users);
 
-        List<User> result = userService.getUsersByNeighbourhood(1);
+        List<User> result = userService.getUsersByNeighbourhood(TEST_NEIGHBOURHOOD_ID);
 
-        assertEquals(1, result.size());
+        assertEquals(EXPECTED_LIST_SIZE, result.size());
         assertEquals(testUser, result.get(0));
-        verify(userRepository).findByNeighbourhood_id(1);
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).findByNeighbourhood_id(TEST_NEIGHBOURHOOD_ID);
     }
 }

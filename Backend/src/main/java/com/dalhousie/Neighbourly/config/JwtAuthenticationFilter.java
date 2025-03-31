@@ -29,7 +29,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
-
+    private static final int BEGIN_INDEX = 7;
     private static final List<String> EXCLUDED_URLS = Arrays.asList("/api/check/**");
 
     @Override
@@ -53,8 +53,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        int beginIndex = 7;
-        jwt = authHeader.substring(beginIndex);
+        jwt = authHeader.substring(BEGIN_INDEX);
 
         // Extract user email from JWT and handle errors
         try {
