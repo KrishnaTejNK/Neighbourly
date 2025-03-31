@@ -2,90 +2,39 @@ package com.dalhousie.Neighbourly.parking.service;
 
 import com.dalhousie.Neighbourly.parking.dto.ParkingRequestDTO;
 import com.dalhousie.Neighbourly.parking.dto.ParkingResponseDTO;
-import com.dalhousie.Neighbourly.parking.entity.ParkingRental;
-import com.dalhousie.Neighbourly.parking.entity.ParkingRequest;
-import com.dalhousie.Neighbourly.parking.repository.ParkingRentalRepository;
-import com.dalhousie.Neighbourly.parking.repository.ParkingRequestRepository;
-import com.dalhousie.Neighbourly.user.entity.User;
-import com.dalhousie.Neighbourly.user.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
-@Service
-public class ParkingRequestService {
-    @Autowired
-    private ParkingRequestRepository parkingRequestRepository;
-    @Autowired
-    private ParkingRentalRepository parkingRentalRepository;
-    @Autowired
-    private UserRepository userRepository;
+/**
+ * Service interface for managing parking request operations.
+ */
+public interface ParkingRequestService {
 
-    public void createParkingRequest(ParkingRequestDTO ParkingRequestDTO) {
-        ParkingRental rental = parkingRentalRepository.findById(ParkingRequestDTO.getRentalId())
-                .orElseThrow(() -> new RuntimeException("Parking rental not found"));
-        User user = userRepository.findById(ParkingRequestDTO.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    /**
+     * Creates a new parking request based on the provided details.
+     * @param parkingRequestDTO Data transfer object containing parking request details
+     * @throws RuntimeException if the rental or user is not found
+     */
+    void createParkingRequest(ParkingRequestDTO parkingRequestDTO);
 
-        ParkingRequest request = new ParkingRequest();
-        request.setParkingRental(rental);
-        request.setUser(user);
-        request.setStatus(ParkingRequest.ParkingRequestStatus.PENDING);
+    /**
+     * Retrieves all parking requests for a specific owner.
+     * @param ownerId The ID of the owner (user who owns the rentals)
+     * @return List of ParkingResponseDTO objects representing the requests
+     */
+    List<ParkingResponseDTO> getParkingRequestsForOwner(int ownerId);
 
-        parkingRequestRepository.save(request);
-    }
+    /**
+     * Approves a parking request and updates the associated rental status.
+     * @param requestId The ID of the request to approve
+     * @throws RuntimeException if the request is not found
+     */
+    void approveRequest(int requestId);
 
-    public List<ParkingResponseDTO> getParkingRequestsForOwner(int ownerId) {
-        // Step 1: Get all rental IDs owned by this user
-        List<Integer> rentalIds = parkingRentalRepository.findByUserId(ownerId)
-                .stream()
-                .map(ParkingRental::getRentalId)
-                .collect(Collectors.toList());
-
-        if (rentalIds.isEmpty()) {
-            return Collections.emptyList(); // Return empty list if no rentals exist
-        }
-        System.out.println("Hi");
-        System.out.println(rentalIds);
-        // Step 2: Find all parking requests where rental_id is in the owner's rental list
-        List<ParkingRequest> requests = parkingRequestRepository.findByParkingRental_RentalIdIn(rentalIds);
-
-        // Step 3: Convert to DTO
-        return requests.stream()
-                .map(request -> new ParkingResponseDTO(
-                        request.getRequestId(),
-                        request.getParkingRental().getRentalId(),
-                        request.getUser().getId(),
-                        request.getStatus().name(),
-                        request.getUser().getName(),
-                        request.getParkingRental().getSpot()
-                        )
-
-                )
-
-                .collect(Collectors.toList());
-    }
-
-
-    public void approveRequest(int requestId) {
-        ParkingRequest request = parkingRequestRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Request not found"));
-        request.setStatus(ParkingRequest.ParkingRequestStatus.APPROVED);
-        parkingRequestRepository.save(request);
-
-        // Update the rental status to BOOKED
-        ParkingRental rental = request.getParkingRental();
-        rental.setStatus(ParkingRental.ParkingRentalStatus.BOOKED);
-        parkingRentalRepository.save(rental);
-    }
-
-    public void denyRequest(int requestId) {
-        ParkingRequest request = parkingRequestRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Request not found"));
-        request.setStatus(ParkingRequest.ParkingRequestStatus.DENIED);
-        parkingRequestRepository.save(request);
-    }
+    /**
+     * Denies a parking request.
+     * @param requestId The ID of the request to deny
+     * @throws RuntimeException if the request is not found
+     */
+    void denyRequest(int requestId);
 }

@@ -45,8 +45,5 @@ public class Amenity {
     }
 
 
-    public enum Status {
-        AVAILABLE,
-        BOOKED
-    }
+
 }

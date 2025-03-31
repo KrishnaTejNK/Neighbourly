@@ -44,10 +44,5 @@ public class HelpRequest {
         CREATE
     }
 
-    // Enum for RequestStatus (Open, Approved, Declined)
-    public enum RequestStatus {
-        OPEN,
-        APPROVED,
-        DECLINED
-    }
+
 }

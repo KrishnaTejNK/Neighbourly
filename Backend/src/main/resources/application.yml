@@ -6,7 +6,7 @@ spring:
    driver-class-name: com.mysql.cj.jdbc.Driver
    username: ${PROD_DB_USER}
    password: ${PROD_DB_PASSWORD}
- 
+
   jpa:
     hibernate:
       ddl-auto: update

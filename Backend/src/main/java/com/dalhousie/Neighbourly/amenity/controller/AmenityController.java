@@ -1,19 +1,20 @@
 package com.dalhousie.Neighbourly.amenity.controller;
 
-
 import com.dalhousie.Neighbourly.amenity.entity.Amenity;
 import com.dalhousie.Neighbourly.amenity.service.AmenityService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/amenities")
 public class AmenityController {
 
-    @Autowired
-    private AmenityService amenityService;
+    private final AmenityService amenityService;
+
+
 
     @GetMapping("/{neighbourhoodId}")
     public List<Amenity> getAmenities(@PathVariable int neighbourhoodId) {
@@ -29,5 +30,4 @@ public class AmenityController {
     public void deleteAmenity(@PathVariable int amenityId) {
         amenityService.deleteAmenity(amenityId);
     }
-
 }

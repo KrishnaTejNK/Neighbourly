@@ -23,32 +23,41 @@ public class CreateCommunityController {
 
     @PostMapping("/create")
     public ResponseEntity<CustomResponseBody<CommunityResponse>> requestCommunityCreation(@RequestBody CreateCommunityDTO createRequest) {
-
-        // Find user by email
         Optional<User> userOptional = userRepository.findByEmail(createRequest.getEmail());
         if (userOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body(new CustomResponseBody<>(CustomResponseBody.Result.FAILURE, null, "User not found"));
+            CustomResponseBody<CommunityResponse> errorResponse =
+                    new CustomResponseBody<>(CustomResponseBody.Result.FAILURE, null, "User not found");
+            return ResponseEntity.badRequest().body(errorResponse);
         }
+
         User user = userOptional.get();
+        String description = buildDescription(user, createRequest);
+        HelpRequestDTO helpRequestDTO = buildHelpRequest(user, description);
 
-        // Prepare structured description
-        String description = String.format(
+        CommunityResponse response = createCommunityService.storeCreateRequest(helpRequestDTO);
+        CustomResponseBody<CommunityResponse> successResponse =
+                new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS, response, "Community creation request submitted successfully");
+
+        return ResponseEntity.ok(successResponse);
+    }
+
+    private String buildDescription(User user, CreateCommunityDTO createRequest) {
+        return String.format(
                 "User %s requested to create a community at location: %s | Phone: %s | Address: %s",
-                user.getName(), createRequest.getAddress(), createRequest.getPhone(), createRequest.getPincode()
+                user.getName(),
+                createRequest.getAddress(),
+                createRequest.getPhone(),
+                createRequest.getPincode()
         );
+    }
 
-        // Prepare HelpRequestDTO
+    private HelpRequestDTO buildHelpRequest(User user, String description) {
         HelpRequestDTO helpRequestDTO = new HelpRequestDTO();
         helpRequestDTO.setUserId(user.getId());
         helpRequestDTO.setRequestType("CREATE_COMMUNITY");
         helpRequestDTO.setDescription(description);
-
-        // Call service to create help request
-        CommunityResponse response = createCommunityService.storeCreateRequest(helpRequestDTO);
-
-        return ResponseEntity.ok(new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS, response, "Community creation request submitted successfully"));
+        return helpRequestDTO;
     }
-
 
     @PostMapping("/approve-create/{requestId}")
     public ResponseEntity<CustomResponseBody<CommunityResponse>> approveCreateRequest(@PathVariable int requestId) {

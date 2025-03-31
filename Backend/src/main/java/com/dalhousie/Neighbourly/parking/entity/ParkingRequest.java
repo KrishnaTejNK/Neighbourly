@@ -25,11 +25,7 @@ public class ParkingRequest {
     @Enumerated(EnumType.STRING)
     private ParkingRequestStatus status = ParkingRequestStatus.PENDING; // Default status
 
-    public enum ParkingRequestStatus {
-        PENDING,
-        APPROVED,
-        DENIED
-    }
+
 
     // Getters and Setters
 }

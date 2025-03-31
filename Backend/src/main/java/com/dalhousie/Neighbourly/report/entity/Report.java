@@ -1,7 +1,5 @@
 package com.dalhousie.Neighbourly.report.entity;
 
-import com.dalhousie.Neighbourly.post.entity.Post;
-import com.dalhousie.Neighbourly.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -33,7 +31,14 @@ public class Report {
     @Enumerated(EnumType.STRING)
     private ReportStatus reportStatus = ReportStatus.PENDING;
 
-    public enum ReportStatus {
-        PENDING, REVIEWED, RESOLVED
+
+
+    public Report(int userid, Integer neighbourhoodid, int postid, ReportStatus reportStatus) {
+        this.userid = userid;
+        this.neighbourhoodid = neighbourhoodid;
+        this.postid = postid;
+        this.reportStatus = reportStatus;
     }
+
+
 }

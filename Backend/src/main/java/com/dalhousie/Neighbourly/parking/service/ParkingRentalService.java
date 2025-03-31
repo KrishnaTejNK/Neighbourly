@@ -2,33 +2,25 @@ package com.dalhousie.Neighbourly.parking.service;
 
 import com.dalhousie.Neighbourly.parking.dto.ParkingRentalDTO;
 import com.dalhousie.Neighbourly.parking.entity.ParkingRental;
-import com.dalhousie.Neighbourly.parking.repository.ParkingRentalRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
-public class ParkingRentalService {
+/**
+ * Service interface for managing parking rental operations.
+ */
+public interface ParkingRentalService {
 
-    @Autowired
-    private ParkingRentalRepository parkingRentalRepository;
+    /**
+     * Retrieves all available parking rentals for a given neighbourhood.
+     * @param neighbourhoodId The ID of the neighbourhood
+     * @return List of ParkingRental objects representing available rentals
+     */
+    List<ParkingRental> getAvailableParkingRentals(int neighbourhoodId);
 
-    public List<ParkingRental> getAvailableParkingRentals(int neighbourhoodId) {
-        return parkingRentalRepository.findByNeighbourhoodIdAndStatus(neighbourhoodId, ParkingRental.ParkingRentalStatus.AVAILABLE);
-    }
-
-    public ParkingRental createParkingRental(ParkingRentalDTO dto) {
-        ParkingRental rental = ParkingRental.builder()
-                .neighbourhoodId(dto.getNeighbourhoodId())
-                .userId(dto.getUserId())
-                .spot(dto.getSpot())
-                .startTime(dto.getStartTime())
-                .endTime(dto.getEndTime())
-                .price(dto.getPrice())
-                .status(ParkingRental.ParkingRentalStatus.AVAILABLE)
-                .build();
-
-        return parkingRentalRepository.save(rental);
-    }
+    /**
+     * Creates a new parking rental based on the provided details.
+     * @param dto Data transfer object containing parking rental details
+     * @return The created ParkingRental object
+     */
+    ParkingRental createParkingRental(ParkingRentalDTO dto);
 }

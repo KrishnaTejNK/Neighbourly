@@ -19,8 +19,8 @@ import java.util.function.Function;
 @Service
 @Slf4j
 public class JwtServiceImpl implements JwtService{
-    private final static String SECRET_KEY = "C018A285FC4D3473B67F1D29E40C40FEACF3F9B4F01399D9421E562F01CC6B05";
-
+    private static final  String SECRET_KEY = "C018A285FC4D3473B67F1D29E40C40FEACF3F9B4F01399D9421E562F01CC6B05";
+    private static final long timeConverter  = 1000L * 60 * 60 * 24 * 20;
     @Override
     public String extractUsername(String jwtToken) {
         try {
@@ -90,7 +90,7 @@ public class JwtServiceImpl implements JwtService{
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(
                         System.currentTimeMillis() +
-                                1000L * 60 * 60 * 24 * 20 // 20 days
+                                timeConverter// 20 days
                 ))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
