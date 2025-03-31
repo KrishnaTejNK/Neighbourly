@@ -551,8 +551,7 @@ The Community Manager reviews and approves/rejects the request.
 
 ## CodeCoverage Report
 
-![img.png](img.png)
-
+![img_2.png](img_2.png)
 ------------------------------
 
 
