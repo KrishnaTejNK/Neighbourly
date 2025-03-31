@@ -3,8 +3,6 @@ package com.dalhousie.Neighbourly.amenity.service;
 import com.dalhousie.Neighbourly.amenity.entity.Amenity;
 import com.dalhousie.Neighbourly.amenity.repository.AmenityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -2,6 +2,7 @@ package com.dalhousie.Neighbourly.helprequest.dto;
 
 import com.dalhousie.Neighbourly.helprequest.model.HelpRequest;
 
+import com.dalhousie.Neighbourly.helprequest.model.RequestStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,7 +17,7 @@ public class HelpRequestDTO {
     private int userId;
     private int neighbourhoodId;
     private String requestType;
-    private HelpRequest.RequestStatus status;
+    private RequestStatus status;
     private String description;
 
     public HelpRequestDTO buiHelpRequestDTO(HelpRequest helpRequest) {

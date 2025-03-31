@@ -1,7 +1,6 @@
 package com.dalhousie.Neighbourly.community.service;
 
 import com.dalhousie.Neighbourly.community.entities.CommunityResponse;
-import com.dalhousie.Neighbourly.helprequest.dto.HelpRequestDTO;
 import com.dalhousie.Neighbourly.helprequest.model.HelpRequest;
 import com.dalhousie.Neighbourly.helprequest.repository.HelpRequestRepository;
 import com.dalhousie.Neighbourly.helprequest.service.HelpRequestService;

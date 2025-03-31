@@ -3,6 +3,7 @@ package com.dalhousie.Neighbourly.report.dto;
 
 import com.dalhousie.Neighbourly.post.dto.PostResponseDTO;
 import com.dalhousie.Neighbourly.report.entity.Report;
+import com.dalhousie.Neighbourly.report.entity.ReportStatus;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -18,5 +19,5 @@ public class ReportDTO {
     private int userId;
     private int neighbourhoodId;
     private LocalDateTime reportedAt;
-    private Report.ReportStatus reportStatus;
+    private ReportStatus reportStatus;
 }

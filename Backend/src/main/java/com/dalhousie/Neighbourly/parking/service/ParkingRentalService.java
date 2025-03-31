@@ -2,6 +2,7 @@ package com.dalhousie.Neighbourly.parking.service;
 
 import com.dalhousie.Neighbourly.parking.dto.ParkingRentalDTO;
 import com.dalhousie.Neighbourly.parking.entity.ParkingRental;
+import com.dalhousie.Neighbourly.parking.entity.ParkingRentalStatus;
 import com.dalhousie.Neighbourly.parking.repository.ParkingRentalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,10 +17,10 @@ public class ParkingRentalService {
 
     // Refactored to enhance readability and reduce complexity
     public List<ParkingRental> getAvailableParkingRentals(int neighbourhoodId) {
-        return getParkingRentalsByStatus(neighbourhoodId, ParkingRental.ParkingRentalStatus.AVAILABLE);
+        return getParkingRentalsByStatus(neighbourhoodId, ParkingRentalStatus.AVAILABLE);
     }
 
-    private List<ParkingRental> getParkingRentalsByStatus(int neighbourhoodId, ParkingRental.ParkingRentalStatus status) {
+    private List<ParkingRental> getParkingRentalsByStatus(int neighbourhoodId, ParkingRentalStatus status) {
         return parkingRentalRepository.findByNeighbourhoodIdAndStatus(neighbourhoodId, status);
     }
 
@@ -36,7 +37,7 @@ public class ParkingRentalService {
                 .startTime(dto.getStartTime())
                 .endTime(dto.getEndTime())
                 .price(dto.getPrice())
-                .status(ParkingRental.ParkingRentalStatus.AVAILABLE)
+                .status(ParkingRentalStatus.AVAILABLE)
                 .build();
     }
 

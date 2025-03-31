@@ -1,6 +1,6 @@
 package com.dalhousie.Neighbourly.community.entities;
 
-import com.dalhousie.Neighbourly.helprequest.model.HelpRequest;
+import com.dalhousie.Neighbourly.helprequest.model.RequestStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -9,5 +9,5 @@ import lombok.Data;
 public class CommunityResponse {
     private int userId;
     private int neighbourhoodId;
-    private HelpRequest.RequestStatus status;
+    private RequestStatus status;
 }

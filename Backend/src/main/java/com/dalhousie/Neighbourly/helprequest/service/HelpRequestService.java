@@ -3,6 +3,7 @@ package com.dalhousie.Neighbourly.helprequest.service;
 import com.dalhousie.Neighbourly.community.entities.CommunityResponse;
 import com.dalhousie.Neighbourly.helprequest.dto.HelpRequestDTO;
 import com.dalhousie.Neighbourly.helprequest.model.HelpRequest;
+import com.dalhousie.Neighbourly.helprequest.model.RequestStatus;
 import com.dalhousie.Neighbourly.helprequest.repository.HelpRequestRepository;
 import com.dalhousie.Neighbourly.user.entity.User;
 import com.dalhousie.Neighbourly.user.repository.UserRepository;
@@ -39,7 +40,7 @@ public class HelpRequestService {
         helpRequest.setNeighbourhood(neighbourhood);
         helpRequest.setRequestType(requestType);
         helpRequest.setDescription(dto.getDescription());
-        helpRequest.setStatus(HelpRequest.RequestStatus.OPEN);
+        helpRequest.setStatus(RequestStatus.OPEN);
         helpRequest.setCreatedAt(LocalDateTime.now());
         return helpRequest;
     }
@@ -71,13 +72,13 @@ public class HelpRequestService {
         Neighbourhood neighbourhood = getNeighbourhoodById(neighbourhoodId);
 
         return helpRequestRepository.findByNeighbourhoodAndRequestTypeAndStatus(
-                neighbourhood, HelpRequest.RequestType.JOIN, HelpRequest.RequestStatus.OPEN
+                neighbourhood, HelpRequest.RequestType.JOIN, RequestStatus.OPEN
         );
     }
 
     public List<HelpRequestDTO> getAllOpenCommunityRequests() {
 
-        List<HelpRequest> helpRequests = helpRequestRepository.findByStatusAndRequestType(HelpRequest.RequestStatus.OPEN, HelpRequest.RequestType.CREATE);
+        List<HelpRequest> helpRequests = helpRequestRepository.findByStatusAndRequestType(RequestStatus.OPEN, HelpRequest.RequestType.CREATE);
         return helpRequests.stream()
                 .map(helpRequest -> new HelpRequestDTO().buiHelpRequestDTO(helpRequest))
                 .collect(Collectors.toList());

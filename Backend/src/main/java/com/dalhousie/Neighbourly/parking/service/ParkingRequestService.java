@@ -3,7 +3,9 @@ package com.dalhousie.Neighbourly.parking.service;
 import com.dalhousie.Neighbourly.parking.dto.ParkingRequestDTO;
 import com.dalhousie.Neighbourly.parking.dto.ParkingResponseDTO;
 import com.dalhousie.Neighbourly.parking.entity.ParkingRental;
+import com.dalhousie.Neighbourly.parking.entity.ParkingRentalStatus;
 import com.dalhousie.Neighbourly.parking.entity.ParkingRequest;
+import com.dalhousie.Neighbourly.parking.entity.ParkingRequestStatus;
 import com.dalhousie.Neighbourly.parking.repository.ParkingRentalRepository;
 import com.dalhousie.Neighbourly.parking.repository.ParkingRequestRepository;
 import com.dalhousie.Neighbourly.user.entity.User;
@@ -33,7 +35,7 @@ public class ParkingRequestService {
         ParkingRequest request = new ParkingRequest();
         request.setParkingRental(rental);
         request.setUser(user);
-        request.setStatus(ParkingRequest.ParkingRequestStatus.PENDING);
+        request.setStatus(ParkingRequestStatus.PENDING);
 
         parkingRequestRepository.save(request);
     }
@@ -72,19 +74,19 @@ public class ParkingRequestService {
     public void approveRequest(int requestId) {
         ParkingRequest request = parkingRequestRepository.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Request not found"));
-        request.setStatus(ParkingRequest.ParkingRequestStatus.APPROVED);
+        request.setStatus(ParkingRequestStatus.APPROVED);
         parkingRequestRepository.save(request);
 
         // Update the rental status to BOOKED
         ParkingRental rental = request.getParkingRental();
-        rental.setStatus(ParkingRental.ParkingRentalStatus.BOOKED);
+        rental.setStatus(ParkingRentalStatus.BOOKED);
         parkingRentalRepository.save(rental);
     }
 
     public void denyRequest(int requestId) {
         ParkingRequest request = parkingRequestRepository.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Request not found"));
-        request.setStatus(ParkingRequest.ParkingRequestStatus.DENIED);
+        request.setStatus(ParkingRequestStatus.DENIED);
         parkingRequestRepository.save(request);
     }
 

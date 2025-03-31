@@ -3,6 +3,7 @@ package com.dalhousie.Neighbourly.community.service;
 import com.dalhousie.Neighbourly.community.entities.CommunityResponse;
 import com.dalhousie.Neighbourly.helprequest.dto.HelpRequestDTO;
 import com.dalhousie.Neighbourly.helprequest.model.HelpRequest;
+import com.dalhousie.Neighbourly.helprequest.model.RequestStatus;
 import com.dalhousie.Neighbourly.helprequest.repository.HelpRequestRepository;
 import com.dalhousie.Neighbourly.helprequest.service.HelpRequestService;
 import com.dalhousie.Neighbourly.user.entity.User;
@@ -44,11 +45,11 @@ public class JoinCommunityService {
         updateUserDetails(user, request);
 
         // Change the status of the request to APPROVED
-        request.setStatus(HelpRequest.RequestStatus.APPROVED);
+        request.setStatus(RequestStatus.APPROVED);
         helpRequestRepository.save(request);
 
         // Create response
-        CommunityResponse response = new CommunityResponse(user.getId(), user.getNeighbourhood_id(), HelpRequest.RequestStatus.APPROVED);
+        CommunityResponse response = new CommunityResponse(user.getId(), user.getNeighbourhood_id(), RequestStatus.APPROVED);
 
         return new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS, response, "User approved and added as a resident with contact and address.");
     }
@@ -62,11 +63,11 @@ public class JoinCommunityService {
 
         HelpRequest request = requestOptional.get();
         // Change the status of the request to DECLINED
-        request.setStatus(HelpRequest.RequestStatus.DECLINED);
+        request.setStatus(RequestStatus.DECLINED);
         helpRequestRepository.save(request);
 
         // Create the response
-        CommunityResponse response = new CommunityResponse(request.getUser().getId(), request.getNeighbourhood().getNeighbourhoodId(), HelpRequest.RequestStatus.DECLINED);
+        CommunityResponse response = new CommunityResponse(request.getUser().getId(), request.getNeighbourhood().getNeighbourhoodId(), RequestStatus.DECLINED);
 
         return new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS, response, "User denied and request status updated");
     }

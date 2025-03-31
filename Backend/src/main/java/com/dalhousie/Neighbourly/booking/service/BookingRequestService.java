@@ -2,8 +2,10 @@ package com.dalhousie.Neighbourly.booking.service;
 
 import com.dalhousie.Neighbourly.amenity.dto.BookingRequestDTO;
 import com.dalhousie.Neighbourly.amenity.entity.Amenity;
+import com.dalhousie.Neighbourly.amenity.entity.Status;
 import com.dalhousie.Neighbourly.amenity.repository.AmenityRepository;
 import com.dalhousie.Neighbourly.booking.entity.BookingRequest;
+import com.dalhousie.Neighbourly.booking.entity.BookingStatus;
 import com.dalhousie.Neighbourly.booking.repository.BookingRequestRepository;
 import com.dalhousie.Neighbourly.neighbourhood.entity.Neighbourhood;
 import com.dalhousie.Neighbourly.neighbourhood.repository.NeighbourhoodRepository;
@@ -68,7 +70,7 @@ public class BookingRequestService {
         bookingRequest.setBookingFrom(bookingRequestDTO.getBookingFrom());
         bookingRequest.setBookingTo(bookingRequestDTO.getBookingTo());
         bookingRequest.setExpectedAttendees(bookingRequestDTO.getExpectedAttendees());
-        bookingRequest.setStatus(BookingRequest.BookingStatus.PENDING);
+        bookingRequest.setStatus(BookingStatus.PENDING);
 
         return bookingRequestRepository.save(bookingRequest);
     }
@@ -85,7 +87,7 @@ public class BookingRequestService {
 
     // Refactor: Get pending booking requests by neighbourhood
     public List<BookingRequest> getPendingRequests(int neighbourhoodId) {
-        return bookingRequestRepository.findByNeighbourhood_idAndStatus(neighbourhoodId, BookingRequest.BookingStatus.PENDING);
+        return bookingRequestRepository.findByNeighbourhood_idAndStatus(neighbourhoodId, BookingStatus.PENDING);
     }
 
     // Refactor: Get a booking request by ID
@@ -97,11 +99,11 @@ public class BookingRequestService {
     // Refactor: Approve Booking Request
     public boolean approveBooking(int bookingId) {
         BookingRequest request = getBookingRequestById(bookingId);
-        request.setStatus(BookingRequest.BookingStatus.APPROVED);
+        request.setStatus(BookingStatus.APPROVED);
         bookingRequestRepository.save(request);
 
         Amenity amenity = getAmenityById(request.getAmenity_id());
-        amenity.setStatus(Amenity.Status.BOOKED);
+        amenity.setStatus(Status.BOOKED);
         amenityRepository.save(amenity);
 
         return true;
@@ -111,7 +113,7 @@ public class BookingRequestService {
     // Refactor: Deny Booking Request
     public boolean denyBooking(int bookingId) {
         BookingRequest request = getBookingRequestById(bookingId);
-        request.setStatus(BookingRequest.BookingStatus.REJECTED);
+        request.setStatus(BookingStatus.REJECTED);
         bookingRequestRepository.save(request);
 
         return true;

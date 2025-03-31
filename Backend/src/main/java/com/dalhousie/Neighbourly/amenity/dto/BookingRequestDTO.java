@@ -1,6 +1,7 @@
 package com.dalhousie.Neighbourly.amenity.dto;
 
-import com.dalhousie.Neighbourly.booking.entity.BookingRequest;
+
+import com.dalhousie.Neighbourly.booking.entity.BookingStatus;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -16,5 +17,5 @@ public class BookingRequestDTO {
     private LocalDateTime bookingFrom;
     private LocalDateTime bookingTo;
     private int expectedAttendees;
-    private BookingRequest.BookingStatus status = BookingRequest.BookingStatus.PENDING;
+    private BookingStatus status = BookingStatus.PENDING;
 }

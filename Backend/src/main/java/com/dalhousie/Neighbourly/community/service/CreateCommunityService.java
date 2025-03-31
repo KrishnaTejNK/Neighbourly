@@ -3,6 +3,7 @@ package com.dalhousie.Neighbourly.community.service;
 import com.dalhousie.Neighbourly.community.entities.CommunityResponse;
 import com.dalhousie.Neighbourly.helprequest.dto.HelpRequestDTO;
 import com.dalhousie.Neighbourly.helprequest.model.HelpRequest;
+import com.dalhousie.Neighbourly.helprequest.model.RequestStatus;
 import com.dalhousie.Neighbourly.helprequest.repository.HelpRequestRepository;
 import com.dalhousie.Neighbourly.helprequest.service.HelpRequestService;
 import com.dalhousie.Neighbourly.neighbourhood.entity.Neighbourhood;
@@ -57,7 +58,7 @@ public class CreateCommunityService {
 
         updateRequestStatusToApproved(request);
 
-        CommunityResponse response = new CommunityResponse(user.getId(), savedNeighbourhood.getNeighbourhoodId(), HelpRequest.RequestStatus.APPROVED);
+        CommunityResponse response = new CommunityResponse(user.getId(), savedNeighbourhood.getNeighbourhoodId(), RequestStatus.APPROVED);
         return new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS, response, "Community successfully created");
     }
 
@@ -95,7 +96,7 @@ public class CreateCommunityService {
     }
 
     private void updateRequestStatusToApproved(HelpRequest request) {
-        request.setStatus(HelpRequest.RequestStatus.APPROVED);
+        request.setStatus(RequestStatus.APPROVED);
         helpRequestRepository.save(request);
     }
 
@@ -127,10 +128,10 @@ public class CreateCommunityService {
         }
 
         HelpRequest request = requestOptional.get();
-        request.setStatus(HelpRequest.RequestStatus.DECLINED);
+        request.setStatus(RequestStatus.DECLINED);
         helpRequestRepository.save(request);
 
-        CommunityResponse response = new CommunityResponse(request.getUser().getId(), 0, HelpRequest.RequestStatus.DECLINED);
+        CommunityResponse response = new CommunityResponse(request.getUser().getId(), 0, RequestStatus.DECLINED);
         return new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS, response, "Community creation request denied");
     }
 }

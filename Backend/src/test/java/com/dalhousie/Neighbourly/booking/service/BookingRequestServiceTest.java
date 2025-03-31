@@ -4,6 +4,7 @@ import com.dalhousie.Neighbourly.amenity.entity.Amenity;
 import com.dalhousie.Neighbourly.amenity.repository.AmenityRepository;
 import com.dalhousie.Neighbourly.amenity.dto.BookingRequestDTO;
 import com.dalhousie.Neighbourly.booking.entity.BookingRequest;
+import com.dalhousie.Neighbourly.booking.entity.BookingStatus;
 import com.dalhousie.Neighbourly.booking.repository.BookingRequestRepository;
 import com.dalhousie.Neighbourly.neighbourhood.entity.Neighbourhood;
 import com.dalhousie.Neighbourly.neighbourhood.repository.NeighbourhoodRepository;
@@ -98,7 +99,7 @@ class BookingRequestServiceTest {
         bookingRequest.setBookingFrom(BOOKING_FROM);
         bookingRequest.setBookingTo(BOOKING_TO);
         bookingRequest.setExpectedAttendees(EXPECTED_ATTENDEES);
-        bookingRequest.setStatus(BookingRequest.BookingStatus.PENDING);
+        bookingRequest.setStatus(BookingStatus.PENDING);
     }
 
     @Test
@@ -163,7 +164,7 @@ class BookingRequestServiceTest {
 
         // Assert
         assertTrue(result);
-        assertEquals(BookingRequest.BookingStatus.APPROVED, bookingRequest.getStatus());
+        assertEquals(BookingStatus.APPROVED, bookingRequest.getStatus());
         assertEquals(Amenity.Status.BOOKED, amenity.getStatus());
         verify(bookingRequestRepository, times(1)).save(any(BookingRequest.class));
         verify(amenityRepository, times(1)).save(any(Amenity.class));
@@ -180,7 +181,7 @@ class BookingRequestServiceTest {
 
         // Assert
         assertTrue(result);
-        assertEquals(BookingRequest.BookingStatus.REJECTED, bookingRequest.getStatus());
+        assertEquals(BookingStatus.REJECTED, bookingRequest.getStatus());
         verify(bookingRequestRepository, times(1)).save(any(BookingRequest.class));
     }
 
@@ -202,7 +203,7 @@ class BookingRequestServiceTest {
     @Test
     void testGetPendingRequests() {
         // Arrange
-        when(bookingRequestRepository.findByNeighbourhood_idAndStatus(NEIGHBOURHOOD_ID, BookingRequest.BookingStatus.PENDING))
+        when(bookingRequestRepository.findByNeighbourhood_idAndStatus(NEIGHBOURHOOD_ID, BookingStatus.PENDING))
                 .thenReturn(Arrays.asList(bookingRequest));
 
         // Act
@@ -212,6 +213,6 @@ class BookingRequestServiceTest {
         assertNotNull(pendingRequests);
         assertEquals(1, pendingRequests.size());
         assertEquals(EVENT_NAME, pendingRequests.get(0).getName());
-        verify(bookingRequestRepository, times(1)).findByNeighbourhood_idAndStatus(NEIGHBOURHOOD_ID, BookingRequest.BookingStatus.PENDING);
+        verify(bookingRequestRepository, times(1)).findByNeighbourhood_idAndStatus(NEIGHBOURHOOD_ID, BookingStatus.PENDING);
     }
 }

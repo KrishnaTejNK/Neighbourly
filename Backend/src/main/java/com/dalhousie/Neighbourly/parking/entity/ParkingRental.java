@@ -41,8 +41,5 @@ public class ParkingRental {
     @Column(nullable = false)
     private ParkingRentalStatus status;
 
-    public enum ParkingRentalStatus {
-        BOOKED,
-        AVAILABLE
-    }
+
 }
