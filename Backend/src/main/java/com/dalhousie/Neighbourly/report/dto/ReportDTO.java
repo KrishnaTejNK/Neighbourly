@@ -2,7 +2,6 @@ package com.dalhousie.Neighbourly.report.dto;
 
 
 import com.dalhousie.Neighbourly.post.dto.PostResponseDTO;
-import com.dalhousie.Neighbourly.report.entity.Report;
 import com.dalhousie.Neighbourly.report.entity.ReportStatus;
 import lombok.*;
 
