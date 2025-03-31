@@ -17,7 +17,7 @@ public class NeighbourhoodController {
 
     private final NeighbourhoodService neighbourhoodService;
 
-    @GetMapping
+    @GetMapping("/getallneighbourhoods")
     public ResponseEntity<List<NeighbourhoodResponse>> getAllNeighbourhoods() {
         List<NeighbourhoodResponse> neighbourhoods = neighbourhoodService.getAllNeighbourhoods();
         return ResponseEntity.ok(neighbourhoods);
