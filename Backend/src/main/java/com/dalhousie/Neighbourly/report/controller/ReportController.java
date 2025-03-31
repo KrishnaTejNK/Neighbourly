@@ -3,6 +3,7 @@ package com.dalhousie.Neighbourly.report.controller;
 
 import com.dalhousie.Neighbourly.report.dto.ReportDTO;
 import com.dalhousie.Neighbourly.report.service.ReportService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,15 +11,13 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/reports")
 @CrossOrigin(origins = "http://localhost:3000")
 public class ReportController {
 
     private final ReportService reportService;
 
-    public ReportController(ReportService reportService) {
-        this.reportService = reportService;
-    }
 
     @PostMapping("/report")
     public ResponseEntity<String> reportPost(@RequestBody Map<String, Object> request) {

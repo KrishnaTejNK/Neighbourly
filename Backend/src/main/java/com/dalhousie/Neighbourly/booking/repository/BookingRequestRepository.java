@@ -1,6 +1,7 @@
 package com.dalhousie.Neighbourly.booking.repository;
 
 import com.dalhousie.Neighbourly.booking.entity.BookingRequest;
+import com.dalhousie.Neighbourly.booking.entity.BookingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -18,7 +19,7 @@ public interface BookingRequestRepository extends JpaRepository<BookingRequest, 
     List<BookingRequest> findByAmenity_id(int amenityId);  // NEW METHOD
 
     @Query("SELECT b FROM BookingRequest b WHERE b.neighbourhood_id = :neighbourhoodId and b.status = :status")
-    List<BookingRequest> findByNeighbourhood_idAndStatus(int neighbourhoodId, BookingRequest.BookingStatus status);
+    List<BookingRequest> findByNeighbourhood_idAndStatus(int neighbourhoodId, BookingStatus status);
 
 
 }

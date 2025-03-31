@@ -2,19 +2,17 @@ package com.dalhousie.Neighbourly.report.service;
 
 
 import com.dalhousie.Neighbourly.post.dto.PostResponseDTO;
-import com.dalhousie.Neighbourly.post.entity.Post;
 import com.dalhousie.Neighbourly.post.repository.PostRepository;
 import com.dalhousie.Neighbourly.post.service.PostService;
 import com.dalhousie.Neighbourly.report.dto.ReportDTO;
 import com.dalhousie.Neighbourly.report.entity.Report;
+import com.dalhousie.Neighbourly.report.entity.ReportStatus;
 import com.dalhousie.Neighbourly.report.repository.ReportRepository;
-import com.dalhousie.Neighbourly.user.entity.User;
 import com.dalhousie.Neighbourly.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,7 +33,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     @Transactional
     public void reportPost(int neighbouhoodid, int postId, int userId) {
-        Report report = new Report(userId, neighbouhoodid, postId, Report.ReportStatus.PENDING);
+        Report report = new Report(userId, neighbouhoodid, postId, ReportStatus.PENDING);
         reportRepository.save(report);
     }
 
@@ -64,7 +62,7 @@ public class ReportServiceImpl implements ReportService {
     @Transactional
     public void approvePost(int reportId) {
         Report report = getReportById(reportId);
-        report.setReportStatus(Report.ReportStatus.REVIEWED);
+        report.setReportStatus(ReportStatus.REVIEWED);
         reportRepository.save(report);
     }
 
@@ -72,7 +70,7 @@ public class ReportServiceImpl implements ReportService {
     @Transactional
     public void deletePost(int reportId) {
         Report report = getReportById(reportId);
-        report.setReportStatus(Report.ReportStatus.RESOLVED);
+        report.setReportStatus(ReportStatus.RESOLVED);
         postRepository.deleteById(report.getPostid());
     }
 

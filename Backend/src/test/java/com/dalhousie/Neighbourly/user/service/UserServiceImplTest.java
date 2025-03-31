@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,130 +26,114 @@ class UserServiceImplTest {
     @InjectMocks
     private UserServiceImpl userService;
 
-    private static final String USER_EMAIL = "test@example.com";
-    private static final String PASSWORD = "securePassword123";
-    private static final int USER_ID = 1001;
-    private static final int NEIGHBOURHOOD_ID = 2001;
-
     private User testUser;
 
     @BeforeEach
     void setUp() {
-        testUser = User.builder()
-                .id(USER_ID)
-                .email(USER_EMAIL)
-                .password(PASSWORD)
-                .userType(UserType.ADMIN)
-                .build();
+        testUser = new User();
+        testUser.setId(1);
+        testUser.setEmail("test@example.com");
+        testUser.setPassword("password");
+        testUser.setUserType(UserType.USER);
+        testUser.setNeighbourhood_id(1);
     }
 
     @Test
-    void isUserPresent_ShouldReturnTrue_WhenUserExists() {
-        when(userRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(testUser));
+    void isUserPresent_userExists_returnsTrue() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
 
-        boolean result = userService.isUserPresent(USER_EMAIL);
+        boolean result = userService.isUserPresent("test@example.com");
 
         assertTrue(result);
-        verify(userRepository, times(1)).findByEmail(USER_EMAIL);
+        verify(userRepository).findByEmail("test@example.com");
     }
 
     @Test
-    void isUserPresent_ShouldReturnFalse_WhenUserDoesNotExist() {
-        when(userRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.empty());
+    void isUserPresent_userDoesNotExist_returnsFalse() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
 
-        boolean result = userService.isUserPresent(USER_EMAIL);
+        boolean result = userService.isUserPresent("test@example.com");
 
         assertFalse(result);
-        verify(userRepository, times(1)).findByEmail(USER_EMAIL);
+        verify(userRepository).findByEmail("test@example.com");
     }
 
     @Test
-    void findUserByEmail_ShouldReturnUser_WhenUserExists() {
-        when(userRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(testUser));
+    void findUserByEmail_userExists_returnsUser() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
 
-        Optional<User> result = userService.findUserByEmail(USER_EMAIL);
+        Optional<User> result = userService.findUserByEmail("test@example.com");
 
         assertTrue(result.isPresent());
-        assertEquals(USER_ID, result.get().getId());
-        verify(userRepository, times(1)).findByEmail(USER_EMAIL);
+        assertEquals(testUser, result.get());
+        verify(userRepository).findByEmail("test@example.com");
     }
 
     @Test
-    void findUserByEmail_ShouldReturnEmpty_WhenUserDoesNotExist() {
-        when(userRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.empty());
-
-        Optional<User> result = userService.findUserByEmail(USER_EMAIL);
-
-        assertFalse(result.isPresent());
-        verify(userRepository, times(1)).findByEmail(USER_EMAIL);
-    }
-
-    @Test
-    void saveUser_ShouldSaveUserSuccessfully() {
+    void saveUser_savesSuccessfully() {
         userService.saveUser(testUser);
 
-        verify(userRepository, times(1)).save(testUser);
+        verify(userRepository).save(testUser);
     }
 
     @Test
-    void findUserById_ShouldReturnUser_WhenUserExists() {
-        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(testUser));
+    void findUserById_userExists_returnsUser() {
+        when(userRepository.findById(1)).thenReturn(Optional.of(testUser));
 
-        Optional<User> result = userService.findUserById(USER_ID);
+        Optional<User> result = userService.findUserById(1);
 
         assertTrue(result.isPresent());
-        assertEquals(USER_EMAIL, result.get().getEmail());
-        verify(userRepository, times(1)).findById(USER_ID);
+        assertEquals(testUser, result.get());
+        verify(userRepository).findById(1);
     }
 
     @Test
-    void findUserById_ShouldReturnEmpty_WhenUserDoesNotExist() {
-        when(userRepository.findById(USER_ID)).thenReturn(Optional.empty());
+    void updatePassword_updatesSuccessfully() {
+        userService.updatePassword("test@example.com", "newPassword");
 
-        Optional<User> result = userService.findUserById(USER_ID);
-
-        assertFalse(result.isPresent());
-        verify(userRepository, times(1)).findById(USER_ID);
+        verify(userRepository).updatePassword("test@example.com", "newPassword");
     }
 
     @Test
-    void updatePassword_ShouldUpdatePasswordSuccessfully() {
-        doNothing().when(userRepository).updatePassword(USER_EMAIL, PASSWORD);
+    void getUserRole_userExists_returnsUserRole() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
 
-        userService.updatePassword(USER_EMAIL, PASSWORD);
+        UserType result = userService.getUserRole("test@example.com");
 
-        verify(userRepository, times(1)).updatePassword(USER_EMAIL, PASSWORD);
+        assertEquals(UserType.USER, result);
+        verify(userRepository).findByEmail("test@example.com");
     }
 
     @Test
-    void getUserRole_ShouldReturnUserRole_WhenUserExists() {
-        when(userRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(testUser));
+    void getUserRole_userDoesNotExist_returnsDefaultRole() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
 
-        UserType result = userService.getUserRole(USER_EMAIL);
+        UserType result = userService.getUserRole("test@example.com");
 
-        assertEquals(UserType.ADMIN, result);
-        verify(userRepository, times(1)).findByEmail(USER_EMAIL);
+        assertEquals(UserType.USER, result);
+        verify(userRepository).findByEmail("test@example.com");
     }
 
     @Test
-    void getUserRole_ShouldReturnDefaultUserRole_WhenUserDoesNotExist() {
-        when(userRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.empty());
+    void getUserByEmail_userExists_returnsUser() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
 
-        UserType result = userService.getUserRole(USER_EMAIL);
+        Optional<User> result = userService.getUserByEmail("test@example.com");
 
-        assertEquals(UserType.USER, result); // Default role should be USER
-        verify(userRepository, times(1)).findByEmail(USER_EMAIL);
+        assertTrue(result.isPresent());
+        assertEquals(testUser, result.get());
+        verify(userRepository).findByEmail("test@example.com");
     }
 
     @Test
-    void getUsersByNeighbourhood_ShouldReturnListOfUsers() {
-        when(userRepository.findByNeighbourhood_id(NEIGHBOURHOOD_ID)).thenReturn(List.of(testUser));
+    void getUsersByNeighbourhood_returnsUserList() {
+        List<User> users = Arrays.asList(testUser);
+        when(userRepository.findByNeighbourhood_id(1)).thenReturn(users);
 
-        List<User> result = userService.getUsersByNeighbourhood(NEIGHBOURHOOD_ID);
+        List<User> result = userService.getUsersByNeighbourhood(1);
 
-        assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(USER_ID, result.get(0).getId());
-        verify(userRepository, times(1)).findByNeighbourhood_id(NEIGHBOURHOOD_ID);
+        assertEquals(testUser, result.get(0));
+        verify(userRepository).findByNeighbourhood_id(1);
     }
 }

@@ -1,7 +1,5 @@
 package com.dalhousie.Neighbourly.report.entity;
 
-import com.dalhousie.Neighbourly.post.entity.Post;
-import com.dalhousie.Neighbourly.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -42,7 +40,5 @@ public class Report {
         this.reportStatus = reportStatus;
     }
 
-    public enum ReportStatus {
-        PENDING, REVIEWED, RESOLVED
-    }
+
 }

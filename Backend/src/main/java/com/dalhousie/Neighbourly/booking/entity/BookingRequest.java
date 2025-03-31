@@ -1,7 +1,5 @@
 package com.dalhousie.Neighbourly.booking.entity;
 
-import com.dalhousie.Neighbourly.neighbourhood.entity.Neighbourhood;
-import com.dalhousie.Neighbourly.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -50,11 +48,6 @@ public class BookingRequest {
     @Enumerated(EnumType.STRING)
     private BookingStatus status = BookingStatus.PENDING;
 
-
-    // Getters & Setters
-    public enum BookingStatus {
-        PENDING, APPROVED, REJECTED;
-    }
 
 }
 
