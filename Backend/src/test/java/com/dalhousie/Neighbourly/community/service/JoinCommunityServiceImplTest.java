@@ -26,6 +26,11 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class JoinCommunityServiceImplTest {
 
+    private static final int TEST_USER_ID = 1;
+    private static final int TEST_NEIGHBOURHOOD_ID = 1;
+    private static final int TEST_REQUEST_ID = 1;
+    private static final int EXPECTED_CALL_COUNT = 1;
+
     @Mock
     private HelpRequestService helpRequestService;
 
@@ -46,10 +51,10 @@ class JoinCommunityServiceImplTest {
     @BeforeEach
     void setUp() {
         testUser = new User();
-        testUser.setId(1);
+        testUser.setId(TEST_USER_ID);
 
         testNeighbourhood = new Neighbourhood();
-        testNeighbourhood.setNeighbourhoodId(1);
+        testNeighbourhood.setNeighbourhoodId(TEST_NEIGHBOURHOOD_ID);
 
         testRequest = new HelpRequest();
         testRequest.setUser(testUser);
@@ -58,45 +63,45 @@ class JoinCommunityServiceImplTest {
         testRequest.setStatus(RequestStatus.OPEN);
 
         testDto = new HelpRequestDTO();
-        testDto.setUserId(1);
-        testDto.setNeighbourhoodId(1);
+        testDto.setUserId(TEST_USER_ID);
+        testDto.setNeighbourhoodId(TEST_NEIGHBOURHOOD_ID);
     }
 
     @Test
     void storeJoinRequest_delegatesToHelpRequestService() {
-        CommunityResponse expectedResponse = new CommunityResponse(1, 1, RequestStatus.OPEN);
+        CommunityResponse expectedResponse = new CommunityResponse(TEST_USER_ID, TEST_NEIGHBOURHOOD_ID, RequestStatus.OPEN);
         when(helpRequestService.storeJoinRequest(testDto)).thenReturn(expectedResponse);
 
         CommunityResponse result = joinCommunityService.storeJoinRequest(testDto);
 
         assertEquals(expectedResponse, result);
-        verify(helpRequestService).storeJoinRequest(testDto);
+        verify(helpRequestService, times(EXPECTED_CALL_COUNT)).storeJoinRequest(testDto);
     }
 
     @Test
     void approveJoinRequest_successful_returnsSuccessResponse() {
-        when(helpRequestRepository.findById(1)).thenReturn(Optional.of(testRequest));
-        when(userRepository.findById(1)).thenReturn(Optional.of(testUser));
+        when(helpRequestRepository.findById(TEST_REQUEST_ID)).thenReturn(Optional.of(testRequest));
+        when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
 
-        CustomResponseBody<CommunityResponse> result = joinCommunityService.approveJoinRequest(1);
+        CustomResponseBody<CommunityResponse> result = joinCommunityService.approveJoinRequest(TEST_REQUEST_ID);
 
         assertEquals(CustomResponseBody.Result.SUCCESS, result.result());
         assertNotNull(result.data());
         assertEquals("User approved and added as a resident with contact and address.", result.message());
         assertEquals(UserType.RESIDENT, testUser.getUserType());
-        assertEquals(1, testUser.getNeighbourhood_id());
+        assertEquals(TEST_NEIGHBOURHOOD_ID, testUser.getNeighbourhood_id());
         assertEquals("123-456-7890", testUser.getContact());
         assertEquals("123 Test St", testUser.getAddress());
         assertEquals(RequestStatus.APPROVED, testRequest.getStatus());
-        verify(helpRequestRepository).save(testRequest);
-        verify(userRepository).save(testUser);
+        verify(helpRequestRepository, times(EXPECTED_CALL_COUNT)).save(testRequest);
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).save(testUser);
     }
 
     @Test
     void approveJoinRequest_requestNotFound_returnsFailureResponse() {
-        when(helpRequestRepository.findById(1)).thenReturn(Optional.empty());
+        when(helpRequestRepository.findById(TEST_REQUEST_ID)).thenReturn(Optional.empty());
 
-        CustomResponseBody<CommunityResponse> result = joinCommunityService.approveJoinRequest(1);
+        CustomResponseBody<CommunityResponse> result = joinCommunityService.approveJoinRequest(TEST_REQUEST_ID);
 
         assertEquals(CustomResponseBody.Result.FAILURE, result.result());
         assertNull(result.data());
@@ -107,10 +112,10 @@ class JoinCommunityServiceImplTest {
 
     @Test
     void approveJoinRequest_userNotFound_returnsFailureResponse() {
-        when(helpRequestRepository.findById(1)).thenReturn(Optional.of(testRequest));
-        when(userRepository.findById(1)).thenReturn(Optional.empty());
+        when(helpRequestRepository.findById(TEST_REQUEST_ID)).thenReturn(Optional.of(testRequest));
+        when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.empty());
 
-        CustomResponseBody<CommunityResponse> result = joinCommunityService.approveJoinRequest(1);
+        CustomResponseBody<CommunityResponse> result = joinCommunityService.approveJoinRequest(TEST_REQUEST_ID);
 
         assertEquals(CustomResponseBody.Result.FAILURE, result.result());
         assertNull(result.data());
@@ -120,25 +125,25 @@ class JoinCommunityServiceImplTest {
 
     @Test
     void denyJoinRequest_successful_returnsSuccessResponse() {
-        when(helpRequestRepository.findById(1)).thenReturn(Optional.of(testRequest));
+        when(helpRequestRepository.findById(TEST_REQUEST_ID)).thenReturn(Optional.of(testRequest));
 
-        CustomResponseBody<CommunityResponse> result = joinCommunityService.denyJoinRequest(1);
+        CustomResponseBody<CommunityResponse> result = joinCommunityService.denyJoinRequest(TEST_REQUEST_ID);
 
         assertEquals(CustomResponseBody.Result.SUCCESS, result.result());
         assertNotNull(result.data());
         assertEquals("User denied and request status updated", result.message());
         assertEquals(RequestStatus.DECLINED, testRequest.getStatus());
-        assertEquals(1, result.data().getUserId());
-        assertEquals(1, result.data().getNeighbourhoodId());
-        verify(helpRequestRepository).save(testRequest);
+        assertEquals(TEST_USER_ID, result.data().getUserId());
+        assertEquals(TEST_NEIGHBOURHOOD_ID, result.data().getNeighbourhoodId());
+        verify(helpRequestRepository, times(EXPECTED_CALL_COUNT)).save(testRequest);
         verify(userRepository, never()).save(any());
     }
 
     @Test
     void denyJoinRequest_requestNotFound_returnsFailureResponse() {
-        when(helpRequestRepository.findById(1)).thenReturn(Optional.empty());
+        when(helpRequestRepository.findById(TEST_REQUEST_ID)).thenReturn(Optional.empty());
 
-        CustomResponseBody<CommunityResponse> result = joinCommunityService.denyJoinRequest(1);
+        CustomResponseBody<CommunityResponse> result = joinCommunityService.denyJoinRequest(TEST_REQUEST_ID);
 
         assertEquals(CustomResponseBody.Result.FAILURE, result.result());
         assertNull(result.data());
@@ -149,15 +154,15 @@ class JoinCommunityServiceImplTest {
     @Test
     void updateUserDetails_noPhoneOrAddress_updatesOnlyRequiredFields() {
         testRequest.setDescription("No contact info here");
-        when(helpRequestRepository.findById(1)).thenReturn(Optional.of(testRequest));
-        when(userRepository.findById(1)).thenReturn(Optional.of(testUser));
+        when(helpRequestRepository.findById(TEST_REQUEST_ID)).thenReturn(Optional.of(testRequest));
+        when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
 
-        joinCommunityService.approveJoinRequest(1);
+        joinCommunityService.approveJoinRequest(TEST_REQUEST_ID);
 
         assertEquals(UserType.RESIDENT, testUser.getUserType());
-        assertEquals(1, testUser.getNeighbourhood_id());
+        assertEquals(TEST_NEIGHBOURHOOD_ID, testUser.getNeighbourhood_id());
         assertNull(testUser.getContact());
         assertNull(testUser.getAddress());
-        verify(userRepository).save(testUser);
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).save(testUser);
     }
 }

@@ -1,16 +1,5 @@
 package com.dalhousie.Neighbourly.authentication.service;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Objects;
-import java.util.Optional;
-
-import com.dalhousie.Neighbourly.user.entity.UserType;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
 import com.dalhousie.Neighbourly.authentication.entity.Otp;
 import com.dalhousie.Neighbourly.authentication.entity.PasswordReset;
 import com.dalhousie.Neighbourly.authentication.jwt.JwtService;
@@ -19,23 +8,37 @@ import com.dalhousie.Neighbourly.authentication.requestEntity.OtpVerificationReq
 import com.dalhousie.Neighbourly.authentication.requestEntity.RegisterRequest;
 import com.dalhousie.Neighbourly.authentication.responseEntity.AuthenticationResponse;
 import com.dalhousie.Neighbourly.authentication.responseEntity.PasswordResetTokenResponse;
-import com.dalhousie.Neighbourly.authentication.service.OtpServiceImpl.TokenExpiredException;
 import com.dalhousie.Neighbourly.user.entity.User;
+import com.dalhousie.Neighbourly.user.entity.UserType;
 import com.dalhousie.Neighbourly.user.service.UserService;
-
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import jakarta.mail.internet.MimeMessage;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.mail.MessagingException;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
+import java.util.Objects;
+import java.util.Optional;
+
+/**
+ * Implementation of AuthenticationService for handling user authentication and related operations.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
+
+    private static final int LOCALHOST_PORT = 3000;
+    private static final int EXPIRATION_TIME_MINUTES = 5;
 
     private final UserService userService;
     private final OtpService otpService;
@@ -49,13 +52,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public AuthenticationResponse registerUser(RegisterRequest registerRequest) {
         checkIfUserExists(registerRequest.getEmail());
-        var user = createUser(registerRequest);
+        User user = createUser(registerRequest);
         userService.saveUser(user);
-        log.info("user entered");
+        log.info("User entered");
 
-        Otp otp = otpService.generateOtp(user.getId());
-        prepareAndDispatchOtpMail(otp.getOtp(), user.getEmail());
-
+        sendOtpForUser(user);
         return AuthenticationResponse.builder().token(null).build();
     }
 
@@ -92,7 +93,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private void checkIfUserExists(String email) {
         if (userService.isUserPresent(email)) {
-            throw new RuntimeException("provided user already exists");
+            throw new RuntimeException("Provided user already exists");
         }
     }
 
@@ -125,7 +126,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private Otp findAndValidateOtp(String otpValue) {
         Optional<Otp> otpOptional = otpService.findByOtp(otpValue);
         if (otpOptional.isEmpty() || !otpService.isOtpValid(otpOptional.get())) {
-            throw new TokenExpiredException("Invalid or expired OTP. Please try again.");
+            throw new OtpServiceImpl.TokenExpiredException("Invalid or expired OTP. Please try again.");
         }
         return otpOptional.get();
     }
@@ -135,9 +136,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
     }
 
+    private void sendOtpForUser(User user) {
+        Otp otp = otpService.generateOtp(user.getId());
+        prepareAndDispatchOtpMail(otp.getOtp(), user.getEmail());
+    }
+
     private void prepareAndDispatchOtpMail(String otp, String mail) {
         String subject = "Verify Your Email";
-        String content = "<p>Hello,</p><p>Your OTP for email verification is:</p><h2>" + otp + "</h2><p>This OTP is valid for 5 minutes.</p>";
+        String content = String.format("<p>Hello,</p><p>Your OTP for email verification is:</p><h2>%s</h2><p>This OTP is valid for %d minutes.</p>", otp, EXPIRATION_TIME_MINUTES);
         dispatchEmail(subject, content, mail);
     }
 
@@ -159,15 +165,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public void resetPassword(String email, String password, String token) {
         User user = getUserByEmail(email);
+        PasswordReset passwordReset = validateAndRetrieveResetToken(user.getId(), token);
+        updateUserPassword(email, password);
+        resetTokenService.deleteResetPasswordToken(passwordReset);
+    }
 
-        PasswordReset passwordReset = resetTokenService.findByUserId(user.getId())
+    private PasswordReset validateAndRetrieveResetToken(int userId, String token) {
+        PasswordReset passwordReset = resetTokenService.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("User did not initiate a reset password request."));
 
         validatePasswordResetToken(token, passwordReset);
-
-        String newPassword = passwordEncoder.encode(password);
-        userService.updatePassword(email, newPassword);
-        resetTokenService.deleteResetPasswordToken(passwordReset);
+        return passwordReset;
     }
 
     private void validatePasswordResetToken(String token, PasswordReset passwordReset) {
@@ -180,38 +188,46 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
     }
 
+    private void updateUserPassword(String email, String password) {
+        String newPassword = passwordEncoder.encode(password);
+        userService.updatePassword(email, newPassword);
+    }
+
     @Override
     public PasswordResetTokenResponse forgotPassword(String email, String resetUrl) {
         String resetToken = generateResetToken(email);
-        String resetPasswordLink = resetUrl + "?email=" + email;
-
-        log.info("Reset password link: {}", resetPasswordLink);
+        String resetPasswordLink = buildResetPasswordLink(resetUrl, email);
         prepareAndDispatchResetPwdLink(resetPasswordLink, email);
-
         return PasswordResetTokenResponse.builder().token(resetToken).build();
     }
 
     private String generateResetToken(String email) {
         User user = userService.findUserByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
-
         return resetTokenService.createResetPasswordToken(user.getId()).getToken();
+    }
+
+    private String buildResetPasswordLink(String resetUrl, String email) {
+        String resetPasswordLink = resetUrl + "?email=" + email;
+        log.info("Reset password link: {}", resetPasswordLink);
+        return resetPasswordLink;
     }
 
     private void prepareAndDispatchResetPwdLink(String resetPasswordLink, String email) {
         String subject = "Reset Your Password";
-        String content = "<p>Hello,</p><p>You have requested to reset your password. Please click the link below to create a new password. This link is valid for only 5 minutes for your security.</p><p>If you did not request this change, please ignore this email.</p><p>Click the link below to reset your password:</p><p><a href=\"" + resetPasswordLink + "\">Reset My Password</a></p><p>For your safety, please do not share this link with anyone.</p><p>Thank you!</p>";
+        String content = String.format(
+                "<p>Hello,</p><p>You have requested to reset your password. Please click the link below to create a new password. This link is valid for only %d minutes for your security.</p><p>If you did not request this change, please ignore this email.</p><p>Click the link below to reset your password:</p><p><a href=\"%s\">Reset My Password</a></p><p>For your safety, please do not share this link with anyone.</p><p>Thank you!</p>",
+                EXPIRATION_TIME_MINUTES, resetPasswordLink);
         dispatchEmail(subject, content, email);
     }
 
     @Override
     public String getURL(HttpServletRequest request) {
         String siteURL = request.getRequestURL().toString().replace(request.getServletPath(), "");
-        int port = 3000;
         try {
             java.net.URL oldURL = new java.net.URL(siteURL);
             if ("localhost".equalsIgnoreCase(oldURL.getHost())) {
-                return new java.net.URL(oldURL.getProtocol(), oldURL.getHost(), port, oldURL.getFile()).toString();
+                return new java.net.URL(oldURL.getProtocol(), oldURL.getHost(), LOCALHOST_PORT, oldURL.getFile()).toString();
             }
             return new java.net.URL(oldURL.getProtocol(), oldURL.getHost(), oldURL.getFile()).toString();
         } catch (Exception e) {
@@ -219,4 +235,3 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
     }
 }
-

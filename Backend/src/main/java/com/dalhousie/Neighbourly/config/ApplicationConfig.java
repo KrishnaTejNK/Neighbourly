@@ -24,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class ApplicationConfig {
 
     private final UserService userService;
-
+    private static final int PORT = 587;
 
     /*@Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
@@ -35,10 +35,10 @@ public class ApplicationConfig {
 
     @Bean
     public JavaMailSender javaMailSender() {
-        int port = 587;
+
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost("smtp.gmail.com");
-        mailSender.setPort(port);
+        mailSender.setPort(PORT);
         mailSender.setUsername("devpatel43543@gmail.com");
         mailSender.setPassword("dfjragryfjtqnkwp");
 

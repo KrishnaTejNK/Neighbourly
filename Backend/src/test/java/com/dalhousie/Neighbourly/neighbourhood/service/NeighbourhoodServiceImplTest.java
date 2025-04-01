@@ -20,6 +20,9 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class NeighbourhoodServiceImplTest {
 
+    private static final int TEST_NEIGHBOURHOOD_ID = 1;
+    private static final int MOCK_TEST_NEIGHBOURHOOD_ID = 3;
+    private static final int MOCK_TEST_NEIGHBOURHOOD_ID2 = 5;
     @Mock
     private NeighbourhoodRepository neighbourhoodRepository;
 
@@ -34,32 +37,34 @@ class NeighbourhoodServiceImplTest {
     @BeforeEach
     void setUp() {
         testNeighbourhood = new Neighbourhood();
-        testNeighbourhood.setNeighbourhoodId(1);
+        testNeighbourhood.setNeighbourhoodId(TEST_NEIGHBOURHOOD_ID);
         testNeighbourhood.setName("Test Neighbourhood");
         testNeighbourhood.setLocation("Test Location");
     }
 
     @Test
     void getAllNeighbourhoods_withNeighbourhoods_returnsResponseList() {
+
+
         when(neighbourhoodRepository.findAll()).thenReturn(List.of(testNeighbourhood));
-        when(userRepository.countByNeighbourhoodId(1)).thenReturn(5L);
-        when(userRepository.findManagerNameByNeighbourhoodId(1)).thenReturn("Test Manager");
-        when(userRepository.userRepositoryFindManagerIdByNeighbourhoodId(1)).thenReturn("manager1");
+        when(userRepository.countByNeighbourhoodId(TEST_NEIGHBOURHOOD_ID)).thenReturn((long) MOCK_TEST_NEIGHBOURHOOD_ID2);
+        when(userRepository.findManagerNameByNeighbourhoodId(TEST_NEIGHBOURHOOD_ID)).thenReturn("Test Manager");
+        when(userRepository.userRepositoryFindManagerIdByNeighbourhoodId(TEST_NEIGHBOURHOOD_ID)).thenReturn("manager1");
 
         List<NeighbourhoodResponse> result = neighbourhoodService.getAllNeighbourhoods();
 
         assertEquals(1, result.size());
         NeighbourhoodResponse response = result.get(0);
-        assertEquals(1, response.getNeighbourhoodId());
+        assertEquals(TEST_NEIGHBOURHOOD_ID, response.getNeighbourhoodId());
         assertEquals("Test Neighbourhood", response.getName());
         assertEquals("Test Location", response.getLocation());
         assertEquals("5", response.getMemberCount());
         assertEquals("Test Manager", response.getManagerName());
         assertEquals("manager1", response.getManagerId());
         verify(neighbourhoodRepository).findAll();
-        verify(userRepository).countByNeighbourhoodId(1);
-        verify(userRepository).findManagerNameByNeighbourhoodId(1);
-        verify(userRepository).userRepositoryFindManagerIdByNeighbourhoodId(1);
+        verify(userRepository).countByNeighbourhoodId(TEST_NEIGHBOURHOOD_ID);
+        verify(userRepository).findManagerNameByNeighbourhoodId(TEST_NEIGHBOURHOOD_ID);
+        verify(userRepository).userRepositoryFindManagerIdByNeighbourhoodId(TEST_NEIGHBOURHOOD_ID);
     }
 
     @Test
@@ -78,9 +83,9 @@ class NeighbourhoodServiceImplTest {
     @Test
     void mapToNeighbourhoodResponse_noManager_returnsDefaultValues() {
         when(neighbourhoodRepository.findAll()).thenReturn(List.of(testNeighbourhood));
-        when(userRepository.countByNeighbourhoodId(1)).thenReturn(0L);
-        when(userRepository.findManagerNameByNeighbourhoodId(1)).thenReturn(null);
-        when(userRepository.userRepositoryFindManagerIdByNeighbourhoodId(1)).thenReturn(null);
+        when(userRepository.countByNeighbourhoodId(TEST_NEIGHBOURHOOD_ID)).thenReturn(0L);
+        when(userRepository.findManagerNameByNeighbourhoodId(TEST_NEIGHBOURHOOD_ID)).thenReturn(null);
+        when(userRepository.userRepositoryFindManagerIdByNeighbourhoodId(TEST_NEIGHBOURHOOD_ID)).thenReturn(null);
 
         List<NeighbourhoodResponse> result = neighbourhoodService.getAllNeighbourhoods();
 
@@ -90,17 +95,18 @@ class NeighbourhoodServiceImplTest {
         assertEquals("No Manager Assigned", response.getManagerName());
         assertEquals("", response.getManagerId());
         verify(neighbourhoodRepository).findAll();
-        verify(userRepository).countByNeighbourhoodId(1);
-        verify(userRepository).findManagerNameByNeighbourhoodId(1);
-        verify(userRepository).userRepositoryFindManagerIdByNeighbourhoodId(1);
+        verify(userRepository).countByNeighbourhoodId(TEST_NEIGHBOURHOOD_ID);
+        verify(userRepository).findManagerNameByNeighbourhoodId(TEST_NEIGHBOURHOOD_ID);
+        verify(userRepository).userRepositoryFindManagerIdByNeighbourhoodId(TEST_NEIGHBOURHOOD_ID);
     }
 
     @Test
     void mapToNeighbourhoodResponse_blankManagerName_returnsDefaultName() {
+
         when(neighbourhoodRepository.findAll()).thenReturn(List.of(testNeighbourhood));
-        when(userRepository.countByNeighbourhoodId(1)).thenReturn(3L);
-        when(userRepository.findManagerNameByNeighbourhoodId(1)).thenReturn("");
-        when(userRepository.userRepositoryFindManagerIdByNeighbourhoodId(1)).thenReturn("manager1");
+        when(userRepository.countByNeighbourhoodId(TEST_NEIGHBOURHOOD_ID)).thenReturn((long) MOCK_TEST_NEIGHBOURHOOD_ID);
+        when(userRepository.findManagerNameByNeighbourhoodId(TEST_NEIGHBOURHOOD_ID)).thenReturn("");
+        when(userRepository.userRepositoryFindManagerIdByNeighbourhoodId(TEST_NEIGHBOURHOOD_ID)).thenReturn("manager1");
 
         List<NeighbourhoodResponse> result = neighbourhoodService.getAllNeighbourhoods();
 
@@ -110,8 +116,8 @@ class NeighbourhoodServiceImplTest {
         assertEquals("No Manager Assigned", response.getManagerName());
         assertEquals("manager1", response.getManagerId());
         verify(neighbourhoodRepository).findAll();
-        verify(userRepository).countByNeighbourhoodId(1);
-        verify(userRepository).findManagerNameByNeighbourhoodId(1);
-        verify(userRepository).userRepositoryFindManagerIdByNeighbourhoodId(1);
+        verify(userRepository).countByNeighbourhoodId(TEST_NEIGHBOURHOOD_ID);
+        verify(userRepository).findManagerNameByNeighbourhoodId(TEST_NEIGHBOURHOOD_ID);
+        verify(userRepository).userRepositoryFindManagerIdByNeighbourhoodId(TEST_NEIGHBOURHOOD_ID);
     }
 }

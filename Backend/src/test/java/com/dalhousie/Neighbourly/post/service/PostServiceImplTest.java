@@ -29,6 +29,12 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class PostServiceImplTest {
 
+    private static final int TEST_USER_ID = 1;
+    private static final int TEST_NEIGHBOURHOOD_ID = 1;
+    private static final int TEST_POST_ID = 1;
+    private static final int EXPECTED_LIST_SIZE = 1;
+    private static final int EXPECTED_CALL_COUNT = 1;
+
     @Mock
     private PostRepository postRepository;
 
@@ -49,24 +55,24 @@ public class PostServiceImplTest {
     @BeforeEach
     void setUp() {
         testUser = new User();
-        testUser.setId(1);
+        testUser.setId(TEST_USER_ID);
         testUser.setEmail("test@example.com");
         testUser.setName("Test User");
 
         testNeighbourhood = new Neighbourhood();
-        testNeighbourhood.setNeighbourhoodId(1);
+        testNeighbourhood.setNeighbourhoodId(TEST_NEIGHBOURHOOD_ID);
 
         testPost = new Post();
-        testPost.setPostId(1);
-        testPost.setUser_id(1);
-        testPost.setNeighbourhood_id(1);
+        testPost.setPostId(TEST_POST_ID);
+        testPost.setUser_id(TEST_USER_ID);
+        testPost.setNeighbourhood_id(TEST_NEIGHBOURHOOD_ID);
         testPost.setPostType("General");
         testPost.setPostContent("Test content");
         testPost.setDateTime(LocalDateTime.now());
 
         testPostRequest = new PostRequest();
         testPostRequest.setEmail("test@example.com");
-        testPostRequest.setNeighbourhoodId(1);
+        testPostRequest.setNeighbourhoodId(TEST_NEIGHBOURHOOD_ID);
         testPostRequest.setPostContent("Test content");
         testPostRequest.setPostType("General");
     }
@@ -75,7 +81,7 @@ public class PostServiceImplTest {
     void createPost_successful_returnsSuccessMessage() {
         // Arrange
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
-        when(neighbourhoodRepository.findById(1)).thenReturn(Optional.of(testNeighbourhood));
+        when(neighbourhoodRepository.findById(TEST_NEIGHBOURHOOD_ID)).thenReturn(Optional.of(testNeighbourhood));
         when(postRepository.save(any(Post.class))).thenReturn(testPost);
 
         // Act
@@ -83,9 +89,9 @@ public class PostServiceImplTest {
 
         // Assert
         assertEquals("Post created successfully!", result);
-        verify(userRepository, times(1)).findByEmail("test@example.com");
-        verify(neighbourhoodRepository, times(1)).findById(1);
-        verify(postRepository, times(1)).save(any(Post.class));
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).findByEmail("test@example.com");
+        verify(neighbourhoodRepository, times(EXPECTED_CALL_COUNT)).findById(TEST_NEIGHBOURHOOD_ID);
+        verify(postRepository, times(EXPECTED_CALL_COUNT)).save(any(Post.class));
     }
 
     @Test
@@ -98,7 +104,7 @@ public class PostServiceImplTest {
 
         // Assert
         assertEquals("User not found!", result);
-        verify(userRepository, times(1)).findByEmail("test@example.com");
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).findByEmail("test@example.com");
         verify(neighbourhoodRepository, never()).findById(anyInt());
         verify(postRepository, never()).save(any());
     }
@@ -107,116 +113,116 @@ public class PostServiceImplTest {
     void createPost_neighbourhoodNotFound_returnsErrorMessage() {
         // Arrange
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
-        when(neighbourhoodRepository.findById(1)).thenReturn(Optional.empty());
+        when(neighbourhoodRepository.findById(TEST_NEIGHBOURHOOD_ID)).thenReturn(Optional.empty());
 
         // Act
         String result = postService.createPost(testPostRequest);
 
         // Assert
         assertEquals("Neighbourhood not found!", result);
-        verify(userRepository, times(1)).findByEmail("test@example.com");
-        verify(neighbourhoodRepository, times(1)).findById(1);
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).findByEmail("test@example.com");
+        verify(neighbourhoodRepository, times(EXPECTED_CALL_COUNT)).findById(TEST_NEIGHBOURHOOD_ID);
         verify(postRepository, never()).save(any());
     }
 
     @Test
     void getPostsByNeighbourhood_returnsPostList() {
         // Arrange
-        when(postRepository.findAllByNeighbourhoodId(1)).thenReturn(List.of(testPost));
-        when(userRepository.findById(1)).thenReturn(Optional.of(testUser));
+        when(postRepository.findAllByNeighbourhoodId(TEST_NEIGHBOURHOOD_ID)).thenReturn(List.of(testPost));
+        when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
 
         // Act
-        List<PostResponseDTO> result = postService.getPostsByNeighbourhood(1);
+        List<PostResponseDTO> result = postService.getPostsByNeighbourhood(TEST_NEIGHBOURHOOD_ID);
 
         // Assert
         assertNotNull(result);
-        assertEquals(1, result.size());
+        assertEquals(EXPECTED_LIST_SIZE, result.size());
         PostResponseDTO dto = result.get(0);
-        assertEquals(1, dto.getPostId());
-        assertEquals(1, dto.getUserId());
+        assertEquals(TEST_POST_ID, dto.getPostId());
+        assertEquals(TEST_USER_ID, dto.getUserId());
         assertEquals("Test User", dto.getUserName());
         assertEquals("Test content", dto.getPostContent());
         assertEquals(testPost.getDateTime(), dto.getDateTime());
-        verify(postRepository, times(1)).findAllByNeighbourhoodId(1);
-        verify(userRepository, times(1)).findById(1);
+        verify(postRepository, times(EXPECTED_CALL_COUNT)).findAllByNeighbourhoodId(TEST_NEIGHBOURHOOD_ID);
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).findById(TEST_USER_ID);
     }
 
     @Test
     void getPostsByNeighbourhood_userNotFound_returnsUnknownUser() {
         // Arrange
-        when(postRepository.findAllByNeighbourhoodId(1)).thenReturn(List.of(testPost));
-        when(userRepository.findById(1)).thenReturn(Optional.empty());
+        when(postRepository.findAllByNeighbourhoodId(TEST_NEIGHBOURHOOD_ID)).thenReturn(List.of(testPost));
+        when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.empty());
 
         // Act
-        List<PostResponseDTO> result = postService.getPostsByNeighbourhood(1);
+        List<PostResponseDTO> result = postService.getPostsByNeighbourhood(TEST_NEIGHBOURHOOD_ID);
 
         // Assert
         assertNotNull(result);
-        assertEquals(1, result.size());
+        assertEquals(EXPECTED_LIST_SIZE, result.size());
         PostResponseDTO dto = result.get(0);
         assertEquals("Unknown User", dto.getUserName());
-        verify(postRepository, times(1)).findAllByNeighbourhoodId(1);
-        verify(userRepository, times(1)).findById(1);
+        verify(postRepository, times(EXPECTED_CALL_COUNT)).findAllByNeighbourhoodId(TEST_NEIGHBOURHOOD_ID);
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).findById(TEST_USER_ID);
     }
 
     @Test
     void deletePost_postExists_returnsTrue() {
         // Arrange
-        when(postRepository.findById(1)).thenReturn(Optional.of(testPost));
+        when(postRepository.findById(TEST_POST_ID)).thenReturn(Optional.of(testPost));
 
         // Act
-        boolean result = postService.deletePost(1);
+        boolean result = postService.deletePost(TEST_POST_ID);
 
         // Assert
         assertTrue(result);
-        verify(postRepository, times(1)).findById(1);
-        verify(postRepository, times(1)).deleteById(1);
+        verify(postRepository, times(EXPECTED_CALL_COUNT)).findById(TEST_POST_ID);
+        verify(postRepository, times(EXPECTED_CALL_COUNT)).deleteById(TEST_POST_ID);
     }
 
     @Test
     void deletePost_postNotFound_returnsFalse() {
         // Arrange
-        when(postRepository.findById(1)).thenReturn(Optional.empty());
+        when(postRepository.findById(TEST_POST_ID)).thenReturn(Optional.empty());
 
         // Act
-        boolean result = postService.deletePost(1);
+        boolean result = postService.deletePost(TEST_POST_ID);
 
         // Assert
         assertFalse(result);
-        verify(postRepository, times(1)).findById(1);
+        verify(postRepository, times(EXPECTED_CALL_COUNT)).findById(TEST_POST_ID);
         verify(postRepository, never()).deleteById(anyInt());
     }
 
     @Test
     void getPostById_postExists_returnsPostDTO() {
         // Arrange
-        when(postRepository.findById(1)).thenReturn(Optional.of(testPost));
-        when(userRepository.findById(1)).thenReturn(Optional.of(testUser));
+        when(postRepository.findById(TEST_POST_ID)).thenReturn(Optional.of(testPost));
+        when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
 
         // Act
-        PostResponseDTO result = postService.getPostById(1);
+        PostResponseDTO result = postService.getPostById(TEST_POST_ID);
 
         // Assert
         assertNotNull(result);
-        assertEquals(1, result.getPostId());
-        assertEquals(1, result.getUserId());
+        assertEquals(TEST_POST_ID, result.getPostId());
+        assertEquals(TEST_USER_ID, result.getUserId());
         assertEquals("Test User", result.getUserName());
         assertEquals("Test content", result.getPostContent());
         assertEquals(testPost.getDateTime(), result.getDateTime());
-        verify(postRepository, times(1)).findById(1);
-        verify(userRepository, times(1)).findById(1);
+        verify(postRepository, times(EXPECTED_CALL_COUNT)).findById(TEST_POST_ID);
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).findById(TEST_USER_ID);
     }
 
     @Test
     void getPostById_postNotFound_throwsException() {
         // Arrange
-        when(postRepository.findById(1)).thenReturn(Optional.empty());
+        when(postRepository.findById(TEST_POST_ID)).thenReturn(Optional.empty());
 
         // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> postService.getPostById(1));
-        assertEquals("Post not found with ID: 1", exception.getMessage());
-        verify(postRepository, times(1)).findById(1);
+                () -> postService.getPostById(TEST_POST_ID));
+        assertEquals("Post not found with ID: " + TEST_POST_ID, exception.getMessage());
+        verify(postRepository, times(EXPECTED_CALL_COUNT)).findById(TEST_POST_ID);
         verify(userRepository, never()).findById(anyInt());
     }
 }

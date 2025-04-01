@@ -26,6 +26,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 public class ReportControllerTest {
 
+    private static final int TEST_REPORT_ID = 1;
+    private static final int TEST_POST_ID = 2;
+    private static final int TEST_NEIGHBOURHOOD_ID = 3;
+    private static final int TEST_REPORTER_ID = 4;
+    private static final int EXPECTED_CALL_COUNT = 1;
+
     private MockMvc mockMvc;
 
     @Mock
@@ -44,20 +50,20 @@ public class ReportControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(reportController).build();
 
         testReportDTO = new ReportDTO();
-        testReportDTO.setUserId(1); // Assuming setter names match your comment
-        testReportDTO.setPostId(2);
-        testReportDTO.setNeighbourhoodId(3);
-        testReportDTO.setUserId(4);   // Assuming this maps to reporterId
+        testReportDTO.setUserId(TEST_REPORT_ID); // Assuming this was meant as report ID or similar
+        testReportDTO.setPostId(TEST_POST_ID);
+        testReportDTO.setNeighbourhoodId(TEST_NEIGHBOURHOOD_ID);
+        testReportDTO.setUserId(TEST_REPORTER_ID); // Assuming this maps to reporterId based on test usage
     }
 
     @Test
     void reportPost_successful_returnsOk() throws Exception {
         // Arrange
         Map<String, Object> request = new HashMap<>();
-        request.put("neighbourhoodId", 3);
-        request.put("postId", 2);
-        request.put("reporterId", 4);
-        doNothing().when(reportService).reportPost(3, 2, 4);
+        request.put("neighbourhoodId", TEST_NEIGHBOURHOOD_ID);
+        request.put("postId", TEST_POST_ID);
+        request.put("reporterId", TEST_REPORTER_ID);
+        doNothing().when(reportService).reportPost(TEST_NEIGHBOURHOOD_ID, TEST_POST_ID, TEST_REPORTER_ID);
 
         // Act & Assert
         mockMvc.perform(post("/api/reports/report")
@@ -66,35 +72,34 @@ public class ReportControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("Post reported successfully."));
 
-        verify(reportService, times(1)).reportPost(3, 2, 4);
+        verify(reportService, times(EXPECTED_CALL_COUNT)).reportPost(TEST_NEIGHBOURHOOD_ID, TEST_POST_ID, TEST_REPORTER_ID);
     }
-
 
     @Test
     void approvePost_successful_returnsOk() throws Exception {
         // Arrange
-        doNothing().when(reportService).approvePost(1);
+        doNothing().when(reportService).approvePost(TEST_REPORT_ID);
 
         // Act & Assert
-        mockMvc.perform(put("/api/reports/approve/1")
+        mockMvc.perform(put("/api/reports/approve/" + TEST_REPORT_ID)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Post approved."));
 
-        verify(reportService, times(1)).approvePost(1);
+        verify(reportService, times(EXPECTED_CALL_COUNT)).approvePost(TEST_REPORT_ID);
     }
 
     @Test
     void deletePost_successful_returnsOk() throws Exception {
         // Arrange
-        doNothing().when(reportService).deletePost(1);
+        doNothing().when(reportService).deletePost(TEST_REPORT_ID);
 
         // Act & Assert
-        mockMvc.perform(delete("/api/reports/delete/1")
+        mockMvc.perform(delete("/api/reports/delete/" + TEST_REPORT_ID)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Post deleted."));
 
-        verify(reportService, times(1)).deletePost(1);
+        verify(reportService, times(EXPECTED_CALL_COUNT)).deletePost(TEST_REPORT_ID);
     }
 }

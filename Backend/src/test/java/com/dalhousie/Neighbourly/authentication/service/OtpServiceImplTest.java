@@ -18,6 +18,11 @@ import static org.mockito.ArgumentMatchers.anyString;
 
 class OtpServiceImplTest {
 
+    private static final String TEST_OTP = "123456";
+    private static final int TEST_USER_ID = 1;
+    private static final long OTP_EXPIRY_DURATION_MS = 1000L * 60 * 10; // 10 minutes
+    private static final int EXPECTED_DELETE_CALL_COUNT = 2;
+
     @Mock
     private OtpRepository otpRepository;
 
@@ -25,10 +30,6 @@ class OtpServiceImplTest {
     private OtpServiceImpl otpService;
 
     private Otp otp;
-
-    private static final String TEST_OTP = "123456";
-    private static final int TEST_USER_ID = 1;
-    private static final long OTP_EXPIRY_DURATION_MS = 1000L * 60 * 10; // 10 minutes
 
     @BeforeEach
     void setUp() {
@@ -61,7 +62,7 @@ class OtpServiceImplTest {
 
         assertNotNull(newOtp);
         assertEquals(TEST_OTP, newOtp.getOtp());
-        Mockito.verify(otpRepository, Mockito.times(2)).deleteByUserId(anyInt());
+        Mockito.verify(otpRepository, Mockito.times(EXPECTED_DELETE_CALL_COUNT)).deleteByUserId(anyInt());
         Mockito.verify(otpRepository).save(Mockito.any(Otp.class));
     }
 

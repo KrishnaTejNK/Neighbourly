@@ -22,6 +22,10 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class AmenityServiceImplTest {
 
+    private static final int TEST_NEIGHBOURHOOD_ID_1 = 1;
+    private static final int TEST_NEIGHBOURHOOD_ID_2 = 2;
+    private static final int TEST_AMENITY_ID = 1;
+
     @Mock
     private AmenityRepository amenityRepository;
 
@@ -36,50 +40,48 @@ class AmenityServiceImplTest {
     @Test
     void getAmenitiesByNeighbourhood_returnsAmenities() {
         // Arrange
-        int neighbourhoodId = 1;
         Amenity mockAmenity = new Amenity();
-        mockAmenity.setAmenityId(1);
-        mockAmenity.setNeighbourhoodId(neighbourhoodId);
+        mockAmenity.setAmenityId(TEST_AMENITY_ID);
+        mockAmenity.setNeighbourhoodId(TEST_NEIGHBOURHOOD_ID_1);
         mockAmenity.setName("Pool");
         List<Amenity> mockAmenities = List.of(mockAmenity);
 
-        when(amenityRepository.findByNeighbourhoodId(neighbourhoodId)).thenReturn(mockAmenities);
+        when(amenityRepository.findByNeighbourhoodId(TEST_NEIGHBOURHOOD_ID_1)).thenReturn(mockAmenities);
 
         // Act
-        List<Amenity> result = amenityService.getAmenitiesByNeighbourhood(neighbourhoodId);
+        List<Amenity> result = amenityService.getAmenitiesByNeighbourhood(TEST_NEIGHBOURHOOD_ID_1);
 
         // Assert
         assertNotNull(result, "Result should not be null");
         assertEquals(1, result.size(), "Should return one amenity");
         assertEquals("Pool", result.get(0).getName(), "Amenity name should match");
-        verify(amenityRepository, times(1)).findByNeighbourhoodId(neighbourhoodId);
+        verify(amenityRepository, times(1)).findByNeighbourhoodId(TEST_NEIGHBOURHOOD_ID_1);
     }
 
     @Test
     void getAmenitiesByNeighbourhood_returnsEmptyList_whenNoAmenitiesFound() {
         // Arrange
-        int neighbourhoodId = 2;
-        when(amenityRepository.findByNeighbourhoodId(neighbourhoodId)).thenReturn(Collections.emptyList());
+        when(amenityRepository.findByNeighbourhoodId(TEST_NEIGHBOURHOOD_ID_2)).thenReturn(Collections.emptyList());
 
         // Act
-        List<Amenity> result = amenityService.getAmenitiesByNeighbourhood(neighbourhoodId);
+        List<Amenity> result = amenityService.getAmenitiesByNeighbourhood(TEST_NEIGHBOURHOOD_ID_2);
 
         // Assert
         assertNotNull(result, "Result should not be null");
         assertTrue(result.isEmpty(), "Should return an empty list when no amenities are found");
-        verify(amenityRepository, times(1)).findByNeighbourhoodId(neighbourhoodId);
+        verify(amenityRepository, times(1)).findByNeighbourhoodId(TEST_NEIGHBOURHOOD_ID_2);
     }
 
     @Test
     void createAmenity_savesAndReturnsAmenity() {
         // Arrange
         Amenity amenityToCreate = new Amenity();
-        amenityToCreate.setNeighbourhoodId(1);
+        amenityToCreate.setNeighbourhoodId(TEST_NEIGHBOURHOOD_ID_1);
         amenityToCreate.setName("Gym");
 
         Amenity savedAmenity = new Amenity();
-        savedAmenity.setAmenityId(1); // Simulate ID assigned by repository
-        savedAmenity.setNeighbourhoodId(1);
+        savedAmenity.setAmenityId(TEST_AMENITY_ID); // Simulate ID assigned by repository
+        savedAmenity.setNeighbourhoodId(TEST_NEIGHBOURHOOD_ID_1);
         savedAmenity.setName("Gym");
 
         when(amenityRepository.save(any(Amenity.class))).thenReturn(savedAmenity);
@@ -89,7 +91,7 @@ class AmenityServiceImplTest {
 
         // Assert
         assertNotNull(result, "Result should not be null");
-        assertEquals(1, result.getAmenityId(), "ID should be set after saving");
+        assertEquals(TEST_AMENITY_ID, result.getAmenityId(), "ID should be set after saving");
         assertEquals("Gym", result.getName(), "Amenity name should match");
         verify(amenityRepository, times(1)).save(amenityToCreate);
     }
@@ -97,12 +99,10 @@ class AmenityServiceImplTest {
     @Test
     void deleteAmenity_deletesById() {
         // Arrange
-        int amenityId = 1;
-
         // Act
-        amenityService.deleteAmenity(amenityId);
+        amenityService.deleteAmenity(TEST_AMENITY_ID);
 
         // Assert
-        verify(amenityRepository, times(1)).deleteById(amenityId);
+        verify(amenityRepository, times(1)).deleteById(TEST_AMENITY_ID);
     }
 }

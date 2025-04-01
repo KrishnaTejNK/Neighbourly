@@ -34,6 +34,15 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class BookingRequestServiceImplTest {
 
+    private static final int TEST_USER_ID = 1;
+    private static final int TEST_NEIGHBOURHOOD_ID = 1;
+    private static final int TEST_AMENITY_ID = 1;
+    private static final int TEST_BOOKING_ID = 1;
+    private static final int MISSING_BOOKING_ID = 999;
+    private static final int EXPECTED_CALL_COUNT = 1;
+    private static final int BOOKING_DURATION_HOURS = 2;
+    private static final int EXPECTED_ATTENDEES = 10;
+
     @Mock
     private BookingRequestRepository bookingRequestRepository;
 
@@ -57,20 +66,20 @@ class BookingRequestServiceImplTest {
     @BeforeEach
     void setUp() {
         mockUser = new User();
-        mockUser.setId(1);
+        mockUser.setId(TEST_USER_ID);
 
         mockNeighbourhood = new Neighbourhood();
-        mockNeighbourhood.setNeighbourhoodId(1);
+        mockNeighbourhood.setNeighbourhoodId(TEST_NEIGHBOURHOOD_ID);
 
         mockAmenity = new Amenity();
-        mockAmenity.setAmenityId(1);
+        mockAmenity.setAmenityId(TEST_AMENITY_ID);
         mockAmenity.setStatus(Status.AVAILABLE);
 
         mockRequest = new BookingRequest();
-        mockRequest.setBookingId(1);
-        mockRequest.setUser_id(1);
-        mockRequest.setNeighbourhood_id(1);
-        mockRequest.setAmenity_id(1);
+        mockRequest.setBookingId(TEST_BOOKING_ID);
+        mockRequest.setUser_id(TEST_USER_ID);
+        mockRequest.setNeighbourhood_id(TEST_NEIGHBOURHOOD_ID);
+        mockRequest.setAmenity_id(TEST_AMENITY_ID);
         mockRequest.setStatus(BookingStatus.PENDING);
     }
 
@@ -78,17 +87,17 @@ class BookingRequestServiceImplTest {
     void createBookingRequest_createsAndReturnsRequest() {
         // Arrange
         BookingRequestDTO dto = new BookingRequestDTO();
-        dto.setUser_id(1);
-        dto.setNeighbourhood_id(1);
-        dto.setAmenityId(1);
+        dto.setUser_id(TEST_USER_ID);
+        dto.setNeighbourhood_id(TEST_NEIGHBOURHOOD_ID);
+        dto.setAmenityId(TEST_AMENITY_ID);
         dto.setName("Event");
         dto.setDescription("Test event");
         dto.setBookingFrom(LocalDateTime.now());
-        dto.setBookingTo(LocalDateTime.now().plusHours(2));
-        dto.setExpectedAttendees(10);
+        dto.setBookingTo(LocalDateTime.now().plusHours(BOOKING_DURATION_HOURS));
+        dto.setExpectedAttendees(EXPECTED_ATTENDEES);
 
-        when(userRepository.findById(1)).thenReturn(Optional.of(mockUser));
-        when(neighbourhoodRepository.findById(1)).thenReturn(Optional.of(mockNeighbourhood));
+        when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(mockUser));
+        when(neighbourhoodRepository.findById(TEST_NEIGHBOURHOOD_ID)).thenReturn(Optional.of(mockNeighbourhood));
         when(bookingRequestRepository.save(any(BookingRequest.class))).thenReturn(mockRequest);
 
         // Act
@@ -96,137 +105,130 @@ class BookingRequestServiceImplTest {
 
         // Assert
         assertNotNull(result);
-        assertEquals(1, result.getUser_id());
-        assertEquals(1, result.getNeighbourhood_id());
-        assertEquals(1, result.getAmenity_id());
+        assertEquals(TEST_USER_ID, result.getUser_id());
+        assertEquals(TEST_NEIGHBOURHOOD_ID, result.getNeighbourhood_id());
+        assertEquals(TEST_AMENITY_ID, result.getAmenity_id());
         assertEquals(BookingStatus.PENDING, result.getStatus());
-        verify(bookingRequestRepository, times(1)).save(any(BookingRequest.class));
+        verify(bookingRequestRepository, times(EXPECTED_CALL_COUNT)).save(any(BookingRequest.class));
     }
 
     @Test
     void createBookingRequest_throwsException_whenUserNotFound() {
         // Arrange
         BookingRequestDTO dto = new BookingRequestDTO();
-        dto.setUser_id(1);
-        dto.setNeighbourhood_id(1);
+        dto.setUser_id(TEST_USER_ID);
+        dto.setNeighbourhood_id(TEST_NEIGHBOURHOOD_ID);
 
-        when(userRepository.findById(1)).thenReturn(Optional.empty());
+        when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.empty());
 
         // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> bookingRequestService.createBookingRequest(dto));
-        assertEquals("User not found for ID: 1", exception.getMessage());
+        assertEquals("User not found for ID: " + TEST_USER_ID, exception.getMessage());
     }
 
     @Test
     void getBookingsByNeighbourhood_returnsBookings() {
         // Arrange
-        int neighbourhoodId = 1;
-        when(bookingRequestRepository.findByNeighbourhood_id(neighbourhoodId)).thenReturn(List.of(mockRequest));
+        when(bookingRequestRepository.findByNeighbourhood_id(TEST_NEIGHBOURHOOD_ID)).thenReturn(List.of(mockRequest));
 
         // Act
-        List<BookingRequest> result = bookingRequestService.getBookingsByNeighbourhood(neighbourhoodId);
+        List<BookingRequest> result = bookingRequestService.getBookingsByNeighbourhood(TEST_NEIGHBOURHOOD_ID);
 
         // Assert
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(mockRequest, result.get(0));
-        verify(bookingRequestRepository, times(1)).findByNeighbourhood_id(neighbourhoodId);
+        verify(bookingRequestRepository, times(EXPECTED_CALL_COUNT)).findByNeighbourhood_id(TEST_NEIGHBOURHOOD_ID);
     }
 
     @Test
     void getBookingsByAmenity_returnsBookings() {
         // Arrange
-        int amenityId = 1;
-        when(bookingRequestRepository.findByAmenity_id(amenityId)).thenReturn(List.of(mockRequest));
+        when(bookingRequestRepository.findByAmenity_id(TEST_AMENITY_ID)).thenReturn(List.of(mockRequest));
 
         // Act
-        List<BookingRequest> result = bookingRequestService.getBookingsByAmenity(amenityId);
+        List<BookingRequest> result = bookingRequestService.getBookingsByAmenity(TEST_AMENITY_ID);
 
         // Assert
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(mockRequest, result.get(0));
-        verify(bookingRequestRepository, times(1)).findByAmenity_id(amenityId);
+        verify(bookingRequestRepository, times(EXPECTED_CALL_COUNT)).findByAmenity_id(TEST_AMENITY_ID);
     }
 
     @Test
     void getPendingRequests_returnsPendingRequests() {
         // Arrange
-        int neighbourhoodId = 1;
-        when(bookingRequestRepository.findByNeighbourhood_idAndStatus(neighbourhoodId, BookingStatus.PENDING))
+        when(bookingRequestRepository.findByNeighbourhood_idAndStatus(TEST_NEIGHBOURHOOD_ID, BookingStatus.PENDING))
                 .thenReturn(List.of(mockRequest));
 
         // Act
-        List<BookingRequest> result = bookingRequestService.getPendingRequests(neighbourhoodId);
+        List<BookingRequest> result = bookingRequestService.getPendingRequests(TEST_NEIGHBOURHOOD_ID);
 
         // Assert
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(BookingStatus.PENDING, result.get(0).getStatus());
-        verify(bookingRequestRepository, times(1)).findByNeighbourhood_idAndStatus(neighbourhoodId, BookingStatus.PENDING);
+        verify(bookingRequestRepository, times(EXPECTED_CALL_COUNT)).findByNeighbourhood_idAndStatus(TEST_NEIGHBOURHOOD_ID, BookingStatus.PENDING);
     }
 
     @Test
     void getRequestById_returnsRequest() {
         // Arrange
-        int bookingId = 1;
-        when(bookingRequestRepository.findById(bookingId)).thenReturn(Optional.of(mockRequest));
+        when(bookingRequestRepository.findById(TEST_BOOKING_ID)).thenReturn(Optional.of(mockRequest));
 
         // Act
-        BookingRequest result = bookingRequestService.getRequestById(bookingId);
+        BookingRequest result = bookingRequestService.getRequestById(TEST_BOOKING_ID);
 
         // Assert
         assertNotNull(result);
         assertEquals(mockRequest, result);
-        verify(bookingRequestRepository, times(1)).findById(bookingId);
+        verify(bookingRequestRepository, times(EXPECTED_CALL_COUNT)).findById(TEST_BOOKING_ID);
     }
 
     @Test
     void getRequestById_throwsException_whenNotFound() {
         // Arrange
-        int bookingId = 999;
-        when(bookingRequestRepository.findById(bookingId)).thenReturn(Optional.empty());
+        when(bookingRequestRepository.findById(MISSING_BOOKING_ID)).thenReturn(Optional.empty());
 
         // Act & Assert
         InvalidConfigurationPropertyValueException exception = assertThrows(InvalidConfigurationPropertyValueException.class,
-                () -> bookingRequestService.getRequestById(bookingId));
+                () -> bookingRequestService.getRequestById(MISSING_BOOKING_ID));
         assertEquals("Booking Request not found", exception.getReason());
     }
 
     @Test
     void approveBooking_approvesRequestAndUpdatesAmenity() {
         // Arrange
-        int bookingId = 1;
-        when(bookingRequestRepository.findById(bookingId)).thenReturn(Optional.of(mockRequest));
-        when(amenityRepository.findById(1)).thenReturn(Optional.of(mockAmenity));
+        when(bookingRequestRepository.findById(TEST_BOOKING_ID)).thenReturn(Optional.of(mockRequest));
+        when(amenityRepository.findById(TEST_AMENITY_ID)).thenReturn(Optional.of(mockAmenity));
         when(bookingRequestRepository.save(any(BookingRequest.class))).thenReturn(mockRequest);
         when(amenityRepository.save(any(Amenity.class))).thenReturn(mockAmenity);
 
         // Act
-        boolean result = bookingRequestService.approveBooking(bookingId);
+        boolean result = bookingRequestService.approveBooking(TEST_BOOKING_ID);
 
         // Assert
         assertTrue(result);
         assertEquals(BookingStatus.APPROVED, mockRequest.getStatus());
         assertEquals(Status.BOOKED, mockAmenity.getStatus());
-        verify(bookingRequestRepository, times(1)).save(mockRequest);
-        verify(amenityRepository, times(1)).save(mockAmenity);
+        verify(bookingRequestRepository, times(EXPECTED_CALL_COUNT)).save(mockRequest);
+        verify(amenityRepository, times(EXPECTED_CALL_COUNT)).save(mockAmenity);
     }
 
     @Test
     void denyBooking_deniesRequest() {
         // Arrange
-        int bookingId = 1;
-        when(bookingRequestRepository.findById(bookingId)).thenReturn(Optional.of(mockRequest));
+        when(bookingRequestRepository.findById(TEST_BOOKING_ID)).thenReturn(Optional.of(mockRequest));
         when(bookingRequestRepository.save(any(BookingRequest.class))).thenReturn(mockRequest);
 
         // Act
-        boolean result = bookingRequestService.denyBooking(bookingId);
+        boolean result = bookingRequestService.denyBooking(TEST_BOOKING_ID);
 
         // Assert
         assertTrue(result);
         assertEquals(BookingStatus.REJECTED, mockRequest.getStatus());
-        verify(bookingRequestRepository, times(1)).save(mockRequest);
+        verify(bookingRequestRepository, times(EXPECTED_CALL_COUNT)).save(mockRequest);
         verify(amenityRepository, never()).save(any()); // Amenity not updated in deny
     }
 }

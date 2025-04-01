@@ -31,6 +31,12 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class CreateCommunityServiceImplTest {
 
+    private static final int TEST_USER_ID = 1;
+    private static final int TEST_NEIGHBOURHOOD_ID = 2;
+    private static final int TEST_REQUEST_ID = 1;
+    private static final int MISSING_REQUEST_ID = 999;
+    private static final int EXPECTED_CALL_COUNT = 1;
+
     @Mock
     private HelpRequestService helpRequestService;
 
@@ -54,20 +60,20 @@ public class CreateCommunityServiceImplTest {
     @BeforeEach
     void setUp() {
         mockUser = new User();
-        mockUser.setId(1);
+        mockUser.setId(TEST_USER_ID);
 
         mockNeighbourhood = new Neighbourhood();
-        mockNeighbourhood.setNeighbourhoodId(2);
+        mockNeighbourhood.setNeighbourhoodId(TEST_NEIGHBOURHOOD_ID);
 
         mockRequest = new HelpRequest();
-        mockRequest.setRequestId(1);
+        mockRequest.setRequestId(TEST_REQUEST_ID);
         mockRequest.setUser(mockUser);
         mockRequest.setNeighbourhood(mockNeighbourhood);
         mockRequest.setRequestType(HelpRequest.RequestType.CREATE);
         mockRequest.setDescription("location: Downtown | Phone: 123-456-7890 | Address: 123 Main St");
         mockRequest.setStatus(RequestStatus.OPEN);
 
-        mockResponse = new CommunityResponse(1, 2, RequestStatus.APPROVED);
+        mockResponse = new CommunityResponse(TEST_USER_ID, TEST_NEIGHBOURHOOD_ID, RequestStatus.APPROVED);
     }
 
     @Test
@@ -82,47 +88,45 @@ public class CreateCommunityServiceImplTest {
         // Assert
         assertNotNull(result);
         assertEquals(mockResponse, result);
-        verify(helpRequestService, times(1)).storeCreateRequest(dto);
+        verify(helpRequestService, times(EXPECTED_CALL_COUNT)).storeCreateRequest(dto);
     }
 
     @Test
     void approveCreateRequest_approvesSuccessfully() {
         // Arrange
-        int requestId = 1;
-        when(helpRequestRepository.findByRequestId(requestId)).thenReturn(Optional.of(mockRequest));
-        when(userRepository.findById(1)).thenReturn(Optional.of(mockUser));
+        when(helpRequestRepository.findByRequestId(TEST_REQUEST_ID)).thenReturn(Optional.of(mockRequest));
+        when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(mockUser));
         when(neighbourhoodRepository.save(any(Neighbourhood.class))).thenReturn(mockNeighbourhood);
         when(userRepository.save(any(User.class))).thenReturn(mockUser);
         when(helpRequestRepository.save(any(HelpRequest.class))).thenReturn(mockRequest);
 
         // Act
-        CustomResponseBody<CommunityResponse> result = createCommunityService.approveCreateRequest(requestId);
+        CustomResponseBody<CommunityResponse> result = createCommunityService.approveCreateRequest(TEST_REQUEST_ID);
 
         // Assert
         assertNotNull(result);
         assertEquals(CustomResponseBody.Result.SUCCESS, result.result());
         assertEquals("Community successfully created", result.message());
         CommunityResponse response = result.data();
-        assertEquals(1, response.getUserId());
-        assertEquals(2, response.getNeighbourhoodId());
+        assertEquals(TEST_USER_ID, response.getUserId());
+        assertEquals(TEST_NEIGHBOURHOOD_ID, response.getNeighbourhoodId());
         assertEquals(RequestStatus.APPROVED, response.getStatus());
         assertEquals(UserType.COMMUNITY_MANAGER, mockUser.getUserType());
         assertEquals("123-456-7890", mockUser.getContact());
         assertEquals("123 Main St", mockUser.getAddress());
         assertEquals(RequestStatus.APPROVED, mockRequest.getStatus());
-        verify(neighbourhoodRepository, times(1)).save(any(Neighbourhood.class));
-        verify(userRepository, times(1)).save(mockUser);
-        verify(helpRequestRepository, times(1)).save(mockRequest);
+        verify(neighbourhoodRepository, times(EXPECTED_CALL_COUNT)).save(any(Neighbourhood.class));
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).save(mockUser);
+        verify(helpRequestRepository, times(EXPECTED_CALL_COUNT)).save(mockRequest);
     }
 
     @Test
     void approveCreateRequest_returnsFailure_whenRequestNotFound() {
         // Arrange
-        int requestId = 999;
-        when(helpRequestRepository.findByRequestId(requestId)).thenReturn(Optional.empty());
+        when(helpRequestRepository.findByRequestId(MISSING_REQUEST_ID)).thenReturn(Optional.empty());
 
         // Act
-        CustomResponseBody<CommunityResponse> result = createCommunityService.approveCreateRequest(requestId);
+        CustomResponseBody<CommunityResponse> result = createCommunityService.approveCreateRequest(MISSING_REQUEST_ID);
 
         // Assert
         assertNotNull(result);
@@ -137,12 +141,11 @@ public class CreateCommunityServiceImplTest {
     @Test
     void approveCreateRequest_returnsFailure_whenRequestTypeInvalid() {
         // Arrange
-        int requestId = 1;
         mockRequest.setRequestType(HelpRequest.RequestType.JOIN); // Not CREATE
-        when(helpRequestRepository.findByRequestId(requestId)).thenReturn(Optional.of(mockRequest));
+        when(helpRequestRepository.findByRequestId(TEST_REQUEST_ID)).thenReturn(Optional.of(mockRequest));
 
         // Act
-        CustomResponseBody<CommunityResponse> result = createCommunityService.approveCreateRequest(requestId);
+        CustomResponseBody<CommunityResponse> result = createCommunityService.approveCreateRequest(TEST_REQUEST_ID);
 
         // Assert
         assertNotNull(result);
@@ -158,12 +161,11 @@ public class CreateCommunityServiceImplTest {
     @Test
     void approveCreateRequest_returnsFailure_whenUserNotFound() {
         // Arrange
-        int requestId = 1;
-        when(helpRequestRepository.findByRequestId(requestId)).thenReturn(Optional.of(mockRequest));
-        when(userRepository.findById(1)).thenReturn(Optional.empty());
+        when(helpRequestRepository.findByRequestId(TEST_REQUEST_ID)).thenReturn(Optional.of(mockRequest));
+        when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.empty());
 
         // Act
-        CustomResponseBody<CommunityResponse> result = createCommunityService.approveCreateRequest(requestId);
+        CustomResponseBody<CommunityResponse> result = createCommunityService.approveCreateRequest(TEST_REQUEST_ID);
 
         // Assert
         assertNotNull(result);
@@ -178,23 +180,22 @@ public class CreateCommunityServiceImplTest {
     @Test
     void denyCreateRequest_deniesSuccessfully() {
         // Arrange
-        int requestId = 1;
-        when(helpRequestRepository.findByRequestId(requestId)).thenReturn(Optional.of(mockRequest));
+        when(helpRequestRepository.findByRequestId(TEST_REQUEST_ID)).thenReturn(Optional.of(mockRequest));
         when(helpRequestRepository.save(any(HelpRequest.class))).thenReturn(mockRequest);
 
         // Act
-        CustomResponseBody<CommunityResponse> result = createCommunityService.denyCreateRequest(requestId);
+        CustomResponseBody<CommunityResponse> result = createCommunityService.denyCreateRequest(TEST_REQUEST_ID);
 
         // Assert
         assertNotNull(result);
         assertEquals(CustomResponseBody.Result.SUCCESS, result.result());
         assertEquals("Community creation request denied", result.message());
         CommunityResponse response = result.data();
-        assertEquals(1, response.getUserId());
+        assertEquals(TEST_USER_ID, response.getUserId());
         assertEquals(0, response.getNeighbourhoodId()); // 0 since no neighbourhood created
         assertEquals(RequestStatus.DECLINED, response.getStatus());
         assertEquals(RequestStatus.DECLINED, mockRequest.getStatus());
-        verify(helpRequestRepository, times(1)).save(mockRequest);
+        verify(helpRequestRepository, times(EXPECTED_CALL_COUNT)).save(mockRequest);
         verify(neighbourhoodRepository, never()).save(any());
         verify(userRepository, never()).save(any());
     }
@@ -202,11 +203,10 @@ public class CreateCommunityServiceImplTest {
     @Test
     void denyCreateRequest_returnsFailure_whenRequestNotFound() {
         // Arrange
-        int requestId = 999;
-        when(helpRequestRepository.findByRequestId(requestId)).thenReturn(Optional.empty());
+        when(helpRequestRepository.findByRequestId(MISSING_REQUEST_ID)).thenReturn(Optional.empty());
 
         // Act
-        CustomResponseBody<CommunityResponse> result = createCommunityService.denyCreateRequest(requestId);
+        CustomResponseBody<CommunityResponse> result = createCommunityService.denyCreateRequest(MISSING_REQUEST_ID);
 
         // Assert
         assertNotNull(result);
