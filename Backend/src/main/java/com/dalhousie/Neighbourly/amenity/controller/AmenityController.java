@@ -10,11 +10,10 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/amenities")
+@CrossOrigin(origins = "http://172.17.2.103:3080/")
 public class AmenityController {
 
     private final AmenityService amenityService;
-
-
 
     @GetMapping("/{neighbourhoodId}")
     public List<Amenity> getAmenities(@PathVariable int neighbourhoodId) {
