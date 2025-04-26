@@ -1,7 +1,5 @@
 package com.dalhousie.Neighbourly.post.entity;
 
-import com.dalhousie.Neighbourly.neighbourhood.entity.Neighbourhood;
-import com.dalhousie.Neighbourly.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;

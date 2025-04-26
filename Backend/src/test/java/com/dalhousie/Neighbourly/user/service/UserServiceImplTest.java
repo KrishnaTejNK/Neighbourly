@@ -8,77 +8,137 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@DataJpaTest
-public class UserServiceImplTest {
+@ExtendWith(MockitoExtension.class)
+class UserServiceImplTest {
 
-    @InjectMocks
-    private UserServiceImpl userService;
+    private static final int TEST_USER_ID = 1;
+    private static final int TEST_NEIGHBOURHOOD_ID = 1;
+    private static final int EXPECTED_LIST_SIZE = 1;
+    private static final int EXPECTED_CALL_COUNT = 1;
 
     @Mock
     private UserRepository userRepository;
 
-    private User mockUser;
+    @InjectMocks
+    private UserServiceImpl userService;
+
+    private User testUser;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-
-        // Sample user for testing
-        mockUser = new User();
-        mockUser.setId(1);
-        mockUser.setName("Krishna Tej");
-        mockUser.setEmail("krishna@gmail.com");
-        mockUser.setEmailVerified(true);
-        mockUser.setContact("1234567890");
-        mockUser.setNeighbourhood_id(101);
-        mockUser.setAddress("123 Street");
-        mockUser.setUserType(UserType.USER);
-        when(userRepository.save(any(User.class))).thenReturn(mockUser);
-        userRepository.save(mockUser);
+        testUser = new User();
+        testUser.setId(TEST_USER_ID);
+        testUser.setEmail("test@example.com");
+        testUser.setPassword("password");
+        testUser.setUserType(UserType.USER);
+        testUser.setNeighbourhood_id(TEST_NEIGHBOURHOOD_ID);
     }
-//    @Test
-//    void testFindUserByEmail() {
-//        when(userRepository.findByEmail("john.doe@example.com")).thenReturn(Optional.of(mockUser));
-//        Optional<User> foundUser = userService.findUserByEmail("john.doe@example.com");
-//        assertTrue(foundUser.isPresent());
-//        assertEquals("John Doe", foundUser.get().getName());
-//    }
 
     @Test
-    void testSaveUser() {
-        userService.saveUser(mockUser);
-        verify(userRepository, times(1)).save(mockUser);
+    void isUserPresent_userExists_returnsTrue() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+
+        boolean result = userService.isUserPresent("test@example.com");
+
+        assertTrue(result);
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).findByEmail("test@example.com");
     }
 
-//    @Test
-//    void testFindUserById() {
-//        when(userRepository.findById(1)).thenReturn(Optional.of(mockUser));
-//        Optional<User> foundUser = userService.findUserById(1);
-//        assertTrue(foundUser.isPresent());
-//        assertEquals("John Doe", foundUser.get().getName());
-//    }
-//
-//    @Test
-//    void testUpdatePassword() {
-//        doNothing().when(userRepository).updatePassword("john.doe@example.com", "newpassword");
-//        userService.updatePassword("john.doe@example.com", "newpassword");
-//        verify(userRepository, times(1)).updatePassword("john.doe@example.com", "newpassword");
-//    }
-//
-//    @Test
-//    void testGetUserByEmail() {
-//        when(userRepository.findByEmail("john.doe@example.com")).thenReturn(Optional.of(mockUser));
-//        Optional<User> foundUser = userService.getUserByEmail("john.doe@example.com");
-//        assertTrue(foundUser.isPresent());
-//        assertEquals("John Doe", foundUser.get().getName());
-//    }
+    @Test
+    void isUserPresent_userDoesNotExist_returnsFalse() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
+
+        boolean result = userService.isUserPresent("test@example.com");
+
+        assertFalse(result);
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).findByEmail("test@example.com");
+    }
+
+    @Test
+    void findUserByEmail_userExists_returnsUser() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+
+        Optional<User> result = userService.findUserByEmail("test@example.com");
+
+        assertTrue(result.isPresent());
+        assertEquals(testUser, result.get());
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).findByEmail("test@example.com");
+    }
+
+    @Test
+    void saveUser_savesSuccessfully() {
+        userService.saveUser(testUser);
+
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).save(testUser);
+    }
+
+    @Test
+    void findUserById_userExists_returnsUser() {
+        when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
+
+        Optional<User> result = userService.findUserById(TEST_USER_ID);
+
+        assertTrue(result.isPresent());
+        assertEquals(testUser, result.get());
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).findById(TEST_USER_ID);
+    }
+
+    @Test
+    void updatePassword_updatesSuccessfully() {
+        userService.updatePassword("test@example.com", "newPassword");
+
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).updatePassword("test@example.com", "newPassword");
+    }
+
+    @Test
+    void getUserRole_userExists_returnsUserRole() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+
+        UserType result = userService.getUserRole("test@example.com");
+
+        assertEquals(UserType.USER, result);
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).findByEmail("test@example.com");
+    }
+
+    @Test
+    void getUserRole_userDoesNotExist_returnsDefaultRole() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
+
+        UserType result = userService.getUserRole("test@example.com");
+
+        assertEquals(UserType.USER, result);
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).findByEmail("test@example.com");
+    }
+
+    @Test
+    void getUserByEmail_userExists_returnsUser() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+
+        Optional<User> result = userService.getUserByEmail("test@example.com");
+
+        assertTrue(result.isPresent());
+        assertEquals(testUser, result.get());
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).findByEmail("test@example.com");
+    }
+
+    @Test
+    void getUsersByNeighbourhood_returnsUserList() {
+        List<User> users = Arrays.asList(testUser);
+        when(userRepository.findByNeighbourhood_id(TEST_NEIGHBOURHOOD_ID)).thenReturn(users);
+
+        List<User> result = userService.getUsersByNeighbourhood(TEST_NEIGHBOURHOOD_ID);
+
+        assertEquals(EXPECTED_LIST_SIZE, result.size());
+        assertEquals(testUser, result.get(0));
+        verify(userRepository, times(EXPECTED_CALL_COUNT)).findByNeighbourhood_id(TEST_NEIGHBOURHOOD_ID);
+    }
 }

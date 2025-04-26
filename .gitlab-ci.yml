@@ -1,12 +1,13 @@
 # Define the sequence of stages for job execution
 stages:
-  - compile
-  - verify
-  - release
-  - launch
+  - build
+  - test
+  - quality-check
+  - publish
+  - deploy
 
-compile-backend:
-  stage: compile
+build-backend:
+  stage: build
   tags:
     - Neighbourly-runner
   image: gradle:latest
@@ -20,8 +21,8 @@ compile-backend:
       - Backend/build/libs/*.jar
 
 
-compile-frontend:
-  stage: compile
+build-frontend:
+  stage: build
   tags:
     - Neighbourly-runner
   image: node:18-alpine
@@ -36,9 +37,28 @@ compile-frontend:
     paths:
       - Frontend/build
 
-release-backend:
+test:
+  stage: test
+  image: gradle:latest
+  script:
+    - cd Backend  
+    - gradle test
+
+quality-check:
+  stage: quality-check
+  image: openjdk:17
+  script:
+    - echo "Compiling the project"
+    - mkdir smells/
+    - java -jar $CI_PROJECT_DIR/quality/DesigniteJava.jar -i $CI_PROJECT_DIR -o smells/
+  artifacts:
+    paths:
+      - smells/
+      - $CI_PROJECT_DIR
+
+publish-backend:
   image: docker:latest
-  stage: release
+  stage: publish
   tags:
     - Neighbourly-runner
   variables:
@@ -57,12 +77,15 @@ release-backend:
     - docker build -t keshvigodhani/backend-api:$IMAGE_TAG . -f Dockerfile
     - docker push keshvigodhani/backend-api:$IMAGE_TAG
   only:
+    - feat/public-booking
     - cicd_issue26
     - dev
     - main
-release-frontend:
+    
+
+publish-frontend:
   image: docker:latest
-  stage: release
+  stage: publish
   tags:
     - Neighbourly-runner
   variables:
@@ -81,13 +104,14 @@ release-frontend:
     - docker build --build-arg BACKEND_BASE_URL=$BASE_URL -t keshvigodhani/frontend:$IMAGE_TAG . -f Dockerfile
     - docker push keshvigodhani/frontend:$IMAGE_TAG
   only:
+    - feat/public-booking
     - cicd_issue26
     - dev
     - main
 
-launch-backend:
+deploy-backend:
   image: alpine:latest
-  stage: launch
+  stage: deploy
   tags:
     - Neighbourly-runner
   before_script:
@@ -110,7 +134,7 @@ launch-backend:
           ;;
         main)
           CONTAINER_NAME="neighbourly-prod-app"
-          SERVER_PORT=8073
+          SERVER_PORT=8070
           DB_URL=$PROD_DB_URL
           DB_USER=$PROD_DB_USER
           DB_PASSWORD=$PROD_DB_PASSWORD
@@ -131,12 +155,14 @@ launch-backend:
     name: development
     url: http://$SERVER_IP:$SERVER_PORT
   only:
+    - feat/public-booking
     - cicd_issue26
     - dev
     - main
-launch-frontend:
+
+deploy-frontend:
   image: alpine:latest
-  stage: launch
+  stage: deploy
   tags:
     - Neighbourly-runner
   before_script:
@@ -174,6 +200,7 @@ launch-frontend:
     name: development
     url: http://$SERVER_IP:$SERVER_PORT
   only:
+    - feat/public-booking
     - cicd_issue26
     - dev
     - main

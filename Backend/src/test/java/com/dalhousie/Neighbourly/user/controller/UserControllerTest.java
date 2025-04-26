@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Optional;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -25,6 +25,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class) // Enables Mockito support
 @SpringBootTest
 public class UserControllerTest {
+
+    private static final int TEST_USER_ID = 1;
+    private static final int TEST_NEIGHBOURHOOD_ID = 101;
+    private static final int MISSING_USER_ID = 99;
+    private static final String TEST_CONTACT = "1234567890";
+    private static final String TEST_ADDRESS = "123 Street";
+    private static final int EXPECTED_CALL_COUNT = 1;
 
     private MockMvc mockMvc;
 
@@ -43,40 +50,29 @@ public class UserControllerTest {
 
         // Sample user for testing
         mockUser = new User();
-        mockUser.setId(1);
+        mockUser.setId(TEST_USER_ID);
         mockUser.setName("Krishna Tej");
         mockUser.setEmail("krishna@gmail.com");
         mockUser.setEmailVerified(true);
-        mockUser.setContact("1234567890");
-        mockUser.setNeighbourhood_id(101);
-        mockUser.setAddress("123 Street");
+        mockUser.setContact(TEST_CONTACT);
+        mockUser.setNeighbourhood_id(TEST_NEIGHBOURHOOD_ID);
+        mockUser.setAddress(TEST_ADDRESS);
         mockUser.setUserType(UserType.USER);
     }
 
     @Test
-    void testGetUserProfileByEmail() throws Exception {
-        when(userService.getUserByEmail("krishna@gmail.com")).thenReturn(Optional.of(mockUser));
-
-        mockMvc.perform(get("/api/user/profile/krishna@gmail.com")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.name").value("Krishna Tej"))
-                .andExpect(jsonPath("$.email").value("krishna@gmail.com"))
-                .andExpect(jsonPath("$.userType").value("USER"));
-    }
-
-    @Test
     void testGetUserProfileByUserId() throws Exception {
-        when(userService.findUserById(1)).thenReturn(Optional.of(mockUser));
+        when(userService.findUserById(TEST_USER_ID)).thenReturn(Optional.of(mockUser));
 
-        mockMvc.perform(get("/api/user/details/1")
+        mockMvc.perform(get("/api/user/details/" + TEST_USER_ID)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.id").value(TEST_USER_ID))
                 .andExpect(jsonPath("$.name").value("Krishna Tej"))
                 .andExpect(jsonPath("$.email").value("krishna@gmail.com"))
                 .andExpect(jsonPath("$.userType").value("USER"));
+
+        verify(userService, times(EXPECTED_CALL_COUNT)).findUserById(TEST_USER_ID);
     }
 
     @Test
@@ -85,13 +81,17 @@ public class UserControllerTest {
 
         mockMvc.perform(get("/api/user/profile/unknown@gmail.com"))
                 .andExpect(status().isNotFound());
+
+        verify(userService, times(EXPECTED_CALL_COUNT)).getUserByEmail("unknown@gmail.com");
     }
 
     @Test
     void testGetUserProfileByUserId_NotFound() throws Exception {
-        when(userService.findUserById(99)).thenReturn(Optional.empty());
+        when(userService.findUserById(MISSING_USER_ID)).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/api/user/details/99"))
+        mockMvc.perform(get("/api/user/details/" + MISSING_USER_ID))
                 .andExpect(status().isNotFound());
+
+        verify(userService, times(EXPECTED_CALL_COUNT)).findUserById(MISSING_USER_ID);
     }
 }

@@ -10,7 +10,7 @@ const Homepage = () => {
   const navigate = useNavigate();
 
   const headerIcons = [
-    { icon: HandHelping, text: "Help Requests" },
+    { icon: HandHelping, text: "Post" },
     { icon: ParkingSquare, text: "Parking"},
     { icon: Building2, text: "Public Places" }
 
